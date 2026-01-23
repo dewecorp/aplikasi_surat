@@ -51,7 +51,7 @@ if (!$surat) {
             transform: translateX(-50%);
         }
         body.landscape-mode .letter-container {
-            width: 47%;
+            width: 42%;
             padding: 0 15px;
             box-sizing: border-box;
             /* border-right removed */
@@ -88,9 +88,10 @@ if (!$surat) {
         }
         body.landscape-mode .ttd {
             margin-top: 5px;
-            width: 200px;
-            float: right; /* Ensure it floats correctly in container */
-            margin-right: 10px;
+            width: 260px;
+            align-self: flex-end; /* Required because parent is display: flex */
+            float: right; /* Fallback */
+            margin-right: 0px;
             page-break-inside: avoid; /* Prevent breaking across pages */
         }
         body.landscape-mode .letter-container {
@@ -100,12 +101,12 @@ if (!$surat) {
             justify-content: flex-start;
         }
         body.landscape-mode .ttd img.stempel {
-            width: 70px;
-            left: 30px;
-            top: 10px;
+            width: 150px;
+            left: 10px;
+            top: -10px;
         }
         body.landscape-mode .ttd img.ttd-img {
-            height: 50px;
+            height: 80px;
         }
 
         .letter-container {
@@ -179,21 +180,21 @@ if (!$surat) {
         .ttd {
             float: right;
             text-align: center;
-            width: 250px;
+            width: 300px;
             margin-top: 20px;
             position: relative;
         }
         .ttd img.stempel {
             position: absolute;
-            left: 45px;
-            top: 15px;
-            width: 90px;
+            left: 20px;
+            top: 0px;
+            width: 170px;
             opacity: 0.8;
             transform: rotate(-5deg);
             z-index: 2;
         }
         .ttd img.ttd-img {
-            height: 70px;
+            height: 100px;
             margin-top: 5px;
             margin-bottom: 0px;
             position: relative;
@@ -248,7 +249,7 @@ if (!$surat) {
                     <td>Perihal</td>
                     <td>:</td>
                     <td style="text-decoration: underline; font-weight: bold;">
-                        <?php echo strtoupper($surat['perihal']); ?>
+                        <?php echo $surat['perihal']; ?>
                     </td>
                     <td></td>
                 </tr>
@@ -266,7 +267,7 @@ if (!$surat) {
                 <p style="font-style: italic; font-weight: bold;">Assalamu'alaikum Wr. Wb.</p>
                 
                 <?php if ($surat['jenis_surat'] == 'Undangan'): ?>
-                    <p style="text-indent: 50px;">Di harap dengan hormat, atas kehadiran Bapak / Ibu Wali Murid Kelas 6 <?php echo $setting['nama_madrasah']; ?> untuk dapat menghadiri acara yang Insya Allah akan dilaksanakan pada :</p>
+                    <p style="text-indent: 50px;">Di harap dengan hormat, atas kehadiran Bapak / Ibu <?php echo $surat['penerima']; ?> <?php echo $setting['nama_madrasah']; ?> untuk dapat menghadiri acara yang Insya Allah akan dilaksanakan pada :</p>
                     
                     <table class="detail-table">
                         <tr>
@@ -337,7 +338,7 @@ if (!$surat) {
                     <?php endif; ?>
                 <?php endif; ?>
 
-                <p style="text-indent: 50px;">Demikian undangan kami sampaikan, atas kehadiran Bapak / Ibu Wali Murid kami ucapkan terima kasih.</p>
+                <p style="text-indent: 50px;">Demikian undangan kami sampaikan, atas kehadiran Bapak / Ibu <?php echo $surat['penerima']; ?> kami ucapkan terima kasih.</p>
                 
                 <p style="font-style: italic; font-weight: bold;">Wassalamu'alaikum Wr. Wb.</p>
             </div>

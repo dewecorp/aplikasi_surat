@@ -14,6 +14,7 @@ if (isset($_POST['login'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['nama'] = $user['nama'];
             $_SESSION['role'] = $user['role'];
+            $_SESSION['foto'] = $user['foto'];
             $_SESSION['success'] = "Selamat Datang, " . $user['nama'];
             
             // Log Activity

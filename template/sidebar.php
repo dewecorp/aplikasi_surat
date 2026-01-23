@@ -1,5 +1,26 @@
 <?php
 $page = basename($_SERVER['PHP_SELF'], ".php");
+
+// Fetch latest user info if logged in
+$user_nama = isset($_SESSION['nama']) ? $_SESSION['nama'] : 'Pengunjung';
+$user_role = isset($_SESSION['role']) ? $_SESSION['role'] : 'Guest';
+$user_foto = isset($_SESSION['foto']) ? $_SESSION['foto'] : 'default.jpg';
+
+if (isset($_SESSION['user_id']) && isset($conn)) {
+    $uid = $_SESSION['user_id'];
+    $u_query = mysqli_query($conn, "SELECT nama, role, foto FROM users WHERE id='$uid'");
+    if ($u_query && mysqli_num_rows($u_query) > 0) {
+        $u_row = mysqli_fetch_assoc($u_query);
+        $user_nama = $u_row['nama'];
+        $user_role = $u_row['role'];
+        $user_foto = $u_row['foto'];
+        
+        // Sync session (optional but good for consistency across requests)
+        $_SESSION['nama'] = $user_nama;
+        $_SESSION['role'] = $user_role;
+        $_SESSION['foto'] = $user_foto;
+    }
+}
 ?>
 <section>
     <!-- Left Sidebar -->
@@ -7,11 +28,17 @@ $page = basename($_SERVER['PHP_SELF'], ".php");
         <!-- User Info -->
         <div class="user-info">
             <div class="image">
-                <img src="assets/images/user.png" width="48" height="48" alt="User" />
+                <?php if ($user_foto != 'default.jpg' && file_exists('uploads/' . $user_foto)): ?>
+                    <img src="uploads/<?php echo $user_foto; ?>" width="48" height="48" alt="User" style="border-radius: 50%; object-fit: cover;" />
+                <?php else: ?>
+                    <div style="width: 48px; height: 48px; background-color: <?php echo getAvatarColor($user_nama); ?>; color: white; border-radius: 50%; text-align: center; line-height: 48px; font-weight: bold; font-size: 20px; display: inline-block;">
+                        <?php echo getInitials($user_nama); ?>
+                    </div>
+                <?php endif; ?>
             </div>
             <div class="info-container">
-                <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?php echo $_SESSION['nama']; ?></div>
-                <div class="email"><?php echo $_SESSION['role']; ?></div>
+                <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?php echo $user_nama; ?></div>
+                <div class="email"><?php echo $user_role; ?></div>
             </div>
         </div>
         <!-- #User Info -->
@@ -79,7 +106,23 @@ $page = basename($_SERVER['PHP_SELF'], ".php");
         <!-- Footer -->
         <div class="legal">
             <div class="copyright">
-                &copy; <?php echo date('Y'); ?> <a href="javascript:void(0);">SIMS - MI Sultan Fattah</a>.
+                &copy; <?php echo date('Y'); ?> 
+                <a href="javascript:void(0);">
+                    SIMS - 
+                    <?php 
+                    if (isset($nama_sekolah)) {
+                        $display_nama = ucwords(strtolower($nama_sekolah));
+                        $display_nama = str_replace(
+                            ['Mi ', 'Mts ', 'Ma ', 'Sd ', 'Smp ', 'Sma ', 'Smk '], 
+                            ['MI ', 'MTs ', 'MA ', 'SD ', 'SMP ', 'SMA ', 'SMK '], 
+                            $display_nama
+                        );
+                        echo $display_nama;
+                    } else {
+                        echo 'MI Sultan Fattah';
+                    }
+                    ?>
+                </a>.
             </div>
         </div>
         <!-- #Footer -->

@@ -62,6 +62,23 @@ function hari_indo($tanggal){
     return $hari[$num];
 }
 
+function getInitials($name) {
+    $words = explode(" ", $name);
+    $initials = "";
+    foreach ($words as $w) {
+        if (!empty($w)) {
+            $initials .= $w[0];
+        }
+    }
+    return strtoupper(substr($initials, 0, 2));
+}
+
+function getAvatarColor($name) {
+    $colors = ['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#03A9F4', '#00BCD4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFC107', '#FF9800', '#FF5722', '#795548', '#9E9E9E', '#607D8B'];
+    $index = abs(crc32($name)) % count($colors);
+    return $colors[$index];
+}
+
 function log_activity($user_id, $type, $description) {
     global $conn;
     $user_id = mysqli_real_escape_string($conn, $user_id);

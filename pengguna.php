@@ -53,6 +53,13 @@ if (isset($_POST['edit'])) {
     $query_str .= " WHERE id='$id'";
 
     if (mysqli_query($conn, $query_str)) {
+        // Update Session jika user yang diedit adalah user yang sedang login
+        if ($id == $_SESSION['user_id']) {
+            $_SESSION['nama'] = $nama;
+            if (isset($foto)) {
+                $_SESSION['foto'] = $foto;
+            }
+        }
         $_SESSION['success'] = "Data pengguna berhasil diubah";
     } else {
         $_SESSION['error'] = "Gagal mengubah data: " . mysqli_error($conn);
@@ -125,9 +132,11 @@ if (isset($_GET['delete'])) {
                                             <td><?php echo $no++; ?></td>
                                             <td>
                                                 <?php if ($row['foto'] != 'default.jpg' && file_exists('uploads/' . $row['foto'])): ?>
-                                                    <img src="uploads/<?php echo $row['foto']; ?>" width="50" height="50" alt="User">
+                                                    <img src="uploads/<?php echo $row['foto']; ?>" width="50" height="50" alt="User" style="border-radius: 50%; object-fit: cover;">
                                                 <?php else: ?>
-                                                    <img src="assets/images/user.png" width="50" height="50" alt="User">
+                                                    <div style="width: 50px; height: 50px; background-color: <?php echo getAvatarColor($row['nama']); ?>; color: white; border-radius: 50%; text-align: center; line-height: 50px; font-weight: bold; font-size: 20px; display: inline-block;">
+                                                        <?php echo getInitials($row['nama']); ?>
+                                                    </div>
                                                 <?php endif; ?>
                                             </td>
                                             <td><?php echo $row['nama']; ?></td>
@@ -161,22 +170,22 @@ if (isset($_GET['delete'])) {
                                                     <form method="POST" enctype="multipart/form-data">
                                                         <div class="modal-body">
                                                             <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
-                                                            <div class="form-group form-float">
+                                                            <label>Nama Lengkap</label>
+                                                            <div class="form-group">
                                                                 <div class="form-line">
                                                                     <input type="text" class="form-control" name="nama" value="<?php echo $row['nama']; ?>" required>
-                                                                    <label class="form-label">Nama Lengkap</label>
                                                                 </div>
                                                             </div>
-                                                            <div class="form-group form-float">
+                                                            <label>Username</label>
+                                                            <div class="form-group">
                                                                 <div class="form-line">
                                                                     <input type="text" class="form-control" name="username" value="<?php echo $row['username']; ?>" required>
-                                                                    <label class="form-label">Username</label>
                                                                 </div>
                                                             </div>
-                                                            <div class="form-group form-float">
+                                                            <label>Password (Kosongkan jika tidak diubah)</label>
+                                                            <div class="form-group">
                                                                 <div class="form-line">
                                                                     <input type="password" class="form-control" name="password">
-                                                                    <label class="form-label">Password (Kosongkan jika tidak diubah)</label>
                                                                 </div>
                                                             </div>
                                                             <div class="form-group">
@@ -220,22 +229,22 @@ if (isset($_GET['delete'])) {
             </div>
             <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
-                    <div class="form-group form-float">
+                    <label>Nama Lengkap</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="text" class="form-control" name="nama" required>
-                            <label class="form-label">Nama Lengkap</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Username</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="text" class="form-control" name="username" required>
-                            <label class="form-label">Username</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Password</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="password" class="form-control" name="password" required>
-                            <label class="form-label">Password</label>
                         </div>
                     </div>
                     <div class="form-group">

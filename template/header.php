@@ -6,6 +6,12 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
+
+// Get Data Sekolah
+$q_instansi = mysqli_query($conn, "SELECT * FROM pengaturan LIMIT 1");
+$instansi = mysqli_fetch_assoc($q_instansi);
+$nama_sekolah = $instansi['nama_madrasah'];
+$logo_sekolah = $instansi['logo'];
 ?>
 <!DOCTYPE html>
 <html>
@@ -14,7 +20,7 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <title>SIMS - MI Sultan Fattah Sukosono</title>
+    <title>SIMS - <?php echo $nama_sekolah; ?></title>
     <!-- Favicon-->
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 
@@ -92,7 +98,12 @@ if (!isset($_SESSION['user_id'])) {
             <div class="navbar-header">
                 <a href="javascript:void(0);" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false"></a>
                 <a href="javascript:void(0);" class="bars"></a>
-                <a class="navbar-brand" href="index.php">SIMS - MI SULTAN FATTAH</a>
+                <a class="navbar-brand" href="index.php" style="display: flex; align-items: center;">
+                    <?php if (!empty($logo_sekolah) && file_exists('assets/images/' . $logo_sekolah)): ?>
+                        <img src="assets/images/<?php echo $logo_sekolah; ?>" alt="Logo" style="height: 35px; margin-right: 10px; background: #fff; border-radius: 50%; padding: 2px;">
+                    <?php endif; ?>
+                    <span style="font-size: 18px;">SISTEM MANAJEMEN SURAT | <?php echo strtoupper($nama_sekolah); ?></span>
+                </a>
             </div>
             <div class="collapse navbar-collapse" id="navbar-collapse">
                 <ul class="nav navbar-nav navbar-right">

@@ -75,50 +75,50 @@ if (isset($_POST['update'])) {
                             <input type="hidden" name="id" value="<?php echo $data['id']; ?>">
                             <div class="row clearfix">
                                 <div class="col-sm-6">
-                                    <div class="form-group form-float">
+                                    <label>Nama Yayasan</label>
+                                    <div class="form-group">
                                         <div class="form-line">
                                             <input type="text" class="form-control" name="nama_yayasan" value="<?php echo $data['nama_yayasan']; ?>" required>
-                                            <label class="form-label">Nama Yayasan</label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="form-group form-float">
+                                    <label>Nama Madrasah</label>
+                                    <div class="form-group">
                                         <div class="form-line">
                                             <input type="text" class="form-control" name="nama_madrasah" value="<?php echo $data['nama_madrasah']; ?>" required>
-                                            <label class="form-label">Nama Madrasah</label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group form-float">
+                            <label>Alamat</label>
+                            <div class="form-group">
                                 <div class="form-line">
                                     <textarea name="alamat" cols="30" rows="3" class="form-control no-resize" required><?php echo $data['alamat']; ?></textarea>
-                                    <label class="form-label">Alamat</label>
                                 </div>
                             </div>
                             <div class="row clearfix">
                                 <div class="col-sm-6">
-                                    <div class="form-group form-float">
+                                    <label>Email</label>
+                                    <div class="form-group">
                                         <div class="form-line">
                                             <input type="email" class="form-control" name="email" value="<?php echo $data['email']; ?>">
-                                            <label class="form-label">Email</label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="form-group form-float">
+                                    <label>Website</label>
+                                    <div class="form-group">
                                         <div class="form-line">
                                             <input type="text" class="form-control" name="website" value="<?php echo $data['website']; ?>">
-                                            <label class="form-label">Website</label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group form-float">
+                            <label>Nama Kepala Madrasah</label>
+                            <div class="form-group">
                                 <div class="form-line">
                                     <input type="text" class="form-control" name="kepala_madrasah" value="<?php echo $data['kepala_madrasah']; ?>" required>
-                                    <label class="form-label">Nama Kepala Madrasah</label>
                                 </div>
                             </div>
                             <div class="row clearfix">

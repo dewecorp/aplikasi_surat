@@ -25,13 +25,14 @@ if (isset($_POST['add'])) {
     $q_last = mysqli_query($conn, "SELECT no_surat FROM surat_keluar WHERE YEAR(tgl_surat) = '$tahun' ORDER BY id DESC LIMIT 1");
     if (mysqli_num_rows($q_last) > 0) {
         $last_data = mysqli_fetch_assoc($q_last);
-        $last_no = intval(substr($last_data['no_surat'], 0, 4));
+        $parts = explode('/', $last_data['no_surat']);
+        $last_no = intval($parts[0]);
         $next_no = $last_no + 1;
     } else {
         $next_no = 1;
     }
     
-    $no_surat = sprintf('%04d', $next_no) . '/MI.SF/' . $romawi . '/' . $tahun;
+    $no_surat = sprintf('%03d', $next_no) . '/MI.SF/' . $romawi . '/' . $tahun;
 
     $query = "INSERT INTO surat_keluar (tgl_surat, no_surat, jenis_surat, perihal, penerima, acara_hari_tanggal, acara_waktu, acara_tempat, keperluan, keterangan) 
               VALUES ('$tgl_surat', '$no_surat', '$jenis_surat', '$perihal', '$penerima', " . 
@@ -276,99 +277,99 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                             <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
                                                             
                                                             <!-- Common Fields -->
-                                                            <div class="form-group form-float">
+                                                            <label>Tanggal Surat</label>
+                                                            <div class="form-group">
                                                                 <div class="form-line">
                                                                     <input type="date" class="form-control" name="tgl_surat" value="<?php echo $row['tgl_surat']; ?>" required>
-                                                                    <label class="form-label">Tanggal Surat</label>
                                                                 </div>
                                                             </div>
-                                                            <div class="form-group form-float">
+                                                            <label>Perihal</label>
+                                                            <div class="form-group">
                                                                 <div class="form-line">
                                                                     <textarea name="perihal" class="form-control no-resize" required><?php echo $row['perihal']; ?></textarea>
-                                                                    <label class="form-label">Perihal</label>
                                                                 </div>
                                                             </div>
-                                                            <div class="form-group form-float">
+                                                            <label>
+                                                                <?php 
+                                                                if ($row['jenis_surat'] == 'Tugas') echo 'Ditugaskan Kepada';
+                                                                elseif ($row['jenis_surat'] == 'Keterangan Pindah') echo 'Nama Siswa / Penerima';
+                                                                else echo 'Penerima';
+                                                                ?>
+                                                            </label>
+                                                            <div class="form-group">
                                                                 <div class="form-line">
                                                                     <input type="text" class="form-control" name="penerima" value="<?php echo $row['penerima']; ?>" required>
-                                                                    <label class="form-label">
-                                                                        <?php 
-                                                                        if ($row['jenis_surat'] == 'Tugas') echo 'Ditugaskan Kepada';
-                                                                        elseif ($row['jenis_surat'] == 'Keterangan Pindah') echo 'Nama Siswa / Penerima';
-                                                                        else echo 'Penerima';
-                                                                        ?>
-                                                                    </label>
                                                                 </div>
                                                             </div>
 
                                                             <!-- Type Specific Fields -->
                                                             <?php if ($row['jenis_surat'] == 'Undangan'): ?>
-                                                                <div class="form-group form-float">
+                                                                <label>Hari/Tanggal Acara</label>
+                                                                <div class="form-group">
                                                                     <div class="form-line">
                                                                         <input type="date" class="form-control" name="acara_hari_tanggal" value="<?php echo $row['acara_hari_tanggal']; ?>">
-                                                                        <label class="form-label">Hari/Tanggal Acara</label>
                                                                     </div>
                                                                 </div>
-                                                                <div class="form-group form-float">
+                                                                <label>Waktu Acara</label>
+                                                                <div class="form-group">
                                                                     <div class="form-line">
                                                                         <input type="time" class="form-control" name="acara_waktu" value="<?php echo $row['acara_waktu']; ?>">
-                                                                        <label class="form-label">Waktu Acara</label>
                                                                     </div>
                                                                 </div>
-                                                                <div class="form-group form-float">
+                                                                <label>Tempat Acara</label>
+                                                                <div class="form-group">
                                                                     <div class="form-line">
                                                                         <input type="text" class="form-control" name="acara_tempat" value="<?php echo $row['acara_tempat']; ?>">
-                                                                        <label class="form-label">Tempat Acara</label>
                                                                     </div>
                                                                 </div>
-                                                                <div class="form-group form-float">
+                                                                <label>Keperluan</label>
+                                                                <div class="form-group">
                                                                     <div class="form-line">
                                                                         <textarea name="keperluan" class="form-control no-resize"><?php echo $row['keperluan']; ?></textarea>
-                                                                        <label class="form-label">Keperluan</label>
                                                                     </div>
                                                                 </div>
-                                                                <div class="form-group form-float">
+                                                                <label>Keterangan</label>
+                                                                <div class="form-group">
                                                                     <div class="form-line">
                                                                         <textarea name="keterangan" class="form-control no-resize"><?php echo $row['keterangan']; ?></textarea>
-                                                                        <label class="form-label">Keterangan</label>
                                                                     </div>
                                                                 </div>
 
                                                             <?php elseif ($row['jenis_surat'] == 'Pemberitahuan'): ?>
-                                                                <div class="form-group form-float">
+                                                                <label>Keterangan</label>
+                                                                <div class="form-group">
                                                                     <div class="form-line">
                                                                         <textarea name="keterangan" class="form-control no-resize"><?php echo $row['keterangan']; ?></textarea>
-                                                                        <label class="form-label">Keterangan</label>
                                                                     </div>
                                                                 </div>
 
                                                             <?php elseif ($row['jenis_surat'] == 'Tugas'): ?>
-                                                                <div class="form-group form-float">
+                                                                <label>Untuk Keperluan</label>
+                                                                <div class="form-group">
                                                                     <div class="form-line">
                                                                         <textarea name="keperluan" class="form-control no-resize"><?php echo $row['keperluan']; ?></textarea>
-                                                                        <label class="form-label">Untuk Keperluan</label>
                                                                     </div>
                                                                 </div>
-                                                                <div class="form-group form-float">
+                                                                <label>Keterangan</label>
+                                                                <div class="form-group">
                                                                     <div class="form-line">
                                                                         <textarea name="keterangan" class="form-control no-resize"><?php echo $row['keterangan']; ?></textarea>
-                                                                        <label class="form-label">Keterangan</label>
                                                                     </div>
                                                                 </div>
 
                                                             <?php elseif ($row['jenis_surat'] == 'Keterangan Pindah'): ?>
-                                                                <div class="form-group form-float">
+                                                                <label>Keterangan / Tujuan Pindah</label>
+                                                                <div class="form-group">
                                                                     <div class="form-line">
                                                                         <textarea name="keterangan" class="form-control no-resize"><?php echo $row['keterangan']; ?></textarea>
-                                                                        <label class="form-label">Keterangan / Tujuan Pindah</label>
                                                                     </div>
                                                                 </div>
 
                                                             <?php else: // Default fallback for other types ?>
-                                                                <div class="form-group form-float">
+                                                                <label>Keterangan</label>
+                                                                <div class="form-group">
                                                                     <div class="form-line">
                                                                         <textarea name="keterangan" class="form-control no-resize"><?php echo $row['keterangan']; ?></textarea>
-                                                                        <label class="form-label">Keterangan</label>
                                                                     </div>
                                                                 </div>
                                                             <?php endif; ?>
@@ -403,52 +404,52 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
             <form method="POST">
                 <div class="modal-body">
                     <input type="hidden" name="jenis_surat" value="Undangan">
-                    <div class="form-group form-float">
+                    <label>Tanggal Surat</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="date" class="form-control" name="tgl_surat" required>
-                            <label class="form-label">Tanggal Surat</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Perihal</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <textarea name="perihal" class="form-control no-resize" required></textarea>
-                            <label class="form-label">Perihal</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Penerima</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="text" class="form-control" name="penerima" required>
-                            <label class="form-label">Penerima</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Hari/Tanggal Acara</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="date" class="form-control" name="acara_hari_tanggal">
-                            <label class="form-label">Hari/Tanggal Acara</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Waktu Acara</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="time" class="form-control" name="acara_waktu">
-                            <label class="form-label">Waktu Acara</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Tempat Acara</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="text" class="form-control" name="acara_tempat">
-                            <label class="form-label">Tempat Acara</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Keperluan</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <textarea name="keperluan" class="form-control no-resize"></textarea>
-                            <label class="form-label">Keperluan</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Keterangan</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <textarea name="keterangan" class="form-control no-resize"></textarea>
-                            <label class="form-label">Keterangan</label>
                         </div>
                     </div>
                 </div>
@@ -471,28 +472,28 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
             <form method="POST">
                 <div class="modal-body">
                     <input type="hidden" name="jenis_surat" value="Pemberitahuan">
-                    <div class="form-group form-float">
+                    <label>Tanggal Surat</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="date" class="form-control" name="tgl_surat" required>
-                            <label class="form-label">Tanggal Surat</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Perihal</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <textarea name="perihal" class="form-control no-resize" required></textarea>
-                            <label class="form-label">Perihal</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Penerima</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="text" class="form-control" name="penerima" required>
-                            <label class="form-label">Penerima</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Keterangan</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <textarea name="keterangan" class="form-control no-resize"></textarea>
-                            <label class="form-label">Keterangan</label>
                         </div>
                     </div>
                 </div>
@@ -515,34 +516,34 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
             <form method="POST">
                 <div class="modal-body">
                     <input type="hidden" name="jenis_surat" value="Tugas">
-                    <div class="form-group form-float">
+                    <label>Tanggal Surat</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="date" class="form-control" name="tgl_surat" required>
-                            <label class="form-label">Tanggal Surat</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Perihal</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <textarea name="perihal" class="form-control no-resize" required></textarea>
-                            <label class="form-label">Perihal</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Ditugaskan Kepada</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="text" class="form-control" name="penerima" required>
-                            <label class="form-label">Ditugaskan Kepada</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Untuk Keperluan</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <textarea name="keperluan" class="form-control no-resize"></textarea>
-                            <label class="form-label">Untuk Keperluan</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Keterangan</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <textarea name="keterangan" class="form-control no-resize"></textarea>
-                            <label class="form-label">Keterangan</label>
                         </div>
                     </div>
                 </div>
@@ -565,28 +566,28 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
             <form method="POST">
                 <div class="modal-body">
                     <input type="hidden" name="jenis_surat" value="Keterangan Pindah">
-                    <div class="form-group form-float">
+                    <label>Tanggal Surat</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="date" class="form-control" name="tgl_surat" required>
-                            <label class="form-label">Tanggal Surat</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Perihal</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <textarea name="perihal" class="form-control no-resize" required></textarea>
-                            <label class="form-label">Perihal</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Nama Siswa / Penerima</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="text" class="form-control" name="penerima" required>
-                            <label class="form-label">Nama Siswa / Penerima</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Keterangan / Tujuan Pindah</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <textarea name="keterangan" class="form-control no-resize"></textarea>
-                            <label class="form-label">Keterangan / Tujuan Pindah</label>
                         </div>
                     </div>
                 </div>

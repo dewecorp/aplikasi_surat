@@ -248,34 +248,34 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                     <form method="POST" enctype="multipart/form-data">
                                                         <div class="modal-body">
                                                             <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
-                                                            <div class="form-group form-float">
+                                                            <label>Tanggal Terima</label>
+                                                            <div class="form-group">
                                                                 <div class="form-line">
                                                                     <input type="date" class="form-control" name="tgl_terima" value="<?php echo $row['tgl_terima']; ?>" required>
-                                                                    <label class="form-label">Tanggal Terima</label>
                                                                 </div>
                                                             </div>
-                                                            <div class="form-group form-float">
+                                                            <label>Nomor Surat</label>
+                                                            <div class="form-group">
                                                                 <div class="form-line">
                                                                     <input type="text" class="form-control" name="no_surat" value="<?php echo $row['no_surat']; ?>" required>
-                                                                    <label class="form-label">Nomor Surat</label>
                                                                 </div>
                                                             </div>
-                                                            <div class="form-group form-float">
+                                                            <label>Tanggal Surat</label>
+                                                            <div class="form-group">
                                                                 <div class="form-line">
                                                                     <input type="date" class="form-control" name="tgl_surat" value="<?php echo $row['tgl_surat']; ?>" required>
-                                                                    <label class="form-label">Tanggal Surat</label>
                                                                 </div>
                                                             </div>
-                                                            <div class="form-group form-float">
+                                                            <label>Perihal</label>
+                                                            <div class="form-group">
                                                                 <div class="form-line">
                                                                     <textarea name="perihal" class="form-control no-resize" required><?php echo $row['perihal']; ?></textarea>
-                                                                    <label class="form-label">Perihal</label>
                                                                 </div>
                                                             </div>
-                                                            <div class="form-group form-float">
+                                                            <label>Pengirim</label>
+                                                            <div class="form-group">
                                                                 <div class="form-line">
                                                                     <input type="text" class="form-control" name="pengirim" value="<?php echo $row['pengirim']; ?>" required>
-                                                                    <label class="form-label">Pengirim</label>
                                                                 </div>
                                                             </div>
                                                             <div class="form-group">
@@ -311,34 +311,34 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
             </div>
             <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
-                    <div class="form-group form-float">
+                    <label>Tanggal Terima</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="date" class="form-control" name="tgl_terima" required>
-                            <label class="form-label">Tanggal Terima</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Nomor Surat</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="text" class="form-control" name="no_surat" required>
-                            <label class="form-label">Nomor Surat</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Tanggal Surat</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="date" class="form-control" name="tgl_surat" required>
-                            <label class="form-label">Tanggal Surat</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Perihal</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <textarea name="perihal" class="form-control no-resize" required></textarea>
-                            <label class="form-label">Perihal</label>
                         </div>
                     </div>
-                    <div class="form-group form-float">
+                    <label>Pengirim</label>
+                    <div class="form-group">
                         <div class="form-line">
                             <input type="text" class="form-control" name="pengirim" required>
-                            <label class="form-label">Pengirim</label>
                         </div>
                     </div>
                     <div class="form-group">
