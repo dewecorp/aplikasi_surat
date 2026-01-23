@@ -1,7 +1,6 @@
 <?php
+session_start();
 include 'config.php';
-include 'template/header.php';
-include 'template/sidebar.php';
 
 // Handle Add
 if (isset($_POST['add'])) {
@@ -28,7 +27,9 @@ if (isset($_POST['add'])) {
     } else {
         $_SESSION['error'] = "Gagal menyimpan surat: " . mysqli_error($conn);
     }
-    echo "<script>window.location='surat_masuk.php';</script>";
+    session_write_close();
+    header("Location: surat_masuk.php");
+    exit();
 }
 
 // Handle Edit
@@ -58,7 +59,9 @@ if (isset($_POST['edit'])) {
     } else {
         $_SESSION['error'] = "Gagal mengubah surat: " . mysqli_error($conn);
     }
-    echo "<script>window.location='surat_masuk.php';</script>";
+    session_write_close();
+    header("Location: surat_masuk.php");
+    exit();
 }
 
 // Handle Delete
@@ -74,8 +77,13 @@ if (isset($_GET['delete'])) {
     } else {
         $_SESSION['error'] = "Gagal menghapus surat";
     }
-    echo "<script>window.location='surat_masuk.php';</script>";
+    session_write_close();
+    header("Location: surat_masuk.php");
+    exit();
 }
+
+include 'template/header.php';
+include 'template/sidebar.php';
 
 // Filter Logic
 $where = "WHERE 1=1";
@@ -125,16 +133,30 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                             <div class="col-sm-2">
                                 <div class="form-group">
                                     <div class="form-line">
-                                        <input type="number" class="form-control" name="filter_tahun" placeholder="Tahun Terima" value="<?php echo isset($_GET['filter_tahun']) ? $_GET['filter_tahun'] : ''; ?>">
+                                        <select class="form-control" name="filter_tahun">
+                                            <option value="">-- Tahun --</option>
+                                            <?php
+                                            $q_tahun = mysqli_query($conn, "SELECT DISTINCT YEAR(tgl_terima) as tahun FROM surat_masuk ORDER BY tahun DESC");
+                                            while($r_tahun = mysqli_fetch_assoc($q_tahun)){
+                                                $selected = (isset($_GET['filter_tahun']) && $_GET['filter_tahun'] == $r_tahun['tahun']) ? 'selected' : '';
+                                                echo "<option value='".$r_tahun['tahun']."' $selected>".$r_tahun['tahun']."</option>";
+                                            }
+                                            ?>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-2">
                                 <div class="form-group">
-                                    <select class="form-control show-tick" name="filter_bulan">
+                                    <select class="form-control" name="filter_bulan">
                                         <option value="">-- Bulan --</option>
-                                        <?php for($i=1;$i<=12;$i++): ?>
-                                            <option value="<?php echo $i; ?>" <?php echo (isset($_GET['filter_bulan']) && $_GET['filter_bulan'] == $i) ? 'selected' : ''; ?>><?php echo $i; ?></option>
+                                        <?php 
+                                        $bulan_indo = array(
+                                            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni',
+                                            7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                                        );
+                                        for($i=1;$i<=12;$i++): ?>
+                                            <option value="<?php echo $i; ?>" <?php echo (isset($_GET['filter_bulan']) && $_GET['filter_bulan'] == $i) ? 'selected' : ''; ?>><?php echo $bulan_indo[$i]; ?></option>
                                         <?php endfor; ?>
                                     </select>
                                 </div>
@@ -142,20 +164,31 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <div class="form-line">
-                                        <input type="text" class="form-control" name="filter_pengirim" placeholder="Pengirim" value="<?php echo isset($_GET['filter_pengirim']) ? $_GET['filter_pengirim'] : ''; ?>">
+                                        <select class="form-control" name="filter_pengirim">
+                                            <option value="">-- Pengirim --</option>
+                                            <?php
+                                            $q_pengirim = mysqli_query($conn, "SELECT DISTINCT pengirim FROM surat_masuk ORDER BY pengirim ASC");
+                                            while($r_pengirim = mysqli_fetch_assoc($q_pengirim)){
+                                                $selected = (isset($_GET['filter_pengirim']) && $_GET['filter_pengirim'] == $r_pengirim['pengirim']) ? 'selected' : '';
+                                                echo "<option value='".$r_pengirim['pengirim']."' $selected>".$r_pengirim['pengirim']."</option>";
+                                            }
+                                            ?>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <div class="form-group">
                                     <div class="form-line">
                                         <input type="date" class="form-control" name="filter_tanggal" value="<?php echo isset($_GET['filter_tanggal']) ? $_GET['filter_tanggal'] : ''; ?>">
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-2">
-                                <button type="submit" class="btn btn-info waves-effect">Cari</button>
-                                <a href="surat_masuk.php" class="btn btn-default waves-effect">Reset</a>
+                            <div class="col-sm-3">
+                                <button type="submit" class="btn btn-info waves-effect" title="Cari"><i class="material-icons">search</i></button>
+                                <a href="surat_masuk.php" class="btn btn-default waves-effect" title="Reset"><i class="material-icons">refresh</i></a>
+                                <a href="export_surat_masuk_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success waves-effect" title="Export Excel"><i class="material-icons">grid_on</i></a>
+                                <a href="export_surat_masuk_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning waves-effect" title="Cetak PDF"><i class="material-icons">print</i></a>
                             </div>
                         </form>
 

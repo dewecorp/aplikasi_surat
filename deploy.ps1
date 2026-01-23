@@ -28,8 +28,14 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "Menambahkan file ke staging..."
 git add .
 
+$customMsg = Read-Host "Masukkan pesan commit (kosongkan untuk default timestamp)"
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$message = "Backup & Update: $timestamp"
+
+if ([string]::IsNullOrWhiteSpace($customMsg)) {
+    $message = "Backup & Update: $timestamp"
+} else {
+    $message = "$customMsg ($timestamp)"
+}
 
 Write-Host "Melakukan commit: $message"
 git commit -m "$message"

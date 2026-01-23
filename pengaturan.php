@@ -23,6 +23,13 @@ if (isset($_POST['update'])) {
 
     $query_str = "UPDATE pengaturan SET nama_yayasan='$nama_yayasan', nama_madrasah='$nama_madrasah', alamat='$alamat', email='$email', website='$website', kepala_madrasah='$kepala_madrasah'";
 
+    // Upload Logo
+    if ($_FILES['logo']['name']) {
+        $logo = time() . '_logo_' . basename($_FILES["logo"]["name"]);
+        move_uploaded_file($_FILES["logo"]["tmp_name"], "assets/images/" . $logo);
+        $query_str .= ", logo='$logo'";
+    }
+
     // Upload TTD
     if ($_FILES['ttd']['name']) {
         $ttd = time() . '_ttd_' . basename($_FILES["ttd"]["name"]);
@@ -45,6 +52,7 @@ if (isset($_POST['update'])) {
         $_SESSION['error'] = "Gagal menyimpan pengaturan: " . mysqli_error($conn);
     }
     echo "<script>window.location='pengaturan.php';</script>";
+    exit();
 }
 ?>
 
@@ -114,8 +122,17 @@ if (isset($_POST['update'])) {
                                 </div>
                             </div>
                             <div class="row clearfix">
-                                <div class="col-sm-6">
-                                    <label>Upload Tanda Tangan (PNG/Transparan lebih baik)</label>
+                                <div class="col-sm-4">
+                                    <label>Upload Logo Madrasah</label>
+                                    <input type="file" name="logo" class="form-control">
+                                    <?php if (isset($data['logo']) && $data['logo']): ?>
+                                        <div class="m-t-10">
+                                            <img src="assets/images/<?php echo $data['logo']; ?>" height="50" alt="Logo">
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label>Upload Tanda Tangan (PNG/Transparan)</label>
                                     <input type="file" name="ttd" class="form-control">
                                     <?php if ($data['ttd']): ?>
                                         <div class="m-t-10">
@@ -123,8 +140,8 @@ if (isset($_POST['update'])) {
                                         </div>
                                     <?php endif; ?>
                                 </div>
-                                <div class="col-sm-6">
-                                    <label>Upload Stempel (PNG/Transparan lebih baik)</label>
+                                <div class="col-sm-4">
+                                    <label>Upload Stempel (PNG/Transparan)</label>
                                     <input type="file" name="stempel" class="form-control">
                                     <?php if ($data['stempel']): ?>
                                         <div class="m-t-10">

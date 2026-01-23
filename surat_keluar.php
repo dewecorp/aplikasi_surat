@@ -1,7 +1,6 @@
 <?php
+session_start();
 include 'config.php';
-include 'template/header.php';
-include 'template/sidebar.php';
 
 // Handle Add
 if (isset($_POST['add'])) {
@@ -9,6 +8,13 @@ if (isset($_POST['add'])) {
     $jenis_surat = $_POST['jenis_surat'];
     $perihal = mysqli_real_escape_string($conn, $_POST['perihal']);
     $penerima = mysqli_real_escape_string($conn, $_POST['penerima']);
+    
+    // Additional fields
+    $acara_hari_tanggal = !empty($_POST['acara_hari_tanggal']) ? $_POST['acara_hari_tanggal'] : NULL;
+    $acara_waktu = !empty($_POST['acara_waktu']) ? $_POST['acara_waktu'] : NULL;
+    $acara_tempat = !empty($_POST['acara_tempat']) ? mysqli_real_escape_string($conn, $_POST['acara_tempat']) : NULL;
+    $keperluan = !empty($_POST['keperluan']) ? mysqli_real_escape_string($conn, $_POST['keperluan']) : NULL;
+    $keterangan = !empty($_POST['keterangan']) ? mysqli_real_escape_string($conn, $_POST['keterangan']) : NULL;
     
     // Generate Nomor Surat
     $tahun = date('Y', strtotime($tgl_surat));
@@ -27,7 +33,13 @@ if (isset($_POST['add'])) {
     
     $no_surat = sprintf('%04d', $next_no) . '/MI.SF/' . $romawi . '/' . $tahun;
 
-    $query = "INSERT INTO surat_keluar (tgl_surat, no_surat, jenis_surat, perihal, penerima) VALUES ('$tgl_surat', '$no_surat', '$jenis_surat', '$perihal', '$penerima')";
+    $query = "INSERT INTO surat_keluar (tgl_surat, no_surat, jenis_surat, perihal, penerima, acara_hari_tanggal, acara_waktu, acara_tempat, keperluan, keterangan) 
+              VALUES ('$tgl_surat', '$no_surat', '$jenis_surat', '$perihal', '$penerima', " . 
+              ($acara_hari_tanggal ? "'$acara_hari_tanggal'" : "NULL") . ", " . 
+              ($acara_waktu ? "'$acara_waktu'" : "NULL") . ", " . 
+              ($acara_tempat ? "'$acara_tempat'" : "NULL") . ", " . 
+              ($keperluan ? "'$keperluan'" : "NULL") . ", " . 
+              ($keterangan ? "'$keterangan'" : "NULL") . ")";
     
     if (mysqli_query($conn, $query)) {
         log_activity($_SESSION['user_id'], 'create', 'Membuat surat keluar no: ' . $no_surat);
@@ -35,7 +47,9 @@ if (isset($_POST['add'])) {
     } else {
         $_SESSION['error'] = "Gagal membuat surat: " . mysqli_error($conn);
     }
-    echo "<script>window.location='surat_keluar.php';</script>";
+    session_write_close();
+    header("Location: surat_keluar.php");
+    exit();
 }
 
 // Handle Edit
@@ -45,10 +59,25 @@ if (isset($_POST['edit'])) {
     $perihal = mysqli_real_escape_string($conn, $_POST['perihal']);
     $penerima = mysqli_real_escape_string($conn, $_POST['penerima']);
     
-    // Nomor surat tidak berubah saat edit untuk menjaga konsistensi urutan, kecuali diminta. 
-    // Di sini kita asumsikan nomor surat tetap, hanya konten yang diedit.
+    // Additional fields
+    $acara_hari_tanggal = !empty($_POST['acara_hari_tanggal']) ? $_POST['acara_hari_tanggal'] : NULL;
+    $acara_waktu = !empty($_POST['acara_waktu']) ? $_POST['acara_waktu'] : NULL;
+    $acara_tempat = !empty($_POST['acara_tempat']) ? mysqli_real_escape_string($conn, $_POST['acara_tempat']) : NULL;
+    $keperluan = !empty($_POST['keperluan']) ? mysqli_real_escape_string($conn, $_POST['keperluan']) : NULL;
+    $keterangan = !empty($_POST['keterangan']) ? mysqli_real_escape_string($conn, $_POST['keterangan']) : NULL;
+
+    // Nomor surat tidak berubah saat edit untuk menjaga konsistensi urutan
     
-    $query = "UPDATE surat_keluar SET tgl_surat='$tgl_surat', perihal='$perihal', penerima='$penerima' WHERE id='$id'";
+    $query = "UPDATE surat_keluar SET 
+              tgl_surat='$tgl_surat', 
+              perihal='$perihal', 
+              penerima='$penerima',
+              acara_hari_tanggal=" . ($acara_hari_tanggal ? "'$acara_hari_tanggal'" : "NULL") . ",
+              acara_waktu=" . ($acara_waktu ? "'$acara_waktu'" : "NULL") . ",
+              acara_tempat=" . ($acara_tempat ? "'$acara_tempat'" : "NULL") . ",
+              keperluan=" . ($keperluan ? "'$keperluan'" : "NULL") . ",
+              keterangan=" . ($keterangan ? "'$keterangan'" : "NULL") . "
+              WHERE id='$id'";
 
     if (mysqli_query($conn, $query)) {
         // Ambil no surat untuk log
@@ -60,7 +89,9 @@ if (isset($_POST['edit'])) {
     } else {
         $_SESSION['error'] = "Gagal mengubah surat: " . mysqli_error($conn);
     }
-    echo "<script>window.location='surat_keluar.php';</script>";
+    session_write_close();
+    header("Location: surat_keluar.php");
+    exit();
 }
 
 // Handle Delete
@@ -76,8 +107,13 @@ if (isset($_GET['delete'])) {
     } else {
         $_SESSION['error'] = "Gagal menghapus surat";
     }
-    echo "<script>window.location='surat_keluar.php';</script>";
+    session_write_close();
+    header("Location: surat_keluar.php");
+    exit();
 }
+
+include 'template/header.php';
+include 'template/sidebar.php';
 
 // Filter Logic
 $where = "WHERE 1=1";
@@ -115,9 +151,10 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                         </h2>
                         <ul class="header-dropdown m-r--5">
                             <li class="dropdown">
-                                <button type="button" class="btn btn-primary waves-effect" data-toggle="modal" data-target="#addModal">
-                                    <i class="material-icons">add</i> Buat Surat Baru
-                                </button>
+                                <button type="button" class="btn btn-primary waves-effect" data-toggle="modal" data-target="#modalUndangan">Surat Undangan</button>
+                                <button type="button" class="btn btn-info waves-effect" data-toggle="modal" data-target="#modalPemberitahuan">Surat Pemberitahuan</button>
+                                <button type="button" class="btn btn-warning waves-effect" data-toggle="modal" data-target="#modalTugas">Surat Tugas</button>
+                                <button type="button" class="btn btn-success waves-effect" data-toggle="modal" data-target="#modalPindah">Surat Pindah</button>
                             </li>
                         </ul>
                     </div>
@@ -127,16 +164,31 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                             <div class="col-sm-2">
                                 <div class="form-group">
                                     <div class="form-line">
-                                        <input type="number" class="form-control" name="filter_tahun" placeholder="Tahun" value="<?php echo isset($_GET['filter_tahun']) ? $_GET['filter_tahun'] : ''; ?>">
+                                        <select class="form-control" name="filter_tahun">
+                                            <option value="">-- Tahun --</option>
+                                            <?php
+                                            $q_tahun = mysqli_query($conn, "SELECT DISTINCT YEAR(tgl_surat) as tahun FROM surat_keluar ORDER BY tahun DESC");
+                                            while($r_tahun = mysqli_fetch_assoc($q_tahun)){
+                                                $selected = (isset($_GET['filter_tahun']) && $_GET['filter_tahun'] == $r_tahun['tahun']) ? 'selected' : '';
+                                                echo "<option value='".$r_tahun['tahun']."' $selected>".$r_tahun['tahun']."</option>";
+                                            }
+                                            ?>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-2">
                                 <div class="form-group">
-                                    <select class="form-control show-tick" name="filter_bulan">
-                                        <option value="">-- Semua Bulan --</option>
-                                        <?php for($i=1;$i<=12;$i++): ?>
-                                            <option value="<?php echo $i; ?>" <?php echo (isset($_GET['filter_bulan']) && $_GET['filter_bulan'] == $i) ? 'selected' : ''; ?>><?php echo $i; ?></option>
+                                    <select class="form-control" name="filter_bulan">
+                                        <option value="">-- Bulan --</option>
+                                        <?php
+                                        $bulan_indo = [
+                                            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                                        ];
+                                        for($i=1;$i<=12;$i++): ?>
+                                            <option value="<?php echo $i; ?>" <?php echo (isset($_GET['filter_bulan']) && $_GET['filter_bulan'] == $i) ? 'selected' : ''; ?>><?php echo $bulan_indo[$i]; ?></option>
                                         <?php endfor; ?>
                                     </select>
                                 </div>
@@ -144,20 +196,31 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <div class="form-line">
-                                        <input type="text" class="form-control" name="filter_penerima" placeholder="Penerima" value="<?php echo isset($_GET['filter_penerima']) ? $_GET['filter_penerima'] : ''; ?>">
+                                        <select class="form-control" name="filter_penerima">
+                                            <option value="">-- Penerima --</option>
+                                            <?php
+                                            $q_penerima = mysqli_query($conn, "SELECT DISTINCT penerima FROM surat_keluar ORDER BY penerima ASC");
+                                            while($r_penerima = mysqli_fetch_assoc($q_penerima)){
+                                                $selected = (isset($_GET['filter_penerima']) && $_GET['filter_penerima'] == $r_penerima['penerima']) ? 'selected' : '';
+                                                echo "<option value='".$r_penerima['penerima']."' $selected>".$r_penerima['penerima']."</option>";
+                                            }
+                                            ?>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <div class="form-group">
                                     <div class="form-line">
                                         <input type="date" class="form-control" name="filter_tanggal" value="<?php echo isset($_GET['filter_tanggal']) ? $_GET['filter_tanggal'] : ''; ?>">
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-2">
-                                <button type="submit" class="btn btn-info waves-effect">Cari</button>
-                                <a href="surat_keluar.php" class="btn btn-default waves-effect">Reset</a>
+                            <div class="col-sm-3">
+                                <button type="submit" class="btn btn-info waves-effect" title="Cari"><i class="material-icons">search</i></button>
+                                <a href="surat_keluar.php" class="btn btn-default waves-effect" title="Reset"><i class="material-icons">refresh</i></a>
+                                <a href="export_surat_keluar_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success waves-effect" title="Export Excel"><i class="material-icons">grid_on</i></a>
+                                <a href="export_surat_keluar_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning waves-effect" title="Cetak PDF"><i class="material-icons">print</i></a>
                             </div>
                         </form>
 
@@ -206,11 +269,13 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h4 class="modal-title">Edit Surat Keluar</h4>
+                                                        <h4 class="modal-title">Edit <?php echo $row['jenis_surat']; ?></h4>
                                                     </div>
                                                     <form method="POST">
                                                         <div class="modal-body">
                                                             <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
+                                                            
+                                                            <!-- Common Fields -->
                                                             <div class="form-group form-float">
                                                                 <div class="form-line">
                                                                     <input type="date" class="form-control" name="tgl_surat" value="<?php echo $row['tgl_surat']; ?>" required>
@@ -226,9 +291,88 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                             <div class="form-group form-float">
                                                                 <div class="form-line">
                                                                     <input type="text" class="form-control" name="penerima" value="<?php echo $row['penerima']; ?>" required>
-                                                                    <label class="form-label">Penerima</label>
+                                                                    <label class="form-label">
+                                                                        <?php 
+                                                                        if ($row['jenis_surat'] == 'Tugas') echo 'Ditugaskan Kepada';
+                                                                        elseif ($row['jenis_surat'] == 'Keterangan Pindah') echo 'Nama Siswa / Penerima';
+                                                                        else echo 'Penerima';
+                                                                        ?>
+                                                                    </label>
                                                                 </div>
                                                             </div>
+
+                                                            <!-- Type Specific Fields -->
+                                                            <?php if ($row['jenis_surat'] == 'Undangan'): ?>
+                                                                <div class="form-group form-float">
+                                                                    <div class="form-line">
+                                                                        <input type="date" class="form-control" name="acara_hari_tanggal" value="<?php echo $row['acara_hari_tanggal']; ?>">
+                                                                        <label class="form-label">Hari/Tanggal Acara</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group form-float">
+                                                                    <div class="form-line">
+                                                                        <input type="time" class="form-control" name="acara_waktu" value="<?php echo $row['acara_waktu']; ?>">
+                                                                        <label class="form-label">Waktu Acara</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group form-float">
+                                                                    <div class="form-line">
+                                                                        <input type="text" class="form-control" name="acara_tempat" value="<?php echo $row['acara_tempat']; ?>">
+                                                                        <label class="form-label">Tempat Acara</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group form-float">
+                                                                    <div class="form-line">
+                                                                        <textarea name="keperluan" class="form-control no-resize"><?php echo $row['keperluan']; ?></textarea>
+                                                                        <label class="form-label">Keperluan</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group form-float">
+                                                                    <div class="form-line">
+                                                                        <textarea name="keterangan" class="form-control no-resize"><?php echo $row['keterangan']; ?></textarea>
+                                                                        <label class="form-label">Keterangan</label>
+                                                                    </div>
+                                                                </div>
+
+                                                            <?php elseif ($row['jenis_surat'] == 'Pemberitahuan'): ?>
+                                                                <div class="form-group form-float">
+                                                                    <div class="form-line">
+                                                                        <textarea name="keterangan" class="form-control no-resize"><?php echo $row['keterangan']; ?></textarea>
+                                                                        <label class="form-label">Keterangan</label>
+                                                                    </div>
+                                                                </div>
+
+                                                            <?php elseif ($row['jenis_surat'] == 'Tugas'): ?>
+                                                                <div class="form-group form-float">
+                                                                    <div class="form-line">
+                                                                        <textarea name="keperluan" class="form-control no-resize"><?php echo $row['keperluan']; ?></textarea>
+                                                                        <label class="form-label">Untuk Keperluan</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-group form-float">
+                                                                    <div class="form-line">
+                                                                        <textarea name="keterangan" class="form-control no-resize"><?php echo $row['keterangan']; ?></textarea>
+                                                                        <label class="form-label">Keterangan</label>
+                                                                    </div>
+                                                                </div>
+
+                                                            <?php elseif ($row['jenis_surat'] == 'Keterangan Pindah'): ?>
+                                                                <div class="form-group form-float">
+                                                                    <div class="form-line">
+                                                                        <textarea name="keterangan" class="form-control no-resize"><?php echo $row['keterangan']; ?></textarea>
+                                                                        <label class="form-label">Keterangan / Tujuan Pindah</label>
+                                                                    </div>
+                                                                </div>
+
+                                                            <?php else: // Default fallback for other types ?>
+                                                                <div class="form-group form-float">
+                                                                    <div class="form-line">
+                                                                        <textarea name="keterangan" class="form-control no-resize"><?php echo $row['keterangan']; ?></textarea>
+                                                                        <label class="form-label">Keterangan</label>
+                                                                    </div>
+                                                                </div>
+                                                            <?php endif; ?>
+
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="submit" name="edit" class="btn btn-link waves-effect">SIMPAN</button>
@@ -249,24 +393,16 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
     </div>
 </section>
 
-<!-- Add Modal -->
-<div class="modal fade" id="addModal" tabindex="-1" role="dialog">
+<!-- Modal Surat Undangan -->
+<div class="modal fade" id="modalUndangan" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Buat Surat Baru</h4>
+                <h4 class="modal-title">Buat Surat Undangan</h4>
             </div>
             <form method="POST">
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label>Jenis Surat</label>
-                        <select class="form-control show-tick" name="jenis_surat" required>
-                            <option value="Undangan">Surat Undangan</option>
-                            <option value="Pemberitahuan">Surat Pemberitahuan</option>
-                            <option value="Tugas">Surat Tugas</option>
-                            <option value="Keterangan Pindah">Surat Keterangan Pindah</option>
-                        </select>
-                    </div>
+                    <input type="hidden" name="jenis_surat" value="Undangan">
                     <div class="form-group form-float">
                         <div class="form-line">
                             <input type="date" class="form-control" name="tgl_surat" required>
@@ -285,9 +421,177 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                             <label class="form-label">Penerima</label>
                         </div>
                     </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <input type="date" class="form-control" name="acara_hari_tanggal">
+                            <label class="form-label">Hari/Tanggal Acara</label>
+                        </div>
+                    </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <input type="time" class="form-control" name="acara_waktu">
+                            <label class="form-label">Waktu Acara</label>
+                        </div>
+                    </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <input type="text" class="form-control" name="acara_tempat">
+                            <label class="form-label">Tempat Acara</label>
+                        </div>
+                    </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <textarea name="keperluan" class="form-control no-resize"></textarea>
+                            <label class="form-label">Keperluan</label>
+                        </div>
+                    </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <textarea name="keterangan" class="form-control no-resize"></textarea>
+                            <label class="form-label">Keterangan</label>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="add" class="btn btn-link waves-effect">GENERATE / SIMPAN</button>
+                    <button type="submit" name="add" class="btn btn-link waves-effect">SIMPAN</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">TUTUP</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Surat Pemberitahuan -->
+<div class="modal fade" id="modalPemberitahuan" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Buat Surat Pemberitahuan</h4>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="jenis_surat" value="Pemberitahuan">
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <input type="date" class="form-control" name="tgl_surat" required>
+                            <label class="form-label">Tanggal Surat</label>
+                        </div>
+                    </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <textarea name="perihal" class="form-control no-resize" required></textarea>
+                            <label class="form-label">Perihal</label>
+                        </div>
+                    </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <input type="text" class="form-control" name="penerima" required>
+                            <label class="form-label">Penerima</label>
+                        </div>
+                    </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <textarea name="keterangan" class="form-control no-resize"></textarea>
+                            <label class="form-label">Keterangan</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="add" class="btn btn-link waves-effect">SIMPAN</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">TUTUP</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Surat Tugas -->
+<div class="modal fade" id="modalTugas" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Buat Surat Tugas</h4>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="jenis_surat" value="Tugas">
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <input type="date" class="form-control" name="tgl_surat" required>
+                            <label class="form-label">Tanggal Surat</label>
+                        </div>
+                    </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <textarea name="perihal" class="form-control no-resize" required></textarea>
+                            <label class="form-label">Perihal</label>
+                        </div>
+                    </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <input type="text" class="form-control" name="penerima" required>
+                            <label class="form-label">Ditugaskan Kepada</label>
+                        </div>
+                    </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <textarea name="keperluan" class="form-control no-resize"></textarea>
+                            <label class="form-label">Untuk Keperluan</label>
+                        </div>
+                    </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <textarea name="keterangan" class="form-control no-resize"></textarea>
+                            <label class="form-label">Keterangan</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="add" class="btn btn-link waves-effect">SIMPAN</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">TUTUP</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Surat Pindah -->
+<div class="modal fade" id="modalPindah" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Buat Surat Keterangan Pindah</h4>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="jenis_surat" value="Keterangan Pindah">
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <input type="date" class="form-control" name="tgl_surat" required>
+                            <label class="form-label">Tanggal Surat</label>
+                        </div>
+                    </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <textarea name="perihal" class="form-control no-resize" required></textarea>
+                            <label class="form-label">Perihal</label>
+                        </div>
+                    </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <input type="text" class="form-control" name="penerima" required>
+                            <label class="form-label">Nama Siswa / Penerima</label>
+                        </div>
+                    </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <textarea name="keterangan" class="form-control no-resize"></textarea>
+                            <label class="form-label">Keterangan / Tujuan Pindah</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="add" class="btn btn-link waves-effect">SIMPAN</button>
                     <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">TUTUP</button>
                 </div>
             </form>

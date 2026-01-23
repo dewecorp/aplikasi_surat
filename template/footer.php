@@ -35,6 +35,28 @@
 
     <!-- Custom Js -->
     <script src="assets/js/admin.js"></script>
+    <?php
+    // Fetch settings for JS
+    if (isset($conn)) {
+        $q_js_set = mysqli_query($conn, "SELECT * FROM pengaturan LIMIT 1");
+        $js_set = mysqli_fetch_assoc($q_js_set);
+        $logo_base64 = '';
+        // Check assets/images first (default/upload location)
+        if (!empty($js_set['logo']) && file_exists('assets/images/' . $js_set['logo'])) {
+            $logo_path = 'assets/images/' . $js_set['logo'];
+            $type = pathinfo($logo_path, PATHINFO_EXTENSION);
+            $data = file_get_contents($logo_path);
+            $logo_base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        }
+    }
+    ?>
+    <script>
+        var simsConfig = {
+            nama_sekolah: <?php echo isset($js_set['nama_madrasah']) ? json_encode($js_set['nama_madrasah']) : '""'; ?>,
+            logo: <?php echo isset($logo_base64) ? json_encode($logo_base64) : '""'; ?>,
+            alamat: <?php echo isset($js_set['alamat']) ? json_encode($js_set['alamat']) : '""'; ?>
+        };
+    </script>
     <script src="assets/js/pages/tables/jquery-datatable.js"></script>
 
     <!-- Demo Js -->

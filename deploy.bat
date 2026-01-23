@@ -26,9 +26,16 @@ if %ERRORLEVEL% NEQ 0 (
 echo Menambahkan file ke staging...
 git add .
 
+set /p CUSTOM_MSG="Masukkan pesan commit (kosongkan untuk default timestamp): "
+
 :: Ambil timestamp menggunakan PowerShell agar format konsisten
 for /f "usebackq delims=" %%a in (`powershell -Command "Get-Date -Format 'yyyy-MM-dd HH:mm:ss'"`) do set TIMESTAMP=%%a
-set "MESSAGE=Backup & Update: %TIMESTAMP%"
+
+if "%CUSTOM_MSG%"=="" (
+    set "MESSAGE=Backup & Update: %TIMESTAMP%"
+) else (
+    set "MESSAGE=%CUSTOM_MSG% (%TIMESTAMP%)"
+)
 
 echo Melakukan commit: %MESSAGE%
 git commit -m "%MESSAGE%"

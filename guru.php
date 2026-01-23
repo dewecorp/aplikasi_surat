@@ -92,6 +92,8 @@ include 'template/sidebar.php';
                         </h2>
                         <ul class="header-dropdown m-r--5">
                             <li class="dropdown">
+                                <a href="export_guru_excel.php" target="_blank" class="btn btn-success waves-effect" title="Export Excel"><i class="material-icons">grid_on</i></a>
+                                <a href="export_guru_print.php" target="_blank" class="btn btn-warning waves-effect" title="Cetak PDF"><i class="material-icons">print</i></a>
                                 <button type="button" class="btn btn-primary waves-effect" data-toggle="modal" data-target="#addModal">
                                     <i class="material-icons">add</i> Tambah Guru
                                 </button>
@@ -159,10 +161,12 @@ include 'template/sidebar.php';
                                                             </div>
                                                             <div class="form-group">
                                                                 <label>Jenis Kelamin</label>
-                                                                <select class="form-control" name="jk" required>
-                                                                    <option value="L" <?php echo ($row['jk'] == 'L') ? 'selected' : ''; ?>>Laki-laki</option>
-                                                                    <option value="P" <?php echo ($row['jk'] == 'P') ? 'selected' : ''; ?>>Perempuan</option>
-                                                                </select>
+                                                                <div class="demo-radio-button">
+                                                                    <input name="jk" type="radio" id="radio_l_<?php echo $row['id']; ?>" value="L" <?php echo ($row['jk'] == 'L') ? 'checked' : ''; ?> required />
+                                                                    <label for="radio_l_<?php echo $row['id']; ?>">Laki-laki</label>
+                                                                    <input name="jk" type="radio" id="radio_p_<?php echo $row['id']; ?>" value="P" <?php echo ($row['jk'] == 'P') ? 'checked' : ''; ?> />
+                                                                    <label for="radio_p_<?php echo $row['id']; ?>">Perempuan</label>
+                                                                </div>
                                                             </div>
                                                             <div class="form-group form-float">
                                                                 <div class="form-line">
@@ -178,10 +182,12 @@ include 'template/sidebar.php';
                                                             </div>
                                                             <div class="form-group">
                                                                 <label>Status</label>
-                                                                <select class="form-control" name="status" required>
-                                                                    <option value="Guru Kelas" <?php echo ($row['status'] == 'Guru Kelas') ? 'selected' : ''; ?>>Guru Kelas</option>
-                                                                    <option value="Guru Mapel" <?php echo ($row['status'] == 'Guru Mapel') ? 'selected' : ''; ?>>Guru Mapel</option>
-                                                                </select>
+                                                                <div class="demo-radio-button">
+                                                                    <input name="status" type="radio" id="radio_s1_<?php echo $row['id']; ?>" value="Guru Kelas" <?php echo ($row['status'] == 'Guru Kelas') ? 'checked' : ''; ?> required />
+                                                                    <label for="radio_s1_<?php echo $row['id']; ?>">Guru Kelas</label>
+                                                                    <input name="status" type="radio" id="radio_s2_<?php echo $row['id']; ?>" value="Guru Mapel" <?php echo ($row['status'] == 'Guru Mapel') ? 'checked' : ''; ?> />
+                                                                    <label for="radio_s2_<?php echo $row['id']; ?>">Guru Mapel</label>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
@@ -226,10 +232,12 @@ include 'template/sidebar.php';
                     </div>
                     <div class="form-group">
                         <label>Jenis Kelamin</label>
-                        <select class="form-control" name="jk" required>
-                            <option value="L">Laki-laki</option>
-                            <option value="P">Perempuan</option>
-                        </select>
+                        <div class="demo-radio-button">
+                            <input name="jk" type="radio" id="radio_l_add" value="L" required />
+                            <label for="radio_l_add">Laki-laki</label>
+                            <input name="jk" type="radio" id="radio_p_add" value="P" />
+                            <label for="radio_p_add">Perempuan</label>
+                        </div>
                     </div>
                     <div class="form-group form-float">
                         <div class="form-line">
@@ -245,10 +253,12 @@ include 'template/sidebar.php';
                     </div>
                     <div class="form-group">
                         <label>Status</label>
-                        <select class="form-control" name="status" required>
-                            <option value="Guru Kelas">Guru Kelas</option>
-                            <option value="Guru Mapel">Guru Mapel</option>
-                        </select>
+                        <div class="demo-radio-button">
+                            <input name="status" type="radio" id="radio_s1_add" value="Guru Kelas" required />
+                            <label for="radio_s1_add">Guru Kelas</label>
+                            <input name="status" type="radio" id="radio_s2_add" value="Guru Mapel" />
+                            <label for="radio_s2_add">Guru Mapel</label>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

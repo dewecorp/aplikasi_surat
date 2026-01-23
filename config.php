@@ -49,6 +49,19 @@ function tgl_indo($tanggal){
 	return $pecahkan[2] . ' ' . $bulan[ (int)$pecahkan[1] ] . ' ' . $pecahkan[0];
 }
 
+function hari_indo($tanggal){
+    $hari = array ( 1 =>    'Senin',
+        'Selasa',
+        'Rabu',
+        'Kamis',
+        'Jumat',
+        'Sabtu',
+        'Minggu'
+    );
+    $num = date('N', strtotime($tanggal));
+    return $hari[$num];
+}
+
 function log_activity($user_id, $type, $description) {
     global $conn;
     $user_id = mysqli_real_escape_string($conn, $user_id);

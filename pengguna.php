@@ -94,6 +94,8 @@ if (isset($_GET['delete'])) {
                         </h2>
                         <ul class="header-dropdown m-r--5">
                             <li class="dropdown">
+                                <a href="export_pengguna_excel.php" target="_blank" class="btn btn-success waves-effect" title="Export Excel"><i class="material-icons">grid_on</i></a>
+                                <a href="export_pengguna_print.php" target="_blank" class="btn btn-warning waves-effect" title="Cetak PDF"><i class="material-icons">print</i></a>
                                 <button type="button" class="btn btn-primary waves-effect" data-toggle="modal" data-target="#addModal">
                                     <i class="material-icons">add</i> Tambah Pengguna
                                 </button>

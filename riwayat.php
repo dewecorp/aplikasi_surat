@@ -17,6 +17,11 @@ if (isset($_GET['filter_bulan']) && !empty($_GET['filter_bulan'])) {
     $where_masuk .= " AND MONTH(tgl_surat) = '$fb'";
     $where_keluar .= " AND MONTH(tgl_surat) = '$fb'";
 }
+if (isset($_GET['filter_pihak']) && !empty($_GET['filter_pihak'])) {
+    $fp = mysqli_real_escape_string($conn, $_GET['filter_pihak']);
+    $where_masuk .= " AND pengirim LIKE '%$fp%'";
+    $where_keluar .= " AND penerima LIKE '%$fp%'";
+}
 
 ?>
 
@@ -40,7 +45,22 @@ if (isset($_GET['filter_bulan']) && !empty($_GET['filter_bulan'])) {
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <div class="form-line">
-                                        <input type="number" class="form-control" name="filter_tahun" placeholder="Tahun Surat" value="<?php echo isset($_GET['filter_tahun']) ? $_GET['filter_tahun'] : ''; ?>">
+                                        <select class="form-control show-tick" name="filter_tahun">
+                                            <option value="">-- Tahun Surat --</option>
+                                            <?php
+                                            // Get distinct years from both tables
+                                            $q_tahun = mysqli_query($conn, "
+                                                SELECT DISTINCT YEAR(tgl_surat) as tahun FROM surat_masuk 
+                                                UNION 
+                                                SELECT DISTINCT YEAR(tgl_surat) as tahun FROM surat_keluar 
+                                                ORDER BY tahun DESC
+                                            ");
+                                            while($r_tahun = mysqli_fetch_assoc($q_tahun)){
+                                                $selected = (isset($_GET['filter_tahun']) && $_GET['filter_tahun'] == $r_tahun['tahun']) ? 'selected' : '';
+                                                echo "<option value='".$r_tahun['tahun']."' $selected>".$r_tahun['tahun']."</option>";
+                                            }
+                                            ?>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -48,15 +68,42 @@ if (isset($_GET['filter_bulan']) && !empty($_GET['filter_bulan'])) {
                                 <div class="form-group">
                                     <select class="form-control show-tick" name="filter_bulan">
                                         <option value="">-- Bulan --</option>
-                                        <?php for($i=1;$i<=12;$i++): ?>
-                                            <option value="<?php echo $i; ?>" <?php echo (isset($_GET['filter_bulan']) && $_GET['filter_bulan'] == $i) ? 'selected' : ''; ?>><?php echo $i; ?></option>
+                                        <?php
+                                        $bulan_indo = [
+                                            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                                        ];
+                                        for($i=1;$i<=12;$i++): ?>
+                                            <option value="<?php echo $i; ?>" <?php echo (isset($_GET['filter_bulan']) && $_GET['filter_bulan'] == $i) ? 'selected' : ''; ?>><?php echo $bulan_indo[$i]; ?></option>
                                         <?php endfor; ?>
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-sm-2">
-                                <button type="submit" class="btn btn-info waves-effect">Cari</button>
-                                <a href="riwayat.php" class="btn btn-default waves-effect">Reset</a>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <select class="form-control show-tick" name="filter_pihak" data-live-search="true">
+                                        <option value="">-- Penerima/Pengirim --</option>
+                                        <?php
+                                        $q_pihak = mysqli_query($conn, "
+                                            SELECT DISTINCT pengirim as nama FROM surat_masuk 
+                                            UNION 
+                                            SELECT DISTINCT penerima as nama FROM surat_keluar 
+                                            ORDER BY nama ASC
+                                        ");
+                                        while($r_pihak = mysqli_fetch_assoc($q_pihak)){
+                                            $selected = (isset($_GET['filter_pihak']) && $_GET['filter_pihak'] == $r_pihak['nama']) ? 'selected' : '';
+                                            echo "<option value='".$r_pihak['nama']."' $selected>".$r_pihak['nama']."</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <button type="submit" class="btn btn-info waves-effect" title="Cari"><i class="material-icons">search</i></button>
+                                <a href="riwayat.php" class="btn btn-default waves-effect" title="Reset"><i class="material-icons">refresh</i></a>
+                                <a href="export_riwayat_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success waves-effect" title="Export Excel"><i class="material-icons">grid_on</i></a>
+                                <a href="export_riwayat_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning waves-effect" title="Cetak PDF"><i class="material-icons">print</i></a>
                             </div>
                         </form>
 
@@ -69,17 +116,17 @@ if (isset($_GET['filter_bulan']) && !empty($_GET['filter_bulan'])) {
                                         <th>No Surat</th>
                                         <th>Tgl Surat</th>
                                         <th>Perihal</th>
-                                        <th>Pihak Lain</th>
+                                        <th>Penerima/Pengirim</th>
                                         <th>File</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php
                                     $no = 1;
-                                    $query_sql = "SELECT 'Masuk' as tipe, id, tgl_surat, no_surat, perihal, pengirim as pihak_lain, file FROM surat_masuk $where_masuk
+                                    $query_sql = "SELECT 'Masuk' as tipe, id, tgl_surat, no_surat, perihal, pengirim as pihak_lain, file, created_at FROM surat_masuk $where_masuk
                                                   UNION ALL
-                                                  SELECT 'Keluar' as tipe, id, tgl_surat, no_surat, perihal, penerima as pihak_lain, file FROM surat_keluar $where_keluar
-                                                  ORDER BY tgl_surat DESC";
+                                                  SELECT 'Keluar' as tipe, id, tgl_surat, no_surat, perihal, penerima as pihak_lain, '' as file, created_at FROM surat_keluar $where_keluar
+                                                  ORDER BY created_at DESC";
                                     
                                     $query = mysqli_query($conn, $query_sql);
                                     if (!$query) {
@@ -96,7 +143,11 @@ if (isset($_GET['filter_bulan']) && !empty($_GET['filter_bulan'])) {
                                             <td><?php echo $row['perihal']; ?></td>
                                             <td><?php echo $row['pihak_lain']; ?></td>
                                             <td>
-                                                <?php if (!empty($row['file']) && file_exists('uploads/' . $row['file'])): ?>
+                                                <?php if ($row['tipe'] == 'Keluar'): ?>
+                                                    <a href="print_surat_keluar.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-primary btn-xs waves-effect">
+                                                        <i class="material-icons">print</i> Lihat PDF
+                                                    </a>
+                                                <?php elseif (!empty($row['file']) && file_exists('uploads/' . $row['file'])): ?>
                                                     <a href="uploads/<?php echo $row['file']; ?>" target="_blank" class="btn btn-primary btn-xs waves-effect">
                                                         <i class="material-icons">file_download</i> Lihat
                                                     </a>
