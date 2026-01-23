@@ -12,6 +12,21 @@ $q_instansi = mysqli_query($conn, "SELECT * FROM pengaturan LIMIT 1");
 $instansi = mysqli_fetch_assoc($q_instansi);
 $nama_sekolah = $instansi['nama_madrasah'];
 $logo_sekolah = $instansi['logo'];
+
+// Title Page Logic
+$page = basename($_SERVER['PHP_SELF'], ".php");
+$titles = [
+    'index' => 'Dashboard',
+    'guru' => 'Data Guru',
+    'surat_keluar' => 'Surat Keluar',
+    'surat_masuk' => 'Surat Masuk',
+    'riwayat' => 'Riwayat',
+    'pengguna' => 'Data Pengguna',
+    'pengaturan' => 'Pengaturan',
+    'backup' => 'Backup & Restore',
+    'login' => 'Login'
+];
+$current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_replace('_', ' ', $page));
 ?>
 <!DOCTYPE html>
 <html>
@@ -20,9 +35,9 @@ $logo_sekolah = $instansi['logo'];
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <title>SIMS - <?php echo $nama_sekolah; ?></title>
+    <title><?php echo $current_page_title; ?> | SIMS</title>
     <!-- Favicon-->
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%231e88e5%22><path d=%22M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z%22/></svg>" type="image/svg+xml">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext" rel="stylesheet" type="text/css">
@@ -100,7 +115,7 @@ $logo_sekolah = $instansi['logo'];
                 <a href="javascript:void(0);" class="bars"></a>
                 <a class="navbar-brand" href="index.php" style="display: flex; align-items: center;">
                     <?php if (!empty($logo_sekolah) && file_exists('assets/images/' . $logo_sekolah)): ?>
-                        <img src="assets/images/<?php echo $logo_sekolah; ?>" alt="Logo" style="height: 35px; margin-right: 10px; background: #fff; border-radius: 50%; padding: 2px;">
+                        <img src="assets/images/<?php echo $logo_sekolah; ?>" alt="Logo" style="height: 35px; margin-right: 10px; filter: drop-shadow(0 0 4px #fff);">
                     <?php endif; ?>
                     <span style="font-size: 18px;">SISTEM MANAJEMEN SURAT | <?php echo strtoupper($nama_sekolah); ?></span>
                 </a>

@@ -45,7 +45,7 @@ if (isset($_GET['filter_pihak']) && !empty($_GET['filter_pihak'])) {
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <div class="form-line">
-                                        <select class="form-control show-tick" name="filter_tahun">
+                                        <select class="form-control" name="filter_tahun">
                                             <option value="">-- Tahun Surat --</option>
                                             <?php
                                             // Get distinct years from both tables
@@ -66,37 +66,41 @@ if (isset($_GET['filter_pihak']) && !empty($_GET['filter_pihak'])) {
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <select class="form-control show-tick" name="filter_bulan">
-                                        <option value="">-- Bulan --</option>
-                                        <?php
-                                        $bulan_indo = [
-                                            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                                            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                                            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-                                        ];
-                                        for($i=1;$i<=12;$i++): ?>
-                                            <option value="<?php echo $i; ?>" <?php echo (isset($_GET['filter_bulan']) && $_GET['filter_bulan'] == $i) ? 'selected' : ''; ?>><?php echo $bulan_indo[$i]; ?></option>
-                                        <?php endfor; ?>
-                                    </select>
+                                    <div class="form-line">
+                                        <select class="form-control" name="filter_bulan">
+                                            <option value="">-- Bulan --</option>
+                                            <?php
+                                            $bulan_indo = [
+                                                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                                            ];
+                                            for($i=1;$i<=12;$i++): ?>
+                                                <option value="<?php echo $i; ?>" <?php echo (isset($_GET['filter_bulan']) && $_GET['filter_bulan'] == $i) ? 'selected' : ''; ?>><?php echo $bulan_indo[$i]; ?></option>
+                                            <?php endfor; ?>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-sm-3">
                                 <div class="form-group">
-                                    <select class="form-control show-tick" name="filter_pihak" data-live-search="true">
-                                        <option value="">-- Penerima/Pengirim --</option>
-                                        <?php
-                                        $q_pihak = mysqli_query($conn, "
-                                            SELECT DISTINCT pengirim as nama FROM surat_masuk 
-                                            UNION 
-                                            SELECT DISTINCT penerima as nama FROM surat_keluar 
-                                            ORDER BY nama ASC
-                                        ");
-                                        while($r_pihak = mysqli_fetch_assoc($q_pihak)){
-                                            $selected = (isset($_GET['filter_pihak']) && $_GET['filter_pihak'] == $r_pihak['nama']) ? 'selected' : '';
-                                            echo "<option value='".$r_pihak['nama']."' $selected>".$r_pihak['nama']."</option>";
-                                        }
-                                        ?>
-                                    </select>
+                                    <div class="form-line">
+                                        <select class="form-control" name="filter_pihak">
+                                            <option value="">-- Penerima/Pengirim --</option>
+                                            <?php
+                                            $q_pihak = mysqli_query($conn, "
+                                                SELECT DISTINCT pengirim as nama FROM surat_masuk 
+                                                UNION 
+                                                SELECT DISTINCT penerima as nama FROM surat_keluar 
+                                                ORDER BY nama ASC
+                                            ");
+                                            while($r_pihak = mysqli_fetch_assoc($q_pihak)){
+                                                $selected = (isset($_GET['filter_pihak']) && $_GET['filter_pihak'] == $r_pihak['nama']) ? 'selected' : '';
+                                                echo "<option value='".$r_pihak['nama']."' $selected>".$r_pihak['nama']."</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-sm-3">
