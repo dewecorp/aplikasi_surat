@@ -6,51 +6,90 @@ include 'config.php';
 if (isset($_POST['add'])) {
     $tgl_surat = $_POST['tgl_surat'];
     $jenis_surat = $_POST['jenis_surat'];
-    $perihal = mysqli_real_escape_string($conn, $_POST['perihal']);
-    $penerima = mysqli_real_escape_string($conn, $_POST['penerima']);
     
-    // Additional fields
-    $acara_hari_tanggal = !empty($_POST['acara_hari_tanggal']) ? $_POST['acara_hari_tanggal'] : NULL;
-    $acara_waktu = !empty($_POST['acara_waktu']) ? $_POST['acara_waktu'] : NULL;
-    $acara_tempat = !empty($_POST['acara_tempat']) ? mysqli_real_escape_string($conn, $_POST['acara_tempat']) : NULL;
-    $keperluan = !empty($_POST['keperluan']) ? mysqli_real_escape_string($conn, $_POST['keperluan']) : NULL;
-    $keterangan = !empty($_POST['keterangan']) ? mysqli_real_escape_string($conn, $_POST['keterangan']) : NULL;
-    $pembuka_surat = !empty($_POST['pembuka_surat']) ? mysqli_real_escape_string($conn, $_POST['pembuka_surat']) : NULL;
-    $isi_surat = !empty($_POST['isi_surat']) ? mysqli_real_escape_string($conn, $_POST['isi_surat']) : NULL;
-    $penutup_surat = !empty($_POST['penutup_surat']) ? mysqli_real_escape_string($conn, $_POST['penutup_surat']) : NULL;
+    // Prepare variables based on Type
+    $penerima_list = [];
     
-    // Generate Nomor Surat
-    $tahun = date('Y', strtotime($tgl_surat));
-    $bulan = date('n', strtotime($tgl_surat));
-    $romawi = getRomawi($bulan);
-    
-    // Ambil nomor terakhir di tahun ini
-    $q_last = mysqli_query($conn, "SELECT no_surat FROM surat_keluar WHERE YEAR(tgl_surat) = '$tahun' ORDER BY id DESC LIMIT 1");
-    if (mysqli_num_rows($q_last) > 0) {
-        $last_data = mysqli_fetch_assoc($q_last);
-        $parts = explode('/', $last_data['no_surat']);
-        $last_no = intval($parts[0]);
-        $next_no = $last_no + 1;
+    if ($jenis_surat == 'Tugas') {
+        if (isset($_POST['penerima']) && is_array($_POST['penerima'])) {
+            $penerima_list = $_POST['penerima'];
+        } else {
+             $penerima_list[] = $_POST['penerima'];
+        }
+        
+        $perihal = mysqli_real_escape_string($conn, $_POST['nama_kegiatan']);
+        $acara_tempat = mysqli_real_escape_string($conn, $_POST['lokasi_kegiatan']);
+        $acara_waktu = mysqli_real_escape_string($conn, $_POST['waktu_kegiatan']);
+        
+        $durasi = $_POST['durasi_kegiatan'];
+        if ($durasi == '1') {
+            $acara_hari_tanggal = $_POST['tgl_kegiatan_single'];
+        } else {
+            $acara_hari_tanggal = $_POST['tgl_kegiatan_start'] . ' s.d ' . $_POST['tgl_kegiatan_end'];
+        }
+        
+        $keperluan = NULL;
+        $keterangan = NULL;
+        $pembuka_surat = NULL;
+        $isi_surat = NULL;
+        $penutup_surat = NULL;
+        
     } else {
-        $next_no = 1;
+        // Standard mapping for other types
+        $penerima_list[] = $_POST['penerima'];
+        $perihal = mysqli_real_escape_string($conn, $_POST['perihal']);
+        
+        $acara_hari_tanggal = !empty($_POST['acara_hari_tanggal']) ? $_POST['acara_hari_tanggal'] : NULL;
+        $acara_waktu = !empty($_POST['acara_waktu']) ? $_POST['acara_waktu'] : NULL;
+        $acara_tempat = !empty($_POST['acara_tempat']) ? mysqli_real_escape_string($conn, $_POST['acara_tempat']) : NULL;
+        $keperluan = !empty($_POST['keperluan']) ? mysqli_real_escape_string($conn, $_POST['keperluan']) : NULL;
+        $keterangan = !empty($_POST['keterangan']) ? mysqli_real_escape_string($conn, $_POST['keterangan']) : NULL;
+        $pembuka_surat = !empty($_POST['pembuka_surat']) ? mysqli_real_escape_string($conn, $_POST['pembuka_surat']) : NULL;
+        $isi_surat = !empty($_POST['isi_surat']) ? mysqli_real_escape_string($conn, $_POST['isi_surat']) : NULL;
+        $penutup_surat = !empty($_POST['penutup_surat']) ? mysqli_real_escape_string($conn, $_POST['penutup_surat']) : NULL;
     }
-    
-    $no_surat = sprintf('%03d', $next_no) . '/MI.SF/' . $romawi . '/' . $tahun;
 
-    $query = "INSERT INTO surat_keluar (tgl_surat, no_surat, jenis_surat, perihal, penerima, acara_hari_tanggal, acara_waktu, acara_tempat, keperluan, keterangan, pembuka_surat, isi_surat, penutup_surat) 
-              VALUES ('$tgl_surat', '$no_surat', '$jenis_surat', '$perihal', '$penerima', " . 
-              ($acara_hari_tanggal ? "'$acara_hari_tanggal'" : "NULL") . ", " . 
-              ($acara_waktu ? "'$acara_waktu'" : "NULL") . ", " . 
-              ($acara_tempat ? "'$acara_tempat'" : "NULL") . ", " . 
-              ($keperluan ? "'$keperluan'" : "NULL") . ", " . 
-              ($keterangan ? "'$keterangan'" : "NULL") . ", " . 
-              ($pembuka_surat ? "'$pembuka_surat'" : "NULL") . ", " . 
-              ($isi_surat ? "'$isi_surat'" : "NULL") . ", " . 
-              ($penutup_surat ? "'$penutup_surat'" : "NULL") . ")";
+    $success_count = 0;
+    foreach ($penerima_list as $penerima_name) {
+        $penerima = mysqli_real_escape_string($conn, $penerima_name);
+        
+        // Generate Nomor Surat
+        $tahun = date('Y', strtotime($tgl_surat));
+        $bulan = date('n', strtotime($tgl_surat));
+        $romawi = getRomawi($bulan);
+        
+        // Ambil nomor terakhir di tahun ini
+        $q_last = mysqli_query($conn, "SELECT no_surat FROM surat_keluar WHERE YEAR(tgl_surat) = '$tahun' ORDER BY id DESC LIMIT 1");
+        if (mysqli_num_rows($q_last) > 0) {
+            $last_data = mysqli_fetch_assoc($q_last);
+            $parts = explode('/', $last_data['no_surat']);
+            $last_no = intval($parts[0]);
+            $next_no = $last_no + 1;
+        } else {
+            $next_no = 1;
+        }
+        
+        $no_surat = sprintf('%03d', $next_no) . '/MI.SF/' . $romawi . '/' . $tahun;
     
-    if (mysqli_query($conn, $query)) {
-        log_activity($_SESSION['user_id'], 'create', 'Membuat surat keluar no: ' . $no_surat);
-        $_SESSION['success'] = "Surat keluar berhasil dibuat";
+        $query = "INSERT INTO surat_keluar (tgl_surat, no_surat, jenis_surat, perihal, penerima, acara_hari_tanggal, acara_waktu, acara_tempat, keperluan, keterangan, pembuka_surat, isi_surat, penutup_surat) 
+                  VALUES ('$tgl_surat', '$no_surat', '$jenis_surat', '$perihal', '$penerima', " . 
+                  ($acara_hari_tanggal ? "'$acara_hari_tanggal'" : "NULL") . ", " . 
+                  ($acara_waktu ? "'$acara_waktu'" : "NULL") . ", " . 
+                  ($acara_tempat ? "'$acara_tempat'" : "NULL") . ", " . 
+                  ($keperluan ? "'$keperluan'" : "NULL") . ", " . 
+                  ($keterangan ? "'$keterangan'" : "NULL") . ", " . 
+                  ($pembuka_surat ? "'$pembuka_surat'" : "NULL") . ", " . 
+                  ($isi_surat ? "'$isi_surat'" : "NULL") . ", " . 
+                  ($penutup_surat ? "'$penutup_surat'" : "NULL") . ")";
+        
+        if (mysqli_query($conn, $query)) {
+            log_activity($_SESSION['user_id'], 'create', 'Membuat surat keluar no: ' . $no_surat);
+            $success_count++;
+        }
+    }
+
+    if ($success_count > 0) {
+        $_SESSION['success'] = "Berhasil membuat $success_count surat keluar";
     } else {
         $_SESSION['error'] = "Gagal membuat surat: " . mysqli_error($conn);
     }
@@ -562,30 +601,78 @@ Wassalamu'alaikum Wr. Wb.</textarea>
                             <input type="date" class="form-control" name="tgl_surat" required>
                         </div>
                     </div>
-                    <label>Perihal</label>
+                    
+                    <label>Nama Kegiatan</label>
                     <div class="form-group">
                         <div class="form-line">
-                            <textarea name="perihal" class="form-control no-resize" required></textarea>
+                            <textarea name="nama_kegiatan" class="form-control no-resize" required placeholder="Contoh: Mengikuti Kegiatan Workshop..."></textarea>
                         </div>
                     </div>
+                    
                     <label>Ditugaskan Kepada</label>
                     <div class="form-group">
-                        <div class="form-line">
-                            <input type="text" class="form-control" name="penerima" required>
-                        </div>
+                         <select class="form-control show-tick" name="penerima[]" multiple data-live-search="true" required>
+                            <?php
+                            $q_guru = mysqli_query($conn, "SELECT nama FROM guru ORDER BY nama ASC");
+                            while($r_guru = mysqli_fetch_assoc($q_guru)) {
+                                echo '<option value="'.$r_guru['nama'].'">'.$r_guru['nama'].'</option>';
+                            }
+                            ?>
+                        </select>
                     </div>
-                    <label>Untuk Keperluan</label>
+                    
+                    <label>Lokasi Kegiatan</label>
                     <div class="form-group">
                         <div class="form-line">
-                            <textarea name="keperluan" class="form-control no-resize"></textarea>
+                            <input type="text" class="form-control" name="lokasi_kegiatan" required>
                         </div>
                     </div>
-                    <label>Keterangan</label>
+
+                    <label>Waktu Kegiatan</label>
                     <div class="form-group">
                         <div class="form-line">
-                            <textarea name="keterangan" class="form-control no-resize"></textarea>
+                            <input type="text" class="form-control" name="waktu_kegiatan" placeholder="Contoh: 08.00 WIB - Selesai" required>
                         </div>
                     </div>
+
+                    <label>Durasi Kegiatan</label>
+                    <div class="form-group">
+                        <input name="durasi_kegiatan" type="radio" id="radio_1" value="1" checked class="with-gap radio-col-blue" />
+                        <label for="radio_1">1 Hari</label>
+                        <input name="durasi_kegiatan" type="radio" id="radio_2" value="more" class="with-gap radio-col-blue" />
+                        <label for="radio_2">Lebih dari 1 Hari</label>
+                    </div>
+
+                    <div id="date_single">
+                        <label>Tanggal Kegiatan</label>
+                        <div class="form-group">
+                            <div class="form-line">
+                                <input type="date" class="form-control" name="tgl_kegiatan_single">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="date_range" style="display: none;">
+                        <div class="row clearfix">
+                            <div class="col-sm-6">
+                                <label>Mulai Tanggal</label>
+                                <div class="form-group">
+                                    <div class="form-line">
+                                        <input type="date" class="form-control" name="tgl_kegiatan_start">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label>Sampai Tanggal</label>
+                                <div class="form-group">
+                                    <div class="form-line">
+                                        <input type="date" class="form-control" name="tgl_kegiatan_end">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="submit" name="add" class="btn btn-link waves-effect">SIMPAN</button>
@@ -652,4 +739,23 @@ Wassalamu'alaikum Wr. Wb.</textarea>
             }
         })
     };
+
+    // Toggle Date Logic for Surat Tugas
+    $('input[name="durasi_kegiatan"]').on('change', function() {
+        if ($(this).val() == '1') {
+            $('#date_single').show();
+            $('#date_range').hide();
+            $('input[name="tgl_kegiatan_single"]').prop('required', true);
+            $('input[name="tgl_kegiatan_start"]').prop('required', false);
+            $('input[name="tgl_kegiatan_end"]').prop('required', false);
+        } else {
+            $('#date_single').hide();
+            $('#date_range').show();
+            $('input[name="tgl_kegiatan_single"]').prop('required', false);
+            $('input[name="tgl_kegiatan_start"]').prop('required', true);
+            $('input[name="tgl_kegiatan_end"]').prop('required', true);
+        }
+    });
+    // Initialize required state
+    $('input[name="tgl_kegiatan_single"]').prop('required', true);
 </script>

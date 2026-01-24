@@ -341,15 +341,43 @@ if (!$surat) {
                             <td width="2%">:</td>
                             <td><b><?php echo $surat['penerima']; ?></b></td>
                         </tr>
+                    </table>
+
+                    <p style="text-indent: 50px;">Untuk melaksanakan tugas:</p>
+                    <table class="detail-table">
                         <tr>
-                            <td>Untuk</td>
+                            <td width="20%">Nama Kegiatan</td>
+                            <td width="2%">:</td>
+                            <td><?php echo $surat['perihal']; ?></td>
+                        </tr>
+                        <tr>
+                            <td>Waktu</td>
                             <td>:</td>
-                            <td><?php echo !empty($surat['keperluan']) ? nl2br($surat['keperluan']) : '-'; ?></td>
+                            <td><?php echo $surat['acara_waktu']; ?></td>
+                        </tr>
+                        <tr>
+                            <td>Tanggal</td>
+                            <td>:</td>
+                            <td>
+                                <?php 
+                                $tgl = $surat['acara_hari_tanggal'];
+                                if (strpos($tgl, ' s.d ') !== false) {
+                                    $parts = explode(' s.d ', $tgl);
+                                    echo tgl_indo($parts[0]) . ' s.d ' . tgl_indo($parts[1]);
+                                } else {
+                                    echo tgl_indo($tgl);
+                                }
+                                ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Tempat</td>
+                            <td>:</td>
+                            <td><?php echo $surat['acara_tempat']; ?></td>
                         </tr>
                     </table>
-                    <?php if (!empty($surat['keterangan'])): ?>
-                        <p>Keterangan: <?php echo nl2br($surat['keterangan']); ?></p>
-                    <?php endif; ?>
+
+                    <p style="text-indent: 50px;">Demikian surat tugas ini dibuat untuk dilaksanakan dengan penuh tanggung jawab.</p>
 
                 <?php elseif ($surat['jenis_surat'] == 'Keterangan Pindah'): ?>
                     <p style="text-indent: 50px;">Yang bertanda tangan di bawah ini menerangkan bahwa:</p>
