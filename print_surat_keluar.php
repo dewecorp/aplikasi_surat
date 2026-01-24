@@ -238,6 +238,9 @@ if (!$surat) {
                             </thead>
                             <tbody>
                                 <?php 
+                                if (empty($tugas_recipients)) {
+                                    echo '<tr><td colspan="4" style="text-align:center; padding: 10px;"><i>Data penerima kosong/belum diinput. Silakan edit surat ini.</i></td></tr>';
+                                }
                                 $no_tugas = 1;
                                 foreach ($tugas_recipients as $t_nama): 
                                     $q_guru = mysqli_query($conn, "SELECT * FROM guru WHERE nama = '".mysqli_real_escape_string($conn, $t_nama)."'");

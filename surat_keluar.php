@@ -106,15 +106,35 @@ if (isset($_POST['add'])) {
 
 // Handle Edit
 if (isset($_POST['edit'])) {
+    // DEBUG: Log POST data
+    file_put_contents('debug_surat_keluar.txt', print_r($_POST, true));
+
     $id = $_POST['id'];
     $tgl_surat = $_POST['tgl_surat'];
     $perihal = mysqli_real_escape_string($conn, $_POST['perihal']);
     
     // Handle Penerima (String or Array)
     $penerima_input = isset($_POST['penerima']) ? $_POST['penerima'] : '';
+    
+    // Fix: Validasi dan Format Penerima
     if (is_array($penerima_input)) {
+        // Hapus nilai kosong
+        $penerima_input = array_filter($penerima_input, function($v) { return !empty(trim($v)); });
+        
+        if (empty($penerima_input)) {
+             $_SESSION['error'] = "Penerima tidak boleh kosong!";
+             session_write_close();
+             header("Location: surat_keluar.php");
+             exit();
+        }
         $penerima = mysqli_real_escape_string($conn, implode('; ', $penerima_input));
     } else {
+        if (trim($penerima_input) == '') {
+             $_SESSION['error'] = "Penerima tidak boleh kosong!";
+             session_write_close();
+             header("Location: surat_keluar.php");
+             exit();
+        }
         $penerima = mysqli_real_escape_string($conn, $penerima_input);
     }
     
@@ -445,13 +465,14 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                             $selected_penerima = array_unique($selected_penerima);
                                                                         }
                                         ?>
-                                        <select class="form-control show-tick" name="penerima[]" multiple required data-container="body" data-live-search="true" data-size="5" data-width="100%">
-                                            <?php foreach($guru_data as $g_nama): ?>
-                                                <option value="<?php echo $g_nama; ?>" <?php echo (in_array($g_nama, $selected_penerima)) ? 'selected' : ''; ?>>
-                                                    <?php echo $g_nama; ?>
-                                                </option>
+                                        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;">
+                                            <?php foreach($guru_data as $index => $g_nama): ?>
+                                                <div class="demo-checkbox">
+                                                    <input type="checkbox" id="md_checkbox_<?php echo $row['id']; ?>_<?php echo $index; ?>" name="penerima[]" value="<?php echo htmlspecialchars($g_nama); ?>" class="filled-in chk-col-blue" <?php echo (in_array($g_nama, $selected_penerima)) ? 'checked' : ''; ?> />
+                                                    <label for="md_checkbox_<?php echo $row['id']; ?>_<?php echo $index; ?>"><?php echo htmlspecialchars($g_nama); ?></label>
+                                                </div>
                                             <?php endforeach; ?>
-                                        </select>
+                                        </div>
                                                                     <?php else: ?>
                                                                         <input type="text" class="form-control" name="penerima" value="<?php echo $row['penerima']; ?>" required>
                                                                     <?php endif; ?>
@@ -765,13 +786,16 @@ Wassalamu'alaikum Wr. Wb.</textarea>
                     <label>Ditugaskan Kepada</label>
                     <div class="form-group">
                         <div class="form-line">
-                            <select class="form-control show-tick" name="penerima[]" multiple required data-container="body" data-live-search="true" data-size="5" data-width="100%">
+                            <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;">
                                 <?php
-                                foreach($guru_data as $g_nama) {
-                                    echo '<option value="'.$g_nama.'">'.$g_nama.'</option>';
+                                foreach($guru_data as $index => $g_nama) {
+                                    echo '<div class="demo-checkbox">
+                                            <input type="checkbox" id="add_checkbox_'.$index.'" name="penerima[]" value="'.htmlspecialchars($g_nama).'" class="filled-in chk-col-blue" />
+                                            <label for="add_checkbox_'.$index.'">'.htmlspecialchars($g_nama).'</label>
+                                          </div>';
                                 }
                                 ?>
-                            </select>
+                            </div>
                         </div>
                     </div>
                     
@@ -894,24 +918,24 @@ Wassalamu'alaikum Wr. Wb.</textarea>
         })
     };
 
-    // Toggle Date Logic for Surat Tugas
-    $('input[name="durasi_kegiatan"]').on('change', function() {
+    // Toggle Date Logic for Surat Tugas (Add Modal)
+    $('#modalTugas input[name="durasi_kegiatan"]').on('change', function() {
         if ($(this).val() == '1') {
             $('#date_single').show();
             $('#date_range').hide();
-            $('input[name="tgl_kegiatan_single"]').prop('required', true);
-            $('input[name="tgl_kegiatan_start"]').prop('required', false);
-            $('input[name="tgl_kegiatan_end"]').prop('required', false);
+            $('#modalTugas input[name="tgl_kegiatan_single"]').prop('required', true);
+            $('#modalTugas input[name="tgl_kegiatan_start"]').prop('required', false);
+            $('#modalTugas input[name="tgl_kegiatan_end"]').prop('required', false);
         } else {
             $('#date_single').hide();
             $('#date_range').show();
-            $('input[name="tgl_kegiatan_single"]').prop('required', false);
-            $('input[name="tgl_kegiatan_start"]').prop('required', true);
-            $('input[name="tgl_kegiatan_end"]').prop('required', true);
+            $('#modalTugas input[name="tgl_kegiatan_single"]').prop('required', false);
+            $('#modalTugas input[name="tgl_kegiatan_start"]').prop('required', true);
+            $('#modalTugas input[name="tgl_kegiatan_end"]').prop('required', true);
         }
     });
     // Initialize required state
-    $('input[name="tgl_kegiatan_single"]').prop('required', true);
+    $('#modalTugas input[name="tgl_kegiatan_single"]').prop('required', true);
 
     // Dynamic Date Logic for Edit Modals
     $(document).on('change', '.durasi-radio', function() {
@@ -929,4 +953,25 @@ Wassalamu'alaikum Wr. Wb.</textarea>
             $('#date_range_' + id + ' input').prop('required', true);
         }
     });
+
+    // Fix: Re-initialize/Refresh Selectpicker on Modal Show to ensure it renders correctly and value is linked
+    $('.modal').on('shown.bs.modal', function () {
+        // Destroy first to ensure clean state, then re-initialize
+        // $(this).find('select.selectpicker').selectpicker('destroy'); 
+        // Note: Destroy might remove the button, so just refresh is usually safer if already initialized
+        $(this).find('select.selectpicker').selectpicker('refresh');
+    });
+
+    // Validasi form sebelum submit
+     $('form').on('submit', function() {
+         var jenis = $(this).find('input[name="jenis_surat"]').val();
+         if (jenis == 'Tugas') {
+             // Cek apakah ada checkbox yang dicentang
+             var checked = $(this).find('input[name="penerima[]"]:checked').length;
+             if (checked === 0) {
+                 alert('Mohon pilih setidaknya satu penerima tugas!');
+                 return false; // Prevent submit
+             }
+         }
+     });
 </script>

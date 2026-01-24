@@ -1,0 +1,20 @@
+Array
+(
+    [id] => 6
+    [tgl_surat] => 2026-01-24
+    [perihal] => Kegiatan KKG
+    [penerima] => Array
+        (
+            [0] => Ali Yasin, S.Pd.I
+            [1] => Khoiruddin, S.Pd.
+            [2] => Nanik Purwati, S.Pd.I
+        )
+
+    [acara_tempat] => MI Salafiyah Wanusobo
+    [acara_waktu] => 08.00 - selesai
+    [durasi_kegiatan] => 1
+    [tgl_kegiatan_single] => 2026-01-28
+    [tgl_kegiatan_start] => 
+    [tgl_kegiatan_end] => 
+    [edit] => 
+)
