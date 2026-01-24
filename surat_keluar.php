@@ -49,6 +49,12 @@ if (isset($_POST['add'])) {
         $penutup_surat = !empty($_POST['penutup_surat']) ? mysqli_real_escape_string($conn, $_POST['penutup_surat']) : NULL;
     }
 
+    // Special handling for Tugas: Merge recipients into one letter
+    if ($jenis_surat == 'Tugas') {
+        $merged_penerima = implode('; ', $penerima_list);
+        $penerima_list = [$merged_penerima];
+    }
+
     $success_count = 0;
     foreach ($penerima_list as $penerima_name) {
         $penerima = mysqli_real_escape_string($conn, $penerima_name);
@@ -103,10 +109,28 @@ if (isset($_POST['edit'])) {
     $id = $_POST['id'];
     $tgl_surat = $_POST['tgl_surat'];
     $perihal = mysqli_real_escape_string($conn, $_POST['perihal']);
-    $penerima = mysqli_real_escape_string($conn, $_POST['penerima']);
+    
+    // Handle Penerima (String or Array)
+    $penerima_input = isset($_POST['penerima']) ? $_POST['penerima'] : '';
+    if (is_array($penerima_input)) {
+        $penerima = mysqli_real_escape_string($conn, implode('; ', $penerima_input));
+    } else {
+        $penerima = mysqli_real_escape_string($conn, $penerima_input);
+    }
     
     // Additional fields
     $acara_hari_tanggal = !empty($_POST['acara_hari_tanggal']) ? $_POST['acara_hari_tanggal'] : NULL;
+    
+    // Logic for Tugas Date (Override acara_hari_tanggal if durasi is set)
+    if (isset($_POST['durasi_kegiatan'])) {
+        $durasi = $_POST['durasi_kegiatan'];
+        if ($durasi == '1') {
+             $acara_hari_tanggal = $_POST['tgl_kegiatan_single'];
+        } else {
+             $acara_hari_tanggal = $_POST['tgl_kegiatan_start'] . ' s.d ' . $_POST['tgl_kegiatan_end'];
+        }
+    }
+
     $acara_waktu = !empty($_POST['acara_waktu']) ? $_POST['acara_waktu'] : NULL;
     $acara_tempat = !empty($_POST['acara_tempat']) ? mysqli_real_escape_string($conn, $_POST['acara_tempat']) : NULL;
     $keperluan = !empty($_POST['keperluan']) ? mysqli_real_escape_string($conn, $_POST['keperluan']) : NULL;
@@ -189,6 +213,36 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
 ?>
 
 <section class="content">
+    <style>
+        /* Fix Dropdown Truncation */
+        .bootstrap-select .dropdown-menu {
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+            left: 0 !important;
+            min-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        .bootstrap-select .dropdown-menu ul {
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+        }
+        .bootstrap-select .dropdown-menu li {
+            list-style: none !important;
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+        }
+        .bootstrap-select .dropdown-menu li a {
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+            margin-left: 0 !important;
+            display: block !important;
+            width: 100% !important;
+        }
+        .bootstrap-select .dropdown-menu .text {
+            display: inline-block !important;
+            white-space: normal !important; /* Allow wrapping if needed */
+        }
+    </style>
     <div class="container-fluid">
         <div class="block-header">
             <h2>SURAT KELUAR</h2>
@@ -291,6 +345,13 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                 </thead>
                                 <tbody>
                                     <?php
+                                    // Pre-fetch Guru data
+                                    $guru_data = [];
+                                    $q_guru_all = mysqli_query($conn, "SELECT nama FROM guru ORDER BY nama ASC");
+                                    while($r_g = mysqli_fetch_assoc($q_guru_all)) {
+                                        $guru_data[] = $r_g['nama'];
+                                    }
+
                                     $no = 1;
                                     $query = mysqli_query($conn, "SELECT * FROM surat_keluar $where ORDER BY id DESC");
                                     while ($row = mysqli_fetch_assoc($query)) :
@@ -334,7 +395,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                     <input type="date" class="form-control" name="tgl_surat" value="<?php echo $row['tgl_surat']; ?>" required>
                                                                 </div>
                                                             </div>
-                                                            <label>Perihal</label>
+                                                            <label><?php echo ($row['jenis_surat'] == 'Tugas') ? 'Nama Kegiatan' : 'Perihal'; ?></label>
                                                             <div class="form-group">
                                                                 <div class="form-line">
                                                                     <textarea name="perihal" class="form-control no-resize" required><?php echo $row['perihal']; ?></textarea>
@@ -349,7 +410,51 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                             </label>
                                                             <div class="form-group">
                                                                 <div class="form-line">
-                                                                    <input type="text" class="form-control" name="penerima" value="<?php echo $row['penerima']; ?>" required>
+                                                                    <?php if ($row['jenis_surat'] == 'Tugas'): ?>
+                                                                        <?php
+                                                                        // Handle multiple selection for Edit
+                                                                        $selected_penerima = [];
+                                                                        if (strpos($row['penerima'], ';') !== false) {
+                                                                            $parts = explode(';', $row['penerima']);
+                                                                            $selected_penerima = array_map('trim', $parts);
+                                                                        } else {
+                                                                            // Legacy Comma Handling
+                                                                            
+                                                                            // 1. Fuzzy Match: Check if Master Name exists in the Saved String
+                                                                            foreach($guru_data as $g_nama) {
+                                                                                if (strpos($row['penerima'], $g_nama) !== false) {
+                                                                                    $selected_penerima[] = $g_nama;
+                                                                                }
+                                                                            }
+                                                                            
+                                                                            // 2. Prefix Match: Split Saved String by comma and check if parts match start of Master Name
+                                                                            $parts = explode(',', $row['penerima']);
+                                                                            $parts = array_map('trim', $parts);
+                                                                            
+                                                                            foreach ($parts as $part) {
+                                                                                if (empty($part)) continue;
+                                                                                foreach ($guru_data as $g_nama) {
+                                                                                    // Check if Master Name starts with the Part (Case insensitive)
+                                                                                    if (stripos($g_nama, $part) === 0) {
+                                                                                        $selected_penerima[] = $g_nama;
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                            
+                                                                            // Remove duplicates
+                                                                            $selected_penerima = array_unique($selected_penerima);
+                                                                        }
+                                        ?>
+                                        <select class="form-control show-tick" name="penerima[]" multiple required data-container="body" data-live-search="true" data-size="5" data-width="100%">
+                                            <?php foreach($guru_data as $g_nama): ?>
+                                                <option value="<?php echo $g_nama; ?>" <?php echo (in_array($g_nama, $selected_penerima)) ? 'selected' : ''; ?>>
+                                                    <?php echo $g_nama; ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                                                    <?php else: ?>
+                                                                        <input type="text" class="form-control" name="penerima" value="<?php echo $row['penerima']; ?>" required>
+                                                                    <?php endif; ?>
                                                                 </div>
                                                             </div>
 
@@ -407,16 +512,64 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                 </div>
 
                                                             <?php elseif ($row['jenis_surat'] == 'Tugas'): ?>
-                                                                <label>Untuk Keperluan</label>
+                                                                <label>Lokasi Kegiatan</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <textarea name="keperluan" class="form-control no-resize"><?php echo $row['keperluan']; ?></textarea>
+                                                                        <input type="text" class="form-control" name="acara_tempat" value="<?php echo $row['acara_tempat']; ?>" required>
                                                                     </div>
                                                                 </div>
-                                                                <label>Keterangan</label>
+
+                                                                <label>Waktu Kegiatan</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <textarea name="keterangan" class="form-control no-resize"><?php echo $row['keterangan']; ?></textarea>
+                                                                        <input type="text" class="form-control" name="acara_waktu" value="<?php echo $row['acara_waktu']; ?>" required>
+                                                                    </div>
+                                                                </div>
+
+                                                                <?php
+                                                                    $is_range = (strpos($row['acara_hari_tanggal'], ' s.d ') !== false);
+                                                                    $tgl_single = $is_range ? '' : $row['acara_hari_tanggal'];
+                                                                    $parts = $is_range ? explode(' s.d ', $row['acara_hari_tanggal']) : [];
+                                                                    $tgl_start = $is_range ? $parts[0] : '';
+                                                                    $tgl_end = $is_range ? $parts[1] : '';
+                                                                ?>
+
+                                                                <label>Durasi Kegiatan</label>
+                                                                <div class="form-group">
+                                                                    <input name="durasi_kegiatan" type="radio" id="radio_1_<?php echo $row['id']; ?>" value="1" <?php echo !$is_range ? 'checked' : ''; ?> class="with-gap radio-col-blue durasi-radio" data-id="<?php echo $row['id']; ?>" />
+                                                                    <label for="radio_1_<?php echo $row['id']; ?>">1 Hari</label>
+                                                                    
+                                                                    <input name="durasi_kegiatan" type="radio" id="radio_2_<?php echo $row['id']; ?>" value="more" <?php echo $is_range ? 'checked' : ''; ?> class="with-gap radio-col-blue durasi-radio" data-id="<?php echo $row['id']; ?>" />
+                                                                    <label for="radio_2_<?php echo $row['id']; ?>">Lebih dari 1 Hari</label>
+                                                                </div>
+
+                                                                <div id="date_single_<?php echo $row['id']; ?>" style="<?php echo $is_range ? 'display: none;' : ''; ?>">
+                                                                    <label>Tanggal Kegiatan</label>
+                                                                    <div class="form-group">
+                                                                        <div class="form-line">
+                                                                            <input type="date" class="form-control" name="tgl_kegiatan_single" value="<?php echo $tgl_single; ?>" <?php echo !$is_range ? 'required' : ''; ?>>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div id="date_range_<?php echo $row['id']; ?>" style="<?php echo !$is_range ? 'display: none;' : ''; ?>">
+                                                                    <div class="row clearfix">
+                                                                        <div class="col-sm-6">
+                                                                            <label>Mulai Tanggal</label>
+                                                                            <div class="form-group">
+                                                                                <div class="form-line">
+                                                                                    <input type="date" class="form-control" name="tgl_kegiatan_start" value="<?php echo $tgl_start; ?>" <?php echo $is_range ? 'required' : ''; ?>>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-6">
+                                                                            <label>Sampai Tanggal</label>
+                                                                            <div class="form-group">
+                                                                                <div class="form-line">
+                                                                                    <input type="date" class="form-control" name="tgl_kegiatan_end" value="<?php echo $tgl_end; ?>" <?php echo $is_range ? 'required' : ''; ?>>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
 
@@ -611,14 +764,15 @@ Wassalamu'alaikum Wr. Wb.</textarea>
                     
                     <label>Ditugaskan Kepada</label>
                     <div class="form-group">
-                         <select class="form-control show-tick" name="penerima[]" multiple data-live-search="true" required>
-                            <?php
-                            $q_guru = mysqli_query($conn, "SELECT nama FROM guru ORDER BY nama ASC");
-                            while($r_guru = mysqli_fetch_assoc($q_guru)) {
-                                echo '<option value="'.$r_guru['nama'].'">'.$r_guru['nama'].'</option>';
-                            }
-                            ?>
-                        </select>
+                        <div class="form-line">
+                            <select class="form-control show-tick" name="penerima[]" multiple required data-container="body" data-live-search="true" data-size="5" data-width="100%">
+                                <?php
+                                foreach($guru_data as $g_nama) {
+                                    echo '<option value="'.$g_nama.'">'.$g_nama.'</option>';
+                                }
+                                ?>
+                            </select>
+                        </div>
                     </div>
                     
                     <label>Lokasi Kegiatan</label>
@@ -758,4 +912,21 @@ Wassalamu'alaikum Wr. Wb.</textarea>
     });
     // Initialize required state
     $('input[name="tgl_kegiatan_single"]').prop('required', true);
+
+    // Dynamic Date Logic for Edit Modals
+    $(document).on('change', '.durasi-radio', function() {
+        var id = $(this).data('id');
+        var val = $(this).val();
+        if (val == '1') {
+            $('#date_single_' + id).show();
+            $('#date_range_' + id).hide();
+            $('#date_single_' + id + ' input').prop('required', true);
+            $('#date_range_' + id + ' input').prop('required', false);
+        } else {
+            $('#date_single_' + id).hide();
+            $('#date_range_' + id).show();
+            $('#date_single_' + id + ' input').prop('required', false);
+            $('#date_range_' + id + ' input').prop('required', true);
+        }
+    });
 </script>
