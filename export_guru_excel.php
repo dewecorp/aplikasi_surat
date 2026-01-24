@@ -40,7 +40,7 @@ header("Content-Disposition: attachment; filename=Data_Guru.xls");
             <td style="mso-number-format:'\@';"><?php echo $row['nuptk']; ?></td>
             <td><?php echo $row['nama']; ?></td>
             <td><?php echo $row['jk']; ?></td>
-            <td><?php echo $row['tempat_lahir'] . ', ' . date('d-m-Y', strtotime($row['tgl_lahir'])); ?></td>
+            <td><?php echo $row['tempat_lahir'] . ', ' . (!empty($row['tgl_lahir']) ? date('d-m-Y', strtotime($row['tgl_lahir'])) : ''); ?></td>
             <td><?php echo $row['status']; ?></td>
         </tr>
         <?php } ?>

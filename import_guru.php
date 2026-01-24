@@ -53,6 +53,9 @@ try {
              }
         }
 
+        // Prepare tgl_lahir value for SQL
+        $sql_tgl_lahir = !empty($tgl_lahir) ? "'$tgl_lahir'" : "NULL";
+
         // Insert or Update Logic
         $id_update = null;
         $is_update = false;
@@ -80,10 +83,10 @@ try {
 
         if ($is_update) {
             // Update existing data
-            $query = "UPDATE guru SET nuptk='$nuptk', nama='$nama', jk='$jk', tempat_lahir='$tempat_lahir', tgl_lahir='$tgl_lahir', status='$status' WHERE id='$id_update'";
+            $query = "UPDATE guru SET nuptk='$nuptk', nama='$nama', jk='$jk', tempat_lahir='$tempat_lahir', tgl_lahir=$sql_tgl_lahir, status='$status' WHERE id='$id_update'";
         } else {
             // Insert new data
-            $query = "INSERT INTO guru (nuptk, nama, jk, tempat_lahir, tgl_lahir, status) VALUES ('$nuptk', '$nama', '$jk', '$tempat_lahir', '$tgl_lahir', '$status')";
+            $query = "INSERT INTO guru (nuptk, nama, jk, tempat_lahir, tgl_lahir, status) VALUES ('$nuptk', '$nama', '$jk', '$tempat_lahir', $sql_tgl_lahir, '$status')";
         }
         
         if (mysqli_query($conn, $query)) {

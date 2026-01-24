@@ -45,6 +45,13 @@ if (isset($_POST['update'])) {
         $query_str .= ", stempel='$stempel'";
     }
 
+    // Upload Background Login
+    if ($_FILES['background_login']['name']) {
+        $bg_login = time() . '_bg_' . basename($_FILES["background_login"]["name"]);
+        move_uploaded_file($_FILES["background_login"]["tmp_name"], "assets/images/" . $bg_login);
+        $query_str .= ", background_login='$bg_login'";
+    }
+
     $query_str .= " WHERE id='$id'";
 
     if (mysqli_query($conn, $query_str)) {

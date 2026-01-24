@@ -73,6 +73,59 @@ if (isset($_GET['delete'])) {
     exit();
 }
 
+// Handle Multiple Delete
+if (isset($_POST['hapus_multiple'])) {
+    if (!empty($_POST['pilih'])) {
+        $ids = $_POST['pilih'];
+        $count = count($ids);
+        $ids_string = implode(',', array_map('intval', $ids));
+        
+        if (mysqli_query($conn, "DELETE FROM guru WHERE id IN ($ids_string)")) {
+            log_activity($_SESSION['user_id'], 'delete', 'Menghapus ' . $count . ' data guru secara multiple');
+            $_SESSION['success'] = "$count data guru berhasil dihapus";
+        } else {
+            $_SESSION['error'] = "Gagal menghapus data: " . mysqli_error($conn);
+        }
+    } else {
+        $_SESSION['error'] = "Tidak ada data yang dipilih";
+    }
+    session_write_close();
+    header("Location: guru.php");
+    exit();
+}
+
+// Handle Multiple Edit
+if (isset($_POST['edit_multiple'])) {
+    if (isset($_POST['id']) && is_array($_POST['id'])) {
+        $count = 0;
+        foreach ($_POST['id'] as $key => $id) {
+            $id = intval($id);
+            $nuptk = mysqli_real_escape_string($conn, $_POST['nuptk'][$key]);
+            $nama = mysqli_real_escape_string($conn, $_POST['nama'][$key]);
+            $jk = $_POST['jk'][$key];
+            $tempat_lahir = mysqli_real_escape_string($conn, $_POST['tempat_lahir'][$key]);
+            $tgl_lahir = $_POST['tgl_lahir'][$key];
+            $status = $_POST['status'][$key];
+
+            $query = "UPDATE guru SET nuptk='$nuptk', nama='$nama', jk='$jk', tempat_lahir='$tempat_lahir', tgl_lahir='$tgl_lahir', status='$status' WHERE id='$id'";
+            if (mysqli_query($conn, $query)) {
+                $count++;
+            }
+        }
+        if ($count > 0) {
+            log_activity($_SESSION['user_id'], 'update', 'Mengubah ' . $count . ' data guru secara multiple');
+            $_SESSION['success'] = "$count data guru berhasil diperbarui";
+        } else {
+            $_SESSION['error'] = "Tidak ada data yang berubah atau terjadi kesalahan";
+        }
+    } else {
+        $_SESSION['error'] = "Data tidak valid";
+    }
+    session_write_close();
+    header("Location: guru.php");
+    exit();
+}
+
 include 'template/header.php';
 include 'template/sidebar.php';
 ?>
@@ -92,6 +145,12 @@ include 'template/sidebar.php';
                         </h2>
                         <ul class="header-dropdown m-r--5">
                             <li class="dropdown">
+                                <button type="button" class="btn btn-warning waves-effect" id="btn-edit-multiple" onclick="showEditMultiple()" style="display:none; margin-right: 5px;">
+                                    <i class="material-icons">edit</i> Edit Terpilih
+                                </button>
+                                <button type="button" class="btn btn-danger waves-effect" id="btn-hapus-multiple" onclick="confirmDeleteMultiple()" style="display:none;">
+                                    <i class="material-icons">delete</i> Hapus Terpilih
+                                </button>
                                 <a href="export_guru_excel.php" target="_blank" class="btn btn-success waves-effect" title="Export Excel"><i class="material-icons">grid_on</i></a>
                                 <a href="export_guru_print.php" target="_blank" class="btn btn-warning waves-effect" title="Cetak PDF"><i class="material-icons">print</i></a>
                                 <button type="button" class="btn btn-info waves-effect" data-toggle="modal" data-target="#importModal">
@@ -105,9 +164,14 @@ include 'template/sidebar.php';
                     </div>
                     <div class="body">
                         <div class="table-responsive">
+                            <form method="POST" id="form-hapus">
                             <table class="table table-bordered table-striped table-hover js-basic-example dataTable">
                                 <thead>
                                     <tr>
+                                        <th width="10" style="text-align:center;">
+                                            <input type="checkbox" id="check-all" class="filled-in chk-col-red">
+                                            <label for="check-all" style="margin-bottom:0; height:10px; min-height:10px; padding-left:25px;"></label>
+                                        </th>
                                         <th>No</th>
                                         <th>NUPTK</th>
                                         <th>Nama Guru</th>
@@ -124,12 +188,24 @@ include 'template/sidebar.php';
                                     while ($row = mysqli_fetch_assoc($query)) :
                                     ?>
                                         <tr>
+                                            <td align="center">
+                                                <input type="checkbox" name="pilih[]" value="<?php echo $row['id']; ?>" id="chk_<?php echo $row['id']; ?>" class="filled-in chk-col-red check-item">
+                                                <label for="chk_<?php echo $row['id']; ?>" style="margin-bottom:0; height:10px; min-height:10px; padding-left:25px;"></label>
+                                            </td>
                                             <td><?php echo $no++; ?></td>
                                             <td><?php echo $row['nuptk']; ?></td>
                                             <td><?php echo $row['nama']; ?></td>
                                             <td><?php echo $row['jk']; ?></td>
-                                            <td><?php echo $row['tempat_lahir'] . ', ' . date('d-m-Y', strtotime($row['tgl_lahir'])); ?></td>
-                                            <td><?php echo $row['status']; ?></td>
+                                            <td><?php echo $row['tempat_lahir'] . ', ' . (!empty($row['tgl_lahir']) ? date('d-m-Y', strtotime($row['tgl_lahir'])) : ''); ?></td>
+                                            <td>
+                                                <?php if ($row['status'] == 'Guru Kelas'): ?>
+                                                    <span class="label bg-blue">Guru Kelas</span>
+                                                <?php elseif ($row['status'] == 'Guru Mapel'): ?>
+                                                    <span class="label bg-orange">Guru Mapel</span>
+                                                <?php else: ?>
+                                                    <?php echo $row['status']; ?>
+                                                <?php endif; ?>
+                                            </td>
                                             <td>
                                                 <button type="button" class="btn btn-warning btn-circle waves-effect waves-circle waves-float" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>">
                                                     <i class="material-icons">edit</i>
@@ -204,6 +280,7 @@ include 'template/sidebar.php';
                                     <?php endwhile; ?>
                                 </tbody>
                             </table>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -266,6 +343,44 @@ include 'template/sidebar.php';
                 </div>
                 <div class="modal-footer">
                     <button type="submit" name="add" class="btn btn-link waves-effect">SIMPAN</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">TUTUP</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Multiple Modal -->
+<div class="modal fade" id="editMultipleModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document" style="width: 90%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Edit Guru Terpilih</h4>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="edit_multiple" value="1">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th width="5%">No</th>
+                                    <th>NUPTK</th>
+                                    <th>Nama Guru</th>
+                                    <th width="10%">L/P</th>
+                                    <th>Tempat Lahir</th>
+                                    <th>Tanggal Lahir</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="edit_multiple_tbody">
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-link waves-effect">SIMPAN PERUBAHAN</button>
                     <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">TUTUP</button>
                 </div>
             </form>
@@ -425,3 +540,92 @@ include 'template/sidebar.php';
 </script>
 
 <?php include 'template/footer.php'; ?>
+
+<script>
+    $(function () {
+        // Check All functionality
+        $('#check-all').click(function () {
+            $('.check-item').prop('checked', this.checked);
+            toggleButtons();
+        });
+
+        // Individual Check functionality
+        $(document).on('change', '.check-item', function () {
+            var check = ($('.check-item').filter(':checked').length == $('.check-item').length);
+            $('#check-all').prop('checked', check);
+            toggleButtons();
+        });
+    });
+
+    function toggleButtons() {
+        if ($('.check-item:checked').length > 0) {
+            $('#btn-hapus-multiple').show();
+            $('#btn-edit-multiple').show();
+        } else {
+            $('#btn-hapus-multiple').hide();
+            $('#btn-edit-multiple').hide();
+        }
+    }
+
+    function showEditMultiple() {
+        var ids = [];
+        $('.check-item:checked').each(function() {
+            ids.push($(this).val());
+        });
+        
+        if (ids.length == 0) return;
+        
+        $.ajax({
+            url: 'get_guru_data.php',
+            type: 'POST',
+            data: {ids: ids.join(',')},
+            dataType: 'json',
+            success: function(response) {
+                var tbody = '';
+                $.each(response, function(i, item) {
+                    tbody += '<tr>';
+                    tbody += '<td align="center">' + (i+1) + '<input type="hidden" name="id[]" value="' + item.id + '"></td>';
+                    tbody += '<td><div class="form-group" style="margin-bottom:0"><div class="form-line"><input type="text" class="form-control" name="nuptk[]" value="' + item.nuptk + '"></div></div></td>';
+                    tbody += '<td><div class="form-group" style="margin-bottom:0"><div class="form-line"><input type="text" class="form-control" name="nama[]" value="' + item.nama + '" required></div></div></td>';
+                    
+                    var selL = item.jk == 'L' ? 'selected' : '';
+                    var selP = item.jk == 'P' ? 'selected' : '';
+                    tbody += '<td><select class="form-control" name="jk[]"><option value="L" '+selL+'>L</option><option value="P" '+selP+'>P</option></select></td>';
+                    
+                    tbody += '<td><div class="form-group" style="margin-bottom:0"><div class="form-line"><input type="text" class="form-control" name="tempat_lahir[]" value="' + item.tempat_lahir + '"></div></div></td>';
+                    tbody += '<td><div class="form-group" style="margin-bottom:0"><div class="form-line"><input type="date" class="form-control" name="tgl_lahir[]" value="' + item.tgl_lahir + '"></div></div></td>';
+                    
+                    var selS1 = item.status == 'Guru Kelas' ? 'selected' : '';
+                    var selS2 = item.status == 'Guru Mapel' ? 'selected' : '';
+                    tbody += '<td><select class="form-control" name="status[]"><option value="Guru Kelas" '+selS1+'>Guru Kelas</option><option value="Guru Mapel" '+selS2+'>Guru Mapel</option></select></td>';
+                    
+                    tbody += '</tr>';
+                });
+                $('#edit_multiple_tbody').html(tbody);
+                $('#editMultipleModal').modal('show');
+            }
+        });
+    }
+
+    function confirmDeleteMultiple() {
+        var count = $('.check-item:checked').length;
+        if (count == 0) {
+            return;
+        }
+
+        swal({
+            title: "Apakah anda yakin?",
+            text: "Anda akan menghapus " + count + " data guru yang dipilih. Data yang dihapus tidak dapat dikembalikan!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Ya, Hapus!",
+            cancelButtonText: "Batal",
+            closeOnConfirm: false
+        }, function () {
+            $('#form-hapus').append('<input type="hidden" name="hapus_multiple" value="1">');
+            $('#form-hapus').submit();
+        });
+    }
+</script>
+

@@ -1,7 +1,16 @@
 <?php
 include 'config.php';
-include 'template/header.php';
-include 'template/sidebar.php';
+
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    if (isset($_POST['is_ajax'])) {
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'message' => 'Sesi habis, silakan login kembali.']);
+        exit;
+    }
+    header("Location: login.php");
+    exit();
+}
 
 // Function to format file size
 function formatSizeUnits($bytes) {
@@ -42,8 +51,8 @@ if (isset($_POST['backup_now'])) {
             while ($row = mysqli_fetch_row($result)) {
                 $return .= "INSERT INTO " . $table . " VALUES(";
                 for ($j = 0; $j < $num_fields; $j++) {
-                    $row[$j] = addslashes($row[$j]);
                     if (isset($row[$j])) {
+                        $row[$j] = addslashes($row[$j]);
                         $return .= '"' . $row[$j] . '"';
                     } else {
                         $return .= 'NULL';
@@ -76,6 +85,12 @@ if (isset($_POST['backup_now'])) {
     // Log Activity
     log_activity($_SESSION['user_id'], 'backup', 'Melakukan backup database (' . $file_name . ')');
     
+    if (isset($_POST['is_ajax'])) {
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'success', 'message' => 'Backup berhasil dibuat!']);
+        exit;
+    }
+    
     $_SESSION['success'] = "Backup berhasil dibuat!";
     echo "<script>window.location='backup.php';</script>";
 }
@@ -92,6 +107,10 @@ if (isset($_GET['delete'])) {
     }
     
     mysqli_query($conn, "DELETE FROM backup WHERE id='$id'");
+
+    // Log Activity
+    log_activity($_SESSION['user_id'], 'delete_backup', 'Menghapus file backup (' . $row['file_name'] . ')');
+
     $_SESSION['success'] = "Backup berhasil dihapus!";
     echo "<script>window.location='backup.php';</script>";
 }
@@ -123,6 +142,34 @@ if (isset($_POST['restore'])) {
     echo "<script>window.location='backup.php';</script>";
 }
 
+// Handle Restore from Upload
+if (isset($_POST['restore_upload'])) {
+    if (isset($_FILES['restore_file']) && $_FILES['restore_file']['error'] == 0) {
+        $file_name = $_FILES['restore_file']['name'];
+        $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
+        
+        if (strtolower($file_ext) == 'sql') {
+            $sql = file_get_contents($_FILES['restore_file']['tmp_name']);
+            if (mysqli_multi_query($conn, $sql)) {
+                 do {
+                    if ($result = mysqli_store_result($conn)) {
+                        mysqli_free_result($result);
+                    }
+                } while (mysqli_more_results($conn) && mysqli_next_result($conn));
+                
+                $_SESSION['success'] = "Database berhasil direstore dari file upload!";
+            } else {
+                $_SESSION['error'] = "Gagal restore: " . mysqli_error($conn);
+            }
+        } else {
+            $_SESSION['error'] = "Format file harus .sql";
+        }
+    } else {
+        $_SESSION['error'] = "Terjadi kesalahan saat upload file.";
+    }
+    echo "<script>window.location='backup.php';</script>";
+}
+
 // Handle Download
 if (isset($_GET['download'])) {
     $id = $_GET['download'];
@@ -142,6 +189,8 @@ if (isset($_GET['download'])) {
         exit;
     }
 }
+include 'template/header.php';
+include 'template/sidebar.php';
 ?>
 
 <section class="content">
@@ -151,21 +200,54 @@ if (isset($_GET['download'])) {
         </div>
 
         <div class="row clearfix">
+            <!-- Backup Column -->
+            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="header">
+                        <h2>BACKUP DATABASE</h2>
+                    </div>
+                    <div class="body">
+                        <p class="m-b-20">Klik tombol di bawah ini untuk membuat cadangan (backup) seluruh database aplikasi. File backup akan tersimpan di server dan dapat diunduh.</p>
+                        <form method="POST" id="backupForm">
+                            <button type="submit" name="backup_now" class="btn btn-primary btn-lg btn-block waves-effect">
+                                <i class="material-icons">backup</i> BUAT BACKUP BARU
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Restore Column -->
+            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="header">
+                        <h2>RESTORE DATABASE (UPLOAD)</h2>
+                    </div>
+                    <div class="body">
+                        <p class="m-b-20">Upload file database (.sql) yang sebelumnya telah diunduh untuk mengembalikan data.</p>
+                        <form method="POST" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <div class="form-line">
+                                    <input type="file" name="restore_file" class="form-control" accept=".sql" required>
+                                </div>
+                                <small class="col-red">PERINGATAN: Tindakan ini akan menimpa seluruh data saat ini!</small>
+                            </div>
+                            <button type="submit" name="restore_upload" class="btn btn-warning btn-lg btn-block waves-effect" onclick="return confirm('Apakah Anda yakin ingin merestore database? Data saat ini akan ditimpa dan tidak dapat dikembalikan!')">
+                                <i class="material-icons">restore</i> UPLOAD & RESTORE
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row clearfix">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="card">
                     <div class="header">
                         <h2>
-                            DAFTAR BACKUP DATABASE
+                            RIWAYAT BACKUP DATABASE
                         </h2>
-                        <ul class="header-dropdown m-r--5">
-                            <li class="dropdown">
-                                <form method="POST">
-                                    <button type="submit" name="backup_now" class="btn btn-primary waves-effect">
-                                        <i class="material-icons">backup</i> Buat Backup Baru
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
                     </div>
                     <div class="body">
                         <div class="table-responsive">
@@ -237,3 +319,56 @@ if (isset($_GET['download'])) {
 </section>
 
 <?php include 'template/footer.php'; ?>
+<script>
+    $(function() {
+        $('#backupForm').on('submit', function(e) {
+            e.preventDefault();
+            var form = this;
+            
+            swal({
+                title: "Sedang Memproses...",
+                text: "Mohon tunggu, sistem sedang melakukan backup database.",
+                type: "info",
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            });
+
+            var formData = new FormData(form);
+            formData.append('backup_now', true);
+            formData.append('is_ajax', true);
+
+            // Artificial delay so user sees the processing alert
+            setTimeout(function() {
+                $.ajax({
+                    url: 'backup.php',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            swal({
+                                title: "Berhasil!",
+                                text: response.message,
+                                type: "success",
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 2000);
+                        } else {
+                            swal("Gagal!", response.message || "Terjadi kesalahan.", "error");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                        swal("Gagal!", "Terjadi kesalahan pada server. Silakan cek console browser.", "error");
+                    }
+                });
+            }, 1500); // 1.5 seconds delay
+        });
+    });
+</script>

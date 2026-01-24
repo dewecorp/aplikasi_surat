@@ -65,12 +65,6 @@ if (isset($_POST['login'])) {
     <link href="assets/css/style.css" rel="stylesheet">
     <style>
         .login-page {
-            <?php if ($bg_login): ?>
-            background: url('<?php echo $bg_login; ?>') no-repeat center center fixed !important;
-            background-size: cover !important;
-            <?php else: ?>
-            background: linear-gradient(45deg, #1e88e5, #4fc3f7) !important;
-            <?php endif; ?>
             max-width: 100% !important; /* Fix width issue if any */
             overflow: hidden; /* Remove scroll */
             height: 100vh;

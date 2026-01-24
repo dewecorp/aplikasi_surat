@@ -60,7 +60,7 @@ $query = mysqli_query($conn, "SELECT * FROM guru ORDER BY nama ASC");
                 <td><?php echo $row['nuptk']; ?></td>
                 <td><?php echo $row['nama']; ?></td>
                 <td align="center"><?php echo $row['jk']; ?></td>
-                <td><?php echo $row['tempat_lahir'] . ', ' . date('d-m-Y', strtotime($row['tgl_lahir'])); ?></td>
+                <td><?php echo $row['tempat_lahir'] . ', ' . (!empty($row['tgl_lahir']) ? date('d-m-Y', strtotime($row['tgl_lahir'])) : ''); ?></td>
                 <td><?php echo $row['status']; ?></td>
             </tr>
             <?php } ?>
