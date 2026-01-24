@@ -8,10 +8,10 @@ if (isset($_POST['add'])) {
     $nama = mysqli_real_escape_string($conn, $_POST['nama']);
     $jk = $_POST['jk'];
     $tempat_lahir = mysqli_real_escape_string($conn, $_POST['tempat_lahir']);
-    $tgl_lahir = $_POST['tgl_lahir'];
+    $tgl_lahir = !empty($_POST['tgl_lahir']) ? "'" . $_POST['tgl_lahir'] . "'" : "NULL";
     $status = $_POST['status'];
 
-    $query = "INSERT INTO guru (nuptk, nama, jk, tempat_lahir, tgl_lahir, status) VALUES ('$nuptk', '$nama', '$jk', '$tempat_lahir', '$tgl_lahir', '$status')";
+    $query = "INSERT INTO guru (nuptk, nama, jk, tempat_lahir, tgl_lahir, status) VALUES ('$nuptk', '$nama', '$jk', '$tempat_lahir', $tgl_lahir, '$status')";
     if (mysqli_query($conn, $query)) {
         log_activity($_SESSION['user_id'], 'create', 'Menambahkan data guru: ' . $nama);
         $_SESSION['success'] = "Data guru berhasil ditambahkan";
@@ -30,7 +30,7 @@ if (isset($_POST['edit'])) {
     $nama = mysqli_real_escape_string($conn, $_POST['nama']);
     $jk = isset($_POST['jk']) ? $_POST['jk'] : '';
     $tempat_lahir = mysqli_real_escape_string($conn, $_POST['tempat_lahir']);
-    $tgl_lahir = $_POST['tgl_lahir'];
+    $tgl_lahir = !empty($_POST['tgl_lahir']) ? "'" . $_POST['tgl_lahir'] . "'" : "NULL";
     $status = isset($_POST['status']) ? $_POST['status'] : '';
     
     if (empty($jk) || empty($status)) {
@@ -40,7 +40,7 @@ if (isset($_POST['edit'])) {
         exit();
     }
     
-    $query = "UPDATE guru SET nuptk='$nuptk', nama='$nama', jk='$jk', tempat_lahir='$tempat_lahir', tgl_lahir='$tgl_lahir', status='$status' WHERE id='$id'";
+    $query = "UPDATE guru SET nuptk='$nuptk', nama='$nama', jk='$jk', tempat_lahir='$tempat_lahir', tgl_lahir=$tgl_lahir, status='$status' WHERE id='$id'";
 
     if (mysqli_query($conn, $query)) {
         log_activity($_SESSION['user_id'], 'update', 'Mengubah data guru: ' . $nama);
