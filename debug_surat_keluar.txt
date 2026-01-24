@@ -13,9 +13,9 @@ Array
 
     [acara_tempat] => MI Salafiyah Wanusobo
     [acara_waktu] => 08.00 - selesai
-    [durasi_kegiatan] => 1
+    [durasi_kegiatan] => more
     [tgl_kegiatan_single] => 2026-01-28
-    [tgl_kegiatan_start] => 
-    [tgl_kegiatan_end] => 
+    [tgl_kegiatan_start] => 2026-01-25
+    [tgl_kegiatan_end] => 2026-01-26
     [edit] => 
 )

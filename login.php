@@ -86,29 +86,31 @@ if (isset($_POST['login'])) {
             display: block; /* Ensure it wraps if needed */
             line-height: 1.2;
             margin-bottom: 8px;
+            color: <?php echo $bg_login ? '#0d47a1' : '#fff'; ?> !important;
+            text-shadow: <?php echo $bg_login ? '1px 1px 0 rgba(255,255,255,0.5)' : 'none'; ?>;
         }
         .logo small {
             display: block;
             font-size: 18px !important; /* Increased font size */
             font-weight: bold;
-            color: #fff;
+            color: <?php echo $bg_login ? '#0d47a1' : '#fff'; ?> !important;
+            text-shadow: <?php echo $bg_login ? '1px 1px 0 rgba(255,255,255,0.5)' : 'none'; ?>;
         }
     </style>
 </head>
 
-<body class="login-page" style="<?php echo $bg_login ? "background: url('$bg_login') no-repeat center center fixed !important; background-size: cover !important;" : "background: linear-gradient(45deg, #1e88e5, #4fc3f7) !important;"; ?>">
+<body class="login-page" style="<?php echo $bg_login ? "background: url('$bg_login') no-repeat center center fixed !important; background-size: cover !important;" : "background: linear-gradient(45deg, #0d47a1, #1976d2) !important;"; ?>">
     <div class="login-box">
         <div class="logo">
             <?php if ($logo): ?>
                 <img src="<?php echo $logo; ?>" alt="Logo">
             <?php endif; ?>
-            <a href="javascript:void(0);"><?php echo $nama_app; ?></a>
+            <a href="javascript:void(0);">SISTEM MANAJEMEN SURAT</a>
             <small><?php echo $nama_sekolah; ?></small>
         </div>
         <div class="card">
             <div class="body">
                 <form id="sign_in" method="POST">
-                    <div class="msg">Masuk untuk memulai sesi Anda</div>
                     <?php if (isset($error)): ?>
                         <div class="alert alert-danger">
                             <?php echo $error; ?>
@@ -132,7 +134,7 @@ if (isset($_POST['login'])) {
                     </div>
                     <div class="row">
                         <div class="col-xs-6 col-xs-offset-3">
-                            <button class="btn btn-block bg-blue waves-effect" type="submit" name="login">MASUK</button>
+                            <button class="btn btn-block bg-blue waves-effect" type="submit" name="login" style="background: linear-gradient(45deg, #0d47a1, #1976d2) !important;">MASUK</button>
                         </div>
                     </div>
                 </form>

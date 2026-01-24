@@ -69,15 +69,15 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
 
     <style>
         .sidebar .user-info {
-            background: linear-gradient(45deg, #1e88e5, #4fc3f7) !important;
+            background: linear-gradient(45deg, #0d47a1, #1976d2) !important;
         }
         /* Custom Gradient Blue Theme */
         .navbar {
-            background: linear-gradient(45deg, #1e88e5, #4fc3f7) !important;
+            background: linear-gradient(45deg, #0d47a1, #1976d2) !important;
         }
         .sidebar .menu .list li.active > :first-child i, 
         .sidebar .menu .list li.active > :first-child span {
-            color: #1e88e5 !important;
+            color: #0d47a1 !important;
         }
         .page-loader-wrapper {
             background: #eee;
