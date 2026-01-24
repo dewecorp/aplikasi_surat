@@ -467,7 +467,6 @@ if (!$surat) {
             <?php if ($surat['jenis_surat'] == 'Keterangan Pindah'): ?>
                 <div style="clear: both; margin-top: 30px; margin-bottom: 20px; page-break-inside: avoid; break-inside: avoid;">
                     <p>Setelah anak tersebut diterima di sekolah tujuan, isian ini harap diisi dan dikirimkan kembali kepada kami.</p>
-                    <p style="text-align: center; border-bottom: 1px dashed black; line-height: 0.1em; margin: 20px 0;"><span style="background:#fff; padding:0 10px;">potong disini</span></p>
                     <table class="detail-table" style="width: 100%;">
                         <tr><td width="30%">NSM</td><td width="2%">:</td><td>............................................................</td></tr>
                         <tr><td>Nama Sekolah</td><td>:</td><td>............................................................</td></tr>
