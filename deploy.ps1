@@ -26,6 +26,13 @@ if ($LASTEXITCODE -ne 0) {
 
 # 3. Git Add & Commit
 Write-Host "Menambahkan file ke staging..."
+
+# Hapus file backup lama sebelum add agar tidak ikut ter-commit
+if (Test-Path $backupFile) {
+    Write-Host "Menghapus backup lama..."
+    Remove-Item $backupFile -Force
+}
+
 git add .
 
 $customMsg = Read-Host "Masukkan pesan commit (kosongkan untuk default timestamp)"

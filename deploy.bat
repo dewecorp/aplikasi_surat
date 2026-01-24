@@ -24,6 +24,13 @@ if %ERRORLEVEL% NEQ 0 (
 
 :: 3. Git Add & Commit
 echo Menambahkan file ke staging...
+
+:: Hapus file backup lama sebelum add agar tidak ikut ter-commit
+if exist "%BACKUP_FILE%" (
+    echo Menghapus backup lama...
+    del "%BACKUP_FILE%"
+)
+
 git add .
 
 set /p CUSTOM_MSG="Masukkan pesan commit (kosongkan untuk default timestamp): "
