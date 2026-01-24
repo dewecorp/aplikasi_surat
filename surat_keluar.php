@@ -1,9 +1,15 @@
 <?php
 session_start();
 include 'config.php';
+// Enable Error Reporting for Debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 // Handle Add
 if (isset($_POST['add'])) {
+    // DEBUG: Log POST data
+    file_put_contents('debug_add_post.txt', print_r($_POST, true));
+
     $tgl_surat = $_POST['tgl_surat'];
     $jenis_surat = $_POST['jenis_surat'];
     
@@ -55,6 +61,22 @@ if (isset($_POST['add'])) {
         $penerima_list = [$merged_penerima];
     }
 
+    // Fields for Surat Pindah
+    $nis_siswa = !empty($_POST['nis_siswa']) ? mysqli_real_escape_string($conn, $_POST['nis_siswa']) : NULL;
+    $tempat_lahir_siswa = !empty($_POST['tempat_lahir_siswa']) ? mysqli_real_escape_string($conn, $_POST['tempat_lahir_siswa']) : NULL;
+    $tgl_lahir_siswa = !empty($_POST['tgl_lahir_siswa']) ? $_POST['tgl_lahir_siswa'] : NULL;
+    $jenis_kelamin_siswa = !empty($_POST['jenis_kelamin_siswa']) ? $_POST['jenis_kelamin_siswa'] : NULL;
+    $kelas_siswa = !empty($_POST['kelas_siswa']) ? mysqli_real_escape_string($conn, $_POST['kelas_siswa']) : NULL;
+    $nama_wali = !empty($_POST['nama_wali']) ? mysqli_real_escape_string($conn, $_POST['nama_wali']) : NULL;
+    $pekerjaan_wali = !empty($_POST['pekerjaan_wali']) ? mysqli_real_escape_string($conn, $_POST['pekerjaan_wali']) : NULL;
+    $alamat_wali = !empty($_POST['alamat_wali']) ? mysqli_real_escape_string($conn, $_POST['alamat_wali']) : NULL;
+    $tujuan_pindah = !empty($_POST['tujuan_pindah']) ? mysqli_real_escape_string($conn, $_POST['tujuan_pindah']) : NULL;
+
+    // Set default perihal for Surat Pindah
+    if ($jenis_surat == 'Keterangan Pindah') {
+        $perihal = 'Surat Keterangan Pindah';
+    }
+
     $success_count = 0;
     foreach ($penerima_list as $penerima_name) {
         $penerima = mysqli_real_escape_string($conn, $penerima_name);
@@ -77,8 +99,14 @@ if (isset($_POST['add'])) {
         
         $no_surat = sprintf('%03d', $next_no) . '/MI.SF/' . $romawi . '/' . $tahun;
     
-        $query = "INSERT INTO surat_keluar (tgl_surat, no_surat, jenis_surat, perihal, penerima, acara_hari_tanggal, acara_waktu, acara_tempat, keperluan, keterangan, pembuka_surat, isi_surat, penutup_surat) 
-                  VALUES ('$tgl_surat', '$no_surat', '$jenis_surat', '$perihal', '$penerima', " . 
+        $query = "INSERT INTO surat_keluar (
+                    tgl_surat, no_surat, jenis_surat, perihal, penerima, 
+                    acara_hari_tanggal, acara_waktu, acara_tempat, keperluan, keterangan, 
+                    pembuka_surat, isi_surat, penutup_surat,
+                    nis_siswa, tempat_lahir_siswa, tgl_lahir_siswa, jenis_kelamin_siswa,
+                    kelas_siswa, nama_wali, pekerjaan_wali, alamat_wali, tujuan_pindah
+                  ) VALUES (
+                    '$tgl_surat', '$no_surat', '$jenis_surat', '$perihal', '$penerima', " . 
                   ($acara_hari_tanggal ? "'$acara_hari_tanggal'" : "NULL") . ", " . 
                   ($acara_waktu ? "'$acara_waktu'" : "NULL") . ", " . 
                   ($acara_tempat ? "'$acara_tempat'" : "NULL") . ", " . 
@@ -86,18 +114,31 @@ if (isset($_POST['add'])) {
                   ($keterangan ? "'$keterangan'" : "NULL") . ", " . 
                   ($pembuka_surat ? "'$pembuka_surat'" : "NULL") . ", " . 
                   ($isi_surat ? "'$isi_surat'" : "NULL") . ", " . 
-                  ($penutup_surat ? "'$penutup_surat'" : "NULL") . ")";
+                  ($penutup_surat ? "'$penutup_surat'" : "NULL") . ", " .
+                  ($nis_siswa ? "'$nis_siswa'" : "NULL") . ", " .
+                  ($tempat_lahir_siswa ? "'$tempat_lahir_siswa'" : "NULL") . ", " .
+                  ($tgl_lahir_siswa ? "'$tgl_lahir_siswa'" : "NULL") . ", " .
+                  ($jenis_kelamin_siswa ? "'$jenis_kelamin_siswa'" : "NULL") . ", " .
+                  ($kelas_siswa ? "'$kelas_siswa'" : "NULL") . ", " .
+                  ($nama_wali ? "'$nama_wali'" : "NULL") . ", " .
+                  ($pekerjaan_wali ? "'$pekerjaan_wali'" : "NULL") . ", " .
+                  ($alamat_wali ? "'$alamat_wali'" : "NULL") . ", " .
+                  ($tujuan_pindah ? "'$tujuan_pindah'" : "NULL") . ")";
         
         if (mysqli_query($conn, $query)) {
             log_activity($_SESSION['user_id'], 'create', 'Membuat surat keluar no: ' . $no_surat);
             $success_count++;
+        } else {
+            // DEBUG: Log Error
+            file_put_contents('debug_add_error.txt', mysqli_error($conn) . "\nSQL: " . $query);
+            $_SESSION['error'] = "Gagal DB: " . mysqli_error($conn);
         }
     }
 
     if ($success_count > 0) {
         $_SESSION['success'] = "Berhasil membuat $success_count surat keluar";
-    } else {
-        $_SESSION['error'] = "Gagal membuat surat: " . mysqli_error($conn);
+    } elseif (!isset($_SESSION['error'])) {
+        $_SESSION['error'] = "Gagal membuat surat.";
     }
     session_write_close();
     header("Location: surat_keluar.php");
@@ -111,7 +152,14 @@ if (isset($_POST['edit'])) {
 
     $id = $_POST['id'];
     $tgl_surat = $_POST['tgl_surat'];
-    $perihal = mysqli_real_escape_string($conn, $_POST['perihal']);
+    
+    // Handle Perihal based on Type
+    $jenis_surat_edit = isset($_POST['jenis_surat']) ? $_POST['jenis_surat'] : '';
+    if ($jenis_surat_edit == 'Keterangan Pindah') {
+        $perihal = 'Surat Keterangan Pindah';
+    } else {
+        $perihal = isset($_POST['perihal']) ? mysqli_real_escape_string($conn, $_POST['perihal']) : '';
+    }
     
     // Handle Penerima (String or Array)
     $penerima_input = isset($_POST['penerima']) ? $_POST['penerima'] : '';
@@ -159,6 +207,17 @@ if (isset($_POST['edit'])) {
     $isi_surat = !empty($_POST['isi_surat']) ? mysqli_real_escape_string($conn, $_POST['isi_surat']) : NULL;
     $penutup_surat = !empty($_POST['penutup_surat']) ? mysqli_real_escape_string($conn, $_POST['penutup_surat']) : NULL;
 
+    // Fields for Surat Pindah
+    $nis_siswa = !empty($_POST['nis_siswa']) ? mysqli_real_escape_string($conn, $_POST['nis_siswa']) : NULL;
+    $tempat_lahir_siswa = !empty($_POST['tempat_lahir_siswa']) ? mysqli_real_escape_string($conn, $_POST['tempat_lahir_siswa']) : NULL;
+    $tgl_lahir_siswa = !empty($_POST['tgl_lahir_siswa']) ? $_POST['tgl_lahir_siswa'] : NULL;
+    $jenis_kelamin_siswa = !empty($_POST['jenis_kelamin_siswa']) ? $_POST['jenis_kelamin_siswa'] : NULL;
+    $kelas_siswa = !empty($_POST['kelas_siswa']) ? mysqli_real_escape_string($conn, $_POST['kelas_siswa']) : NULL;
+    $nama_wali = !empty($_POST['nama_wali']) ? mysqli_real_escape_string($conn, $_POST['nama_wali']) : NULL;
+    $pekerjaan_wali = !empty($_POST['pekerjaan_wali']) ? mysqli_real_escape_string($conn, $_POST['pekerjaan_wali']) : NULL;
+    $alamat_wali = !empty($_POST['alamat_wali']) ? mysqli_real_escape_string($conn, $_POST['alamat_wali']) : NULL;
+    $tujuan_pindah = !empty($_POST['tujuan_pindah']) ? mysqli_real_escape_string($conn, $_POST['tujuan_pindah']) : NULL;
+
     // Nomor surat tidak berubah saat edit untuk menjaga konsistensi urutan
     
     $query = "UPDATE surat_keluar SET 
@@ -172,7 +231,16 @@ if (isset($_POST['edit'])) {
               keterangan=" . ($keterangan ? "'$keterangan'" : "NULL") . ",
               pembuka_surat=" . ($pembuka_surat ? "'$pembuka_surat'" : "NULL") . ",
               isi_surat=" . ($isi_surat ? "'$isi_surat'" : "NULL") . ",
-              penutup_surat=" . ($penutup_surat ? "'$penutup_surat'" : "NULL") . "
+              penutup_surat=" . ($penutup_surat ? "'$penutup_surat'" : "NULL") . ",
+              nis_siswa=" . ($nis_siswa ? "'$nis_siswa'" : "NULL") . ",
+              tempat_lahir_siswa=" . ($tempat_lahir_siswa ? "'$tempat_lahir_siswa'" : "NULL") . ",
+              tgl_lahir_siswa=" . ($tgl_lahir_siswa ? "'$tgl_lahir_siswa'" : "NULL") . ",
+              jenis_kelamin_siswa=" . ($jenis_kelamin_siswa ? "'$jenis_kelamin_siswa'" : "NULL") . ",
+              kelas_siswa=" . ($kelas_siswa ? "'$kelas_siswa'" : "NULL") . ",
+              nama_wali=" . ($nama_wali ? "'$nama_wali'" : "NULL") . ",
+              pekerjaan_wali=" . ($pekerjaan_wali ? "'$pekerjaan_wali'" : "NULL") . ",
+              alamat_wali=" . ($alamat_wali ? "'$alamat_wali'" : "NULL") . ",
+              tujuan_pindah=" . ($tujuan_pindah ? "'$tujuan_pindah'" : "NULL") . "
               WHERE id='$id'";
 
     if (mysqli_query($conn, $query)) {
@@ -183,6 +251,7 @@ if (isset($_POST['edit'])) {
 
         $_SESSION['success'] = "Surat keluar berhasil diubah";
     } else {
+        file_put_contents('debug_edit_error.txt', mysqli_error($conn) . "\nSQL: " . $query);
         $_SESSION['error'] = "Gagal mengubah surat: " . mysqli_error($conn);
     }
     session_write_close();
@@ -407,6 +476,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                     <form method="POST">
                                                         <div class="modal-body">
                                                             <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
+                                                            <input type="hidden" name="jenis_surat" value="<?php echo $row['jenis_surat']; ?>">
                                                             
                                                             <!-- Common Fields -->
                                                             <label>Tanggal Surat</label>
@@ -415,12 +485,14 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                     <input type="date" class="form-control" name="tgl_surat" value="<?php echo $row['tgl_surat']; ?>" required>
                                                                 </div>
                                                             </div>
-                                                            <label><?php echo ($row['jenis_surat'] == 'Tugas') ? 'Nama Kegiatan' : 'Perihal'; ?></label>
-                                                            <div class="form-group">
-                                                                <div class="form-line">
-                                                                    <textarea name="perihal" class="form-control no-resize" required><?php echo $row['perihal']; ?></textarea>
+                                                            <?php if ($row['jenis_surat'] != 'Keterangan Pindah'): ?>
+                                                                <label><?php echo ($row['jenis_surat'] == 'Tugas') ? 'Nama Kegiatan' : 'Perihal'; ?></label>
+                                                                <div class="form-group">
+                                                                    <div class="form-line">
+                                                                        <textarea name="perihal" class="form-control no-resize" required><?php echo $row['perihal']; ?></textarea>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
+                                                            <?php endif; ?>
                                                             <label>
                                                                 <?php 
                                                                 if ($row['jenis_surat'] == 'Tugas') echo 'Ditugaskan Kepada';
@@ -595,10 +667,75 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                 </div>
 
                                                             <?php elseif ($row['jenis_surat'] == 'Keterangan Pindah'): ?>
-                                                                <label>Keterangan / Tujuan Pindah</label>
+                                                                <div class="row clearfix">
+                                                                    <div class="col-sm-6">
+                                                                        <label>NIS / NISN</label>
+                                                                        <div class="form-group">
+                                                                            <div class="form-line">
+                                                                                <input type="text" class="form-control" name="nis_siswa" value="<?php echo isset($row['nis_siswa']) ? $row['nis_siswa'] : ''; ?>">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-sm-6">
+                                                                        <label>Jenis Kelamin</label>
+                                                                        <div class="form-group">
+                                                                            <input name="jenis_kelamin_siswa" type="radio" id="radio_jk_1_<?php echo $row['id']; ?>" value="Laki-Laki" class="with-gap radio-col-blue" <?php echo (isset($row['jenis_kelamin_siswa']) && $row['jenis_kelamin_siswa'] == 'Laki-Laki') ? 'checked' : ''; ?> />
+                                                                            <label for="radio_jk_1_<?php echo $row['id']; ?>">Laki-Laki</label>
+                                                                            <input name="jenis_kelamin_siswa" type="radio" id="radio_jk_2_<?php echo $row['id']; ?>" value="Perempuan" class="with-gap radio-col-blue" <?php echo (isset($row['jenis_kelamin_siswa']) && $row['jenis_kelamin_siswa'] == 'Perempuan') ? 'checked' : ''; ?> />
+                                                                            <label for="radio_jk_2_<?php echo $row['id']; ?>">Perempuan</label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row clearfix">
+                                                                    <div class="col-sm-6">
+                                                                        <label>Tempat Lahir</label>
+                                                                        <div class="form-group">
+                                                                            <div class="form-line">
+                                                                                <input type="text" class="form-control" name="tempat_lahir_siswa" value="<?php echo isset($row['tempat_lahir_siswa']) ? $row['tempat_lahir_siswa'] : ''; ?>">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-sm-6">
+                                                                        <label>Tanggal Lahir</label>
+                                                                        <div class="form-group">
+                                                                            <div class="form-line">
+                                                                                <input type="date" class="form-control" name="tgl_lahir_siswa" value="<?php echo isset($row['tgl_lahir_siswa']) ? $row['tgl_lahir_siswa'] : ''; ?>">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <label>Kelas</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <textarea name="keterangan" class="form-control no-resize"><?php echo $row['keterangan']; ?></textarea>
+                                                                        <input type="text" class="form-control" name="kelas_siswa" value="<?php echo isset($row['kelas_siswa']) ? $row['kelas_siswa'] : ''; ?>" placeholder="Contoh: II (Dua)">
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <h5 class="m-t-20">Data Orang Tua / Wali</h5>
+                                                                <label>Nama Orang Tua / Wali</label>
+                                                                <div class="form-group">
+                                                                    <div class="form-line">
+                                                                        <input type="text" class="form-control" name="nama_wali" value="<?php echo isset($row['nama_wali']) ? $row['nama_wali'] : ''; ?>">
+                                                                    </div>
+                                                                </div>
+                                                                <label>Pekerjaan</label>
+                                                                <div class="form-group">
+                                                                    <div class="form-line">
+                                                                        <input type="text" class="form-control" name="pekerjaan_wali" value="<?php echo isset($row['pekerjaan_wali']) ? $row['pekerjaan_wali'] : ''; ?>">
+                                                                    </div>
+                                                                </div>
+                                                                <label>Alamat</label>
+                                                                <div class="form-group">
+                                                                    <div class="form-line">
+                                                                        <textarea name="alamat_wali" class="form-control no-resize" rows="2"><?php echo isset($row['alamat_wali']) ? $row['alamat_wali'] : ''; ?></textarea>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <h5 class="m-t-20">Tujuan Pindah</h5>
+                                                                <label>Pindah ke Sekolah (SD/MI)</label>
+                                                                <div class="form-group">
+                                                                    <div class="form-line">
+                                                                        <input type="text" class="form-control" name="tujuan_pindah" value="<?php echo isset($row['tujuan_pindah']) ? $row['tujuan_pindah'] : ''; ?>">
                                                                     </div>
                                                                 </div>
 
@@ -877,22 +1014,82 @@ Wassalamu'alaikum Wr. Wb.</textarea>
                             <input type="date" class="form-control" name="tgl_surat" required>
                         </div>
                     </div>
-                    <label>Perihal</label>
-                    <div class="form-group">
-                        <div class="form-line">
-                            <textarea name="perihal" class="form-control no-resize" required></textarea>
-                        </div>
-                    </div>
-                    <label>Nama Siswa / Penerima</label>
+                    <!-- Perihal dihilangkan untuk Surat Pindah (Default di PHP) -->
+                    <label>Nama Siswa</label>
                     <div class="form-group">
                         <div class="form-line">
                             <input type="text" class="form-control" name="penerima" required>
                         </div>
                     </div>
-                    <label>Keterangan / Tujuan Pindah</label>
+                    <div class="row clearfix">
+                        <div class="col-sm-6">
+                            <label>NIS / NISN</label>
+                            <div class="form-group">
+                                <div class="form-line">
+                                    <input type="text" class="form-control" name="nis_siswa">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label>Jenis Kelamin</label>
+                            <div class="form-group">
+                                <input name="jenis_kelamin_siswa" type="radio" id="radio_jk_1" value="Laki-Laki" class="with-gap radio-col-blue" />
+                                <label for="radio_jk_1">Laki-Laki</label>
+                                <input name="jenis_kelamin_siswa" type="radio" id="radio_jk_2" value="Perempuan" class="with-gap radio-col-blue" />
+                                <label for="radio_jk_2">Perempuan</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row clearfix">
+                        <div class="col-sm-6">
+                            <label>Tempat Lahir</label>
+                            <div class="form-group">
+                                <div class="form-line">
+                                    <input type="text" class="form-control" name="tempat_lahir_siswa">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label>Tanggal Lahir</label>
+                            <div class="form-group">
+                                <div class="form-line">
+                                    <input type="date" class="form-control" name="tgl_lahir_siswa">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <label>Kelas</label>
                     <div class="form-group">
                         <div class="form-line">
-                            <textarea name="keterangan" class="form-control no-resize"></textarea>
+                            <input type="text" class="form-control" name="kelas_siswa" placeholder="Contoh: II (Dua)">
+                        </div>
+                    </div>
+                    
+                    <h5 class="m-t-20">Data Orang Tua / Wali</h5>
+                    <label>Nama Orang Tua / Wali</label>
+                    <div class="form-group">
+                        <div class="form-line">
+                            <input type="text" class="form-control" name="nama_wali">
+                        </div>
+                    </div>
+                    <label>Pekerjaan</label>
+                    <div class="form-group">
+                        <div class="form-line">
+                            <input type="text" class="form-control" name="pekerjaan_wali">
+                        </div>
+                    </div>
+                    <label>Alamat</label>
+                    <div class="form-group">
+                        <div class="form-line">
+                            <textarea name="alamat_wali" class="form-control no-resize" rows="2"></textarea>
+                        </div>
+                    </div>
+                    
+                    <h5 class="m-t-20">Tujuan Pindah</h5>
+                    <label>Pindah ke Sekolah (SD/MI)</label>
+                    <div class="form-group">
+                        <div class="form-line">
+                            <input type="text" class="form-control" name="tujuan_pindah">
                         </div>
                     </div>
                 </div>

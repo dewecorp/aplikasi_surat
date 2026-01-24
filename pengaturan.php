@@ -3,6 +3,12 @@ include 'config.php';
 include 'template/header.php';
 include 'template/sidebar.php';
 
+// Cek Role, hanya admin yang boleh akses
+if (strtolower(trim($_SESSION['role'])) != 'admin') {
+    echo "<script>window.location='index.php';</script>";
+    exit();
+}
+
 // Check if data exists, if not create default
 $check = mysqli_query($conn, "SELECT * FROM pengaturan LIMIT 1");
 if (mysqli_num_rows($check) == 0) {

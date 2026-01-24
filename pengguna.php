@@ -1,7 +1,14 @@
 <?php
 include 'config.php';
+// include 'debug_helper.php'; // Temporary debug
 include 'template/header.php';
 include 'template/sidebar.php';
+
+// Cek Role, hanya admin yang boleh akses
+if (strtolower(trim($_SESSION['role'])) != 'admin') {
+    echo "<script>window.location='index.php';</script>";
+    exit();
+}
 
 // Handle Add
 if (isset($_POST['add'])) {
@@ -20,16 +27,22 @@ if (isset($_POST['add'])) {
     }
 
     $query = "INSERT INTO users (nama, username, password, role, foto) VALUES ('$nama', '$username', '$password', '$role', '$foto')";
-    if (mysqli_query($conn, $query)) {
-        $_SESSION['success'] = "Data pengguna berhasil ditambahkan";
-    } else {
-        $_SESSION['error'] = "Gagal menambahkan data: " . mysqli_error($conn);
+    try {
+        if (mysqli_query($conn, $query)) {
+            $_SESSION['success'] = "Data pengguna berhasil ditambahkan";
+        } else {
+            throw new Exception(mysqli_error($conn));
+        }
+    } catch (Exception $e) {
+        $_SESSION['error'] = "Gagal menambahkan data: " . $e->getMessage();
     }
     echo "<script>window.location='pengguna.php';</script>";
+    exit();
 }
 
 // Handle Edit
 if (isset($_POST['edit'])) {
+    // debug_log("Edit triggered. POST data: " . print_r($_POST, true));
     $id = $_POST['id'];
     $nama = mysqli_real_escape_string($conn, $_POST['nama']);
     $username = mysqli_real_escape_string($conn, $_POST['username']);
@@ -51,20 +64,29 @@ if (isset($_POST['edit'])) {
     }
 
     $query_str .= " WHERE id='$id'";
-
-    if (mysqli_query($conn, $query_str)) {
-        // Update Session jika user yang diedit adalah user yang sedang login
-        if ($id == $_SESSION['user_id']) {
-            $_SESSION['nama'] = $nama;
-            if (isset($foto)) {
-                $_SESSION['foto'] = $foto;
+    // debug_log("Query: " . $query_str);
+    
+    try {
+        if (mysqli_query($conn, $query_str)) {
+            // debug_log("Query Success. Affected rows: " . mysqli_affected_rows($conn));
+            // Update Session jika user yang diedit adalah user yang sedang login
+            if ($id == $_SESSION['user_id']) {
+                $_SESSION['nama'] = $nama;
+                if (isset($foto)) {
+                    $_SESSION['foto'] = $foto;
+                }
             }
+            $_SESSION['success'] = "Data pengguna berhasil diubah";
+        } else {
+            // debug_log("Query Failed (else block): " . mysqli_error($conn));
+            throw new Exception(mysqli_error($conn));
         }
-        $_SESSION['success'] = "Data pengguna berhasil diubah";
-    } else {
-        $_SESSION['error'] = "Gagal mengubah data: " . mysqli_error($conn);
+    } catch (Exception $e) {
+        // debug_log("Exception caught: " . $e->getMessage());
+        $_SESSION['error'] = "Gagal mengubah data: " . $e->getMessage();
     }
     echo "<script>window.location='pengguna.php';</script>";
+    exit();
 }
 
 // Handle Delete
@@ -76,13 +98,18 @@ if (isset($_GET['delete'])) {
     if ($cek['role'] == 'admin') {
         $_SESSION['error'] = "Akun Admin tidak bisa dihapus!";
     } else {
-        if (mysqli_query($conn, "DELETE FROM users WHERE id='$id'")) {
-            $_SESSION['success'] = "Data pengguna berhasil dihapus";
-        } else {
-            $_SESSION['error'] = "Gagal menghapus data";
+        try {
+            if (mysqli_query($conn, "DELETE FROM users WHERE id='$id'")) {
+                $_SESSION['success'] = "Data pengguna berhasil dihapus";
+            } else {
+                throw new Exception(mysqli_error($conn));
+            }
+        } catch (Exception $e) {
+            $_SESSION['error'] = "Gagal menghapus data: " . $e->getMessage();
         }
     }
     echo "<script>window.location='pengguna.php';</script>";
+    exit();
 }
 ?>
 

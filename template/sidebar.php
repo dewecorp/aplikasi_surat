@@ -38,7 +38,17 @@ if (isset($_SESSION['user_id']) && isset($conn)) {
             </div>
             <div class="info-container">
                 <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?php echo $user_nama; ?></div>
-                <div class="email"><?php echo $user_role; ?></div>
+                <div class="email">
+                    <?php 
+                    if (strtolower(trim($user_role)) == 'admin') {
+                        echo 'Administrator';
+                    } elseif (strtolower(trim($user_role)) == 'tu') {
+                        echo 'Tata Usaha';
+                    } else {
+                        echo $user_role;
+                    }
+                    ?>
+                </div>
             </div>
         </div>
         <!-- #User Info -->
@@ -76,6 +86,7 @@ if (isset($_SESSION['user_id']) && isset($conn)) {
                         <span>Riwayat</span>
                     </a>
                 </li>
+                <?php if (strtolower(trim($user_role)) == 'admin'): ?>
                 <li class="<?php echo ($page == 'pengguna') ? 'active' : ''; ?>">
                     <a href="pengguna.php">
                         <i class="material-icons">people</i>
@@ -88,6 +99,7 @@ if (isset($_SESSION['user_id']) && isset($conn)) {
                         <span>Pengaturan</span>
                     </a>
                 </li>
+                <?php endif; ?>
                 <li class="<?php echo ($page == 'backup') ? 'active' : ''; ?>">
                     <a href="backup.php">
                         <i class="material-icons">backup</i>

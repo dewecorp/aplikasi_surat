@@ -1,8 +1,9 @@
 Array
 (
     [id] => 6
+    [jenis_surat] => Tugas
     [tgl_surat] => 2026-01-24
-    [perihal] => Kegiatan KKG
+    [perihal] => Kegiatan KKG KKMI Kedung
     [penerima] => Array
         (
             [0] => Ali Yasin, S.Pd.I

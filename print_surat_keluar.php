@@ -278,36 +278,47 @@ if (!$surat) {
                 </div>
             <?php else: ?>
                 <!-- NON TUGAS HEADER -->
-                <table class="meta-table">
-                    <tr>
-                        <td width="10%">Nomor</td>
-                        <td width="2%">:</td>
-                        <td width="48%"><?php echo $surat['no_surat']; ?></td>
-                        <td width="40%" style="text-align: right;">
-                            <?php echo tgl_indo($surat['tgl_surat']); ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Perihal</td>
-                        <td>:</td>
-                        <td style="text-decoration: underline; font-weight: bold;">
-                            <?php echo $surat['perihal']; ?>
-                        </td>
-                        <td></td>
-                    </tr>
-                </table>
+                <?php if ($surat['jenis_surat'] == 'Keterangan Pindah'): ?>
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0; text-decoration: underline; font-weight: bold;">SURAT KETERANGAN PINDAH SEKOLAH</h3>
+                        <p style="margin: 0;">Nomor : <?php echo $surat['no_surat']; ?></p>
+                        
+                        <p style="margin-top: 20px; text-align: justify;">
+                            Yang bertanda tangan di bawah ini Kepala <?php echo $setting['nama_madrasah']; ?> Menerangkan:
+                        </p>
+                    </div>
+                <?php else: ?>
+                    <table class="meta-table">
+                        <tr>
+                            <td width="10%">Nomor</td>
+                            <td width="2%">:</td>
+                            <td width="48%"><?php echo $surat['no_surat']; ?></td>
+                            <td width="40%" style="text-align: right;">
+                                <?php echo tgl_indo($surat['tgl_surat']); ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Perihal</td>
+                            <td>:</td>
+                            <td style="text-decoration: underline; font-weight: bold;">
+                                <?php echo $surat['perihal']; ?>
+                            </td>
+                            <td></td>
+                        </tr>
+                    </table>
 
-                <div style="margin-left: 50px; margin-bottom: 20px;">
-                    Kepada<br>
-                    Yth. <?php echo $surat['penerima']; ?><br>
-                    <br>
-                    Di<br>
-                    - Tempat
-                </div>
+                    <div style="margin-left: 50px; margin-bottom: 20px;">
+                        Kepada<br>
+                        Yth. <?php echo $surat['penerima']; ?><br>
+                        <br>
+                        Di<br>
+                        - Tempat
+                    </div>
+                <?php endif; ?>
                 
                 <!-- CONTENT NON TUGAS -->
                 <div class="content">
-                    <?php if ($surat['jenis_surat'] != 'Pemberitahuan'): ?>
+                    <?php if ($surat['jenis_surat'] != 'Pemberitahuan' && $surat['jenis_surat'] != 'Keterangan Pindah'): ?>
                     <p style="font-style: italic; font-weight: bold;">Assalamu'alaikum Wr. Wb.</p>
                     <?php endif; ?>
                     
@@ -364,16 +375,62 @@ if (!$surat) {
                         <?php endif; ?>
                         
                     <?php elseif ($surat['jenis_surat'] == 'Keterangan Pindah'): ?>
-                        <p style="text-indent: 50px;">Yang bertanda tangan di bawah ini menerangkan bahwa:</p>
                         <table class="detail-table">
                             <tr>
-                                <td width="20%">Nama Siswa</td>
+                                <td width="30%">Nama</td>
                                 <td width="2%">:</td>
-                                <td><b><?php echo $surat['penerima']; ?></b></td>
+                                <td><b><?php echo strtoupper($surat['penerima']); ?></b></td>
+                            </tr>
+                            <tr>
+                                <td>NIS/NISN</td>
+                                <td>:</td>
+                                <td><?php echo isset($surat['nis_siswa']) ? $surat['nis_siswa'] : '-'; ?></td>
+                            </tr>
+                            <tr>
+                                <td>Tempat. Tgl Lahir</td>
+                                <td>:</td>
+                                <td>
+                                    <?php 
+                                    $ttl = [];
+                                    if (!empty($surat['tempat_lahir_siswa'])) $ttl[] = $surat['tempat_lahir_siswa'];
+                                    if (!empty($surat['tgl_lahir_siswa'])) $ttl[] = tgl_indo($surat['tgl_lahir_siswa']);
+                                    echo !empty($ttl) ? implode(', ', $ttl) : '-';
+                                    ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Jenis Kelamin</td>
+                                <td>:</td>
+                                <td><?php echo isset($surat['jenis_kelamin_siswa']) ? $surat['jenis_kelamin_siswa'] : '-'; ?></td>
+                            </tr>
+                            <tr>
+                                <td>Kelas</td>
+                                <td>:</td>
+                                <td><?php echo isset($surat['kelas_siswa']) ? $surat['kelas_siswa'] : '-'; ?></td>
                             </tr>
                         </table>
-                        <p style="text-indent: 50px;">Telah mengajukan permohonan pindah sekolah dengan alasan/tujuan:</p>
-                        <p style="text-indent: 50px;"><?php echo !empty($surat['keterangan']) ? nl2br($surat['keterangan']) : '-'; ?></p>
+                        
+                        <p>Sesuai dengan surat permohonan pindah sekolah oleh orang tua/wali murid :</p>
+                        <table class="detail-table">
+                            <tr>
+                                <td width="30%">Nama</td>
+                                <td width="2%">:</td>
+                                <td><?php echo isset($surat['nama_wali']) ? strtoupper($surat['nama_wali']) : '-'; ?></td>
+                            </tr>
+                            <tr>
+                                <td>Pekerjaan</td>
+                                <td>:</td>
+                                <td><?php echo isset($surat['pekerjaan_wali']) ? $surat['pekerjaan_wali'] : '-'; ?></td>
+                            </tr>
+                            <tr>
+                                <td>Alamat</td>
+                                <td>:</td>
+                                <td><?php echo isset($surat['alamat_wali']) ? $surat['alamat_wali'] : '-'; ?></td>
+                            </tr>
+                        </table>
+
+                        <p>Telah mengajukan pindah sekolah ke SD/MI <?php echo isset($surat['tujuan_pindah']) ? $surat['tujuan_pindah'] : '...................................................................................'; ?></p>
+                        <p style="text-indent: 50px;">Demikian surat ini kami buat dengan sebenarnya, agar dapat digunakan sebagaimana mestinya.</p>
 
                     <?php else: ?>
                         <p style="text-indent: 50px;">Sehubungan dengan <?php echo strtolower($surat['perihal']); ?>, kami sampaikan:</p>
@@ -382,7 +439,7 @@ if (!$surat) {
                         <?php endif; ?>
                     <?php endif; ?>
 
-                    <?php if ($surat['jenis_surat'] != 'Pemberitahuan'): ?>
+                    <?php if ($surat['jenis_surat'] != 'Pemberitahuan' && $surat['jenis_surat'] != 'Keterangan Pindah'): ?>
                     <p style="text-indent: 50px;">Demikian undangan kami sampaikan, atas kehadiran Bapak / Ibu <?php echo $surat['penerima']; ?> kami ucapkan terima kasih.</p>
                     
                     <p style="font-style: italic; font-weight: bold;">Wassalamu'alaikum Wr. Wb.</p>
@@ -406,6 +463,77 @@ if (!$surat) {
                 
                 <p style="text-decoration: underline; font-weight: bold;"><?php echo $setting['kepala_madrasah']; ?></p>
             </div>
+
+            <?php if ($surat['jenis_surat'] == 'Keterangan Pindah'): ?>
+                <div style="clear: both; margin-top: 30px; margin-bottom: 20px; page-break-inside: avoid; break-inside: avoid;">
+                    <p>Setelah anak tersebut diterima di sekolah tujuan, isian ini harap diisi dan dikirimkan kembali kepada kami.</p>
+                    <p style="text-align: center; border-bottom: 1px dashed black; line-height: 0.1em; margin: 20px 0;"><span style="background:#fff; padding:0 10px;">potong disini</span></p>
+                    <table class="detail-table" style="width: 100%;">
+                        <tr><td width="30%">NSM</td><td width="2%">:</td><td>............................................................</td></tr>
+                        <tr><td>Nama Sekolah</td><td>:</td><td>............................................................</td></tr>
+                        <tr><td>Status Sekolah</td><td>:</td><td>............................................................</td></tr>
+                        <tr><td>Alamat</td><td>:</td><td>............................................................</td></tr>
+                        <tr><td>Desa / Kelurahan</td><td>:</td><td>............................................................</td></tr>
+                        <tr><td>Kecamatan</td><td>:</td><td>............................................................</td></tr>
+                        <tr><td>Kabupaten / Kota</td><td>:</td><td>............................................................</td></tr>
+                        <tr><td>Propinsi</td><td>:</td><td>............................................................</td></tr>
+                    </table>
+                </div>
+                
+                <div style="page-break-before: always;"></div>
+                
+                <!-- PAGE 2: Surat Permohonan -->
+                <div style="text-align: right; margin-bottom: 20px;">
+                    <?php 
+                    echo tgl_indo($surat['tgl_surat']); 
+                    ?>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    Perihal : Permohonan Pindah Sekolah
+                </div>
+                <div style="margin-bottom: 20px;">
+                    Kepada :<br>
+                    <br>
+                    Yth. Kepala <?php echo $setting['nama_madrasah']; ?><br>
+                    di-<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Tempat
+                </div>
+                
+                <div class="content">
+                    <p>Dengan Hormat, Saya:</p>
+                    <table class="detail-table">
+                        <tr><td width="30%">Nama</td><td width="2%">:</td><td><?php echo isset($surat['nama_wali']) ? strtoupper($surat['nama_wali']) : '-'; ?></td></tr>
+                        <tr><td>Pekerjaan</td><td>:</td><td><?php echo isset($surat['pekerjaan_wali']) ? $surat['pekerjaan_wali'] : '-'; ?></td></tr>
+                        <tr><td>Alamat</td><td>:</td><td><?php echo isset($surat['alamat_wali']) ? $surat['alamat_wali'] : '-'; ?></td></tr>
+                    </table>
+                    
+                    <p style="text-align: justify;">Dengan ini Mengajukan permohonan pindah sekolah kehadapan bapak/ibu Kepala <?php echo $setting['nama_madrasah']; ?> untuk memberikan surat pindah sekolah anak kami :</p>
+                    
+                    <table class="detail-table">
+                        <tr><td width="30%">Nama</td><td width="2%">:</td><td><?php echo strtoupper($surat['penerima']); ?></td></tr>
+                        <tr><td>NIS/NISN</td><td>:</td><td><?php echo isset($surat['nis_siswa']) ? $surat['nis_siswa'] : '-'; ?></td></tr>
+                        <tr><td>Tempat, Tgl Lahir</td><td>:</td><td>
+                            <?php 
+                            $ttl = [];
+                            if (!empty($surat['tempat_lahir_siswa'])) $ttl[] = $surat['tempat_lahir_siswa'];
+                            if (!empty($surat['tgl_lahir_siswa'])) $ttl[] = tgl_indo($surat['tgl_lahir_siswa']);
+                            echo !empty($ttl) ? implode(', ', $ttl) : '-';
+                            ?>
+                        </td></tr>
+                        <tr><td>Jenis Kelamin</td><td>:</td><td><?php echo isset($surat['jenis_kelamin_siswa']) ? $surat['jenis_kelamin_siswa'] : '-'; ?></td></tr>
+                        <tr><td>Kelas</td><td>:</td><td><?php echo isset($surat['kelas_siswa']) ? $surat['kelas_siswa'] : '-'; ?></td></tr>
+                    </table>
+                    
+                    <p>Demikian surat permohonan ini kami buat dengan sebenarnya, kami ucapkan terima kasih</p>
+                </div>
+                
+                <div class="ttd">
+                    <p>Hormat Kami,</p>
+                    <p>Orang Tua / Wali</p>
+                    <br><br><br>
+                    <p style="text-decoration: underline; font-weight: bold;"><?php echo isset($surat['nama_wali']) ? strtoupper($surat['nama_wali']) : '..........................'; ?></p>
+                </div>
+            <?php endif; ?>
         </div>
         <?php endforeach; ?>
     </div>
