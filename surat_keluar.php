@@ -15,6 +15,9 @@ if (isset($_POST['add'])) {
     $acara_tempat = !empty($_POST['acara_tempat']) ? mysqli_real_escape_string($conn, $_POST['acara_tempat']) : NULL;
     $keperluan = !empty($_POST['keperluan']) ? mysqli_real_escape_string($conn, $_POST['keperluan']) : NULL;
     $keterangan = !empty($_POST['keterangan']) ? mysqli_real_escape_string($conn, $_POST['keterangan']) : NULL;
+    $pembuka_surat = !empty($_POST['pembuka_surat']) ? mysqli_real_escape_string($conn, $_POST['pembuka_surat']) : NULL;
+    $isi_surat = !empty($_POST['isi_surat']) ? mysqli_real_escape_string($conn, $_POST['isi_surat']) : NULL;
+    $penutup_surat = !empty($_POST['penutup_surat']) ? mysqli_real_escape_string($conn, $_POST['penutup_surat']) : NULL;
     
     // Generate Nomor Surat
     $tahun = date('Y', strtotime($tgl_surat));
@@ -34,13 +37,16 @@ if (isset($_POST['add'])) {
     
     $no_surat = sprintf('%03d', $next_no) . '/MI.SF/' . $romawi . '/' . $tahun;
 
-    $query = "INSERT INTO surat_keluar (tgl_surat, no_surat, jenis_surat, perihal, penerima, acara_hari_tanggal, acara_waktu, acara_tempat, keperluan, keterangan) 
+    $query = "INSERT INTO surat_keluar (tgl_surat, no_surat, jenis_surat, perihal, penerima, acara_hari_tanggal, acara_waktu, acara_tempat, keperluan, keterangan, pembuka_surat, isi_surat, penutup_surat) 
               VALUES ('$tgl_surat', '$no_surat', '$jenis_surat', '$perihal', '$penerima', " . 
               ($acara_hari_tanggal ? "'$acara_hari_tanggal'" : "NULL") . ", " . 
               ($acara_waktu ? "'$acara_waktu'" : "NULL") . ", " . 
               ($acara_tempat ? "'$acara_tempat'" : "NULL") . ", " . 
               ($keperluan ? "'$keperluan'" : "NULL") . ", " . 
-              ($keterangan ? "'$keterangan'" : "NULL") . ")";
+              ($keterangan ? "'$keterangan'" : "NULL") . ", " . 
+              ($pembuka_surat ? "'$pembuka_surat'" : "NULL") . ", " . 
+              ($isi_surat ? "'$isi_surat'" : "NULL") . ", " . 
+              ($penutup_surat ? "'$penutup_surat'" : "NULL") . ")";
     
     if (mysqli_query($conn, $query)) {
         log_activity($_SESSION['user_id'], 'create', 'Membuat surat keluar no: ' . $no_surat);
@@ -66,6 +72,9 @@ if (isset($_POST['edit'])) {
     $acara_tempat = !empty($_POST['acara_tempat']) ? mysqli_real_escape_string($conn, $_POST['acara_tempat']) : NULL;
     $keperluan = !empty($_POST['keperluan']) ? mysqli_real_escape_string($conn, $_POST['keperluan']) : NULL;
     $keterangan = !empty($_POST['keterangan']) ? mysqli_real_escape_string($conn, $_POST['keterangan']) : NULL;
+    $pembuka_surat = !empty($_POST['pembuka_surat']) ? mysqli_real_escape_string($conn, $_POST['pembuka_surat']) : NULL;
+    $isi_surat = !empty($_POST['isi_surat']) ? mysqli_real_escape_string($conn, $_POST['isi_surat']) : NULL;
+    $penutup_surat = !empty($_POST['penutup_surat']) ? mysqli_real_escape_string($conn, $_POST['penutup_surat']) : NULL;
 
     // Nomor surat tidak berubah saat edit untuk menjaga konsistensi urutan
     
@@ -77,7 +86,10 @@ if (isset($_POST['edit'])) {
               acara_waktu=" . ($acara_waktu ? "'$acara_waktu'" : "NULL") . ",
               acara_tempat=" . ($acara_tempat ? "'$acara_tempat'" : "NULL") . ",
               keperluan=" . ($keperluan ? "'$keperluan'" : "NULL") . ",
-              keterangan=" . ($keterangan ? "'$keterangan'" : "NULL") . "
+              keterangan=" . ($keterangan ? "'$keterangan'" : "NULL") . ",
+              pembuka_surat=" . ($pembuka_surat ? "'$pembuka_surat'" : "NULL") . ",
+              isi_surat=" . ($isi_surat ? "'$isi_surat'" : "NULL") . ",
+              penutup_surat=" . ($penutup_surat ? "'$penutup_surat'" : "NULL") . "
               WHERE id='$id'";
 
     if (mysqli_query($conn, $query)) {
@@ -336,10 +348,22 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                 </div>
 
                                                             <?php elseif ($row['jenis_surat'] == 'Pemberitahuan'): ?>
-                                                                <label>Keterangan</label>
+                                                                <label>Pembuka Surat</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <textarea name="keterangan" class="form-control no-resize"><?php echo $row['keterangan']; ?></textarea>
+                                                                        <textarea name="pembuka_surat" class="form-control no-resize" rows="4"><?php echo $row['pembuka_surat']; ?></textarea>
+                                                                    </div>
+                                                                </div>
+                                                                <label>Isi Surat</label>
+                                                                <div class="form-group">
+                                                                    <div class="form-line">
+                                                                        <textarea name="isi_surat" class="form-control ckeditor"><?php echo !empty($row['isi_surat']) ? $row['isi_surat'] : $row['keterangan']; ?></textarea>
+                                                                    </div>
+                                                                </div>
+                                                                <label>Penutup Surat</label>
+                                                                <div class="form-group">
+                                                                    <div class="form-line">
+                                                                        <textarea name="penutup_surat" class="form-control no-resize" rows="4"><?php echo $row['penutup_surat']; ?></textarea>
                                                                     </div>
                                                                 </div>
 
@@ -490,10 +514,26 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                             <input type="text" class="form-control" name="penerima" required>
                         </div>
                     </div>
-                    <label>Keterangan</label>
+                    <label>Pembuka Surat</label>
                     <div class="form-group">
                         <div class="form-line">
-                            <textarea name="keterangan" class="form-control no-resize"></textarea>
+                            <textarea name="pembuka_surat" class="form-control no-resize" rows="4">Assalamu'alaikum Wr. Wb.
+
+Dengan ini kami memberitahukan bahwa:</textarea>
+                        </div>
+                    </div>
+                    <label>Isi Surat</label>
+                    <div class="form-group">
+                        <div class="form-line">
+                            <textarea name="isi_surat" class="form-control ckeditor"></textarea>
+                        </div>
+                    </div>
+                    <label>Penutup Surat</label>
+                    <div class="form-group">
+                        <div class="form-line">
+                            <textarea name="penutup_surat" class="form-control no-resize" rows="4">Demikian pemberitahuan ini kami sampaikan. Atas perhatian dan kerjasamanya kami ucapkan terima kasih.
+
+Wassalamu'alaikum Wr. Wb.</textarea>
                         </div>
                     </div>
                 </div>
@@ -601,3 +641,15 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
 </div>
 
 <?php include 'template/footer.php'; ?>
+<script>
+    // Fix CKEditor in Bootstrap Modal
+    $.fn.modal.Constructor.prototype.enforceFocus = function() {
+        modal_this = this
+        $(document).on('focusin.modal', function(e) {
+            if (modal_this.$element[0] !== e.target && !modal_this.$element.has(e.target).length &&
+                !$(e.target).closest('.cke_dialog, .cke').length) {
+                modal_this.$element.trigger('focus')
+            }
+        })
+    };
+</script>

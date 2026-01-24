@@ -16,6 +16,9 @@
     <!-- SweetAlert Plugin Js -->
     <script src="assets/plugins/sweetalert/sweetalert.min.js"></script>
 
+    <!-- Ckeditor -->
+    <script src="assets/plugins/ckeditor/ckeditor.js"></script>
+
     <!-- Jquery CountTo Plugin Js -->
     <script src="assets/plugins/jquery-countto/jquery.countTo.js"></script>
 

@@ -208,6 +208,19 @@ if (!$surat) {
             .no-print { display: none; }
             body { margin: 0; }
         }
+
+        /* Styling for tables inside content (CKEditor) */
+        .content table:not(.detail-table) {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        .content table:not(.detail-table) th, 
+        .content table:not(.detail-table) td {
+            border: 1px solid black;
+            padding: 5px;
+            vertical-align: top;
+        }
     </style>
 </head>
 <body>
@@ -260,11 +273,13 @@ if (!$surat) {
                 Yth. <?php echo $surat['penerima']; ?><br>
                 <br>
                 Di<br>
-                -tempat
+                - Tempat
             </div>
 
             <div class="content">
+                <?php if ($surat['jenis_surat'] != 'Pemberitahuan'): ?>
                 <p style="font-style: italic; font-weight: bold;">Assalamu'alaikum Wr. Wb.</p>
+                <?php endif; ?>
                 
                 <?php if ($surat['jenis_surat'] == 'Undangan'): ?>
                     <p style="text-indent: 50px;">Di harap dengan hormat, atas kehadiran Bapak / Ibu <?php echo $surat['penerima']; ?> <?php echo $setting['nama_madrasah']; ?> untuk dapat menghadiri acara yang Insya Allah akan dilaksanakan pada :</p>
@@ -298,8 +313,25 @@ if (!$surat) {
                     </table>
                     
                 <?php elseif ($surat['jenis_surat'] == 'Pemberitahuan'): ?>
-                    <p style="text-indent: 50px;">Memberitahukan bahwa:</p>
-                    <p style="text-indent: 50px;"><?php echo !empty($surat['keterangan']) ? nl2br($surat['keterangan']) : $surat['perihal']; ?></p>
+                    <?php if (!empty($surat['pembuka_surat'])): ?>
+                        <p style="text-indent: 50px;"><?php echo nl2br($surat['pembuka_surat']); ?></p>
+                    <?php else: ?>
+                        <p style="text-indent: 50px;">Memberitahukan bahwa:</p>
+                    <?php endif; ?>
+
+                    <div style="margin-left: 50px;">
+                        <?php 
+                        if (!empty($surat['isi_surat'])) {
+                            echo $surat['isi_surat']; 
+                        } elseif (!empty($surat['keterangan'])) {
+                            echo nl2br($surat['keterangan']);
+                        }
+                        ?>
+                    </div>
+
+                    <?php if (!empty($surat['penutup_surat'])): ?>
+                        <p style="text-indent: 50px;"><?php echo nl2br($surat['penutup_surat']); ?></p>
+                    <?php endif; ?>
                     
                 <?php elseif ($surat['jenis_surat'] == 'Tugas'): ?>
                     <p style="text-indent: 50px;">Yang bertanda tangan di bawah ini Kepala Madrasah menugaskan kepada:</p>
@@ -338,9 +370,11 @@ if (!$surat) {
                     <?php endif; ?>
                 <?php endif; ?>
 
+                <?php if ($surat['jenis_surat'] != 'Pemberitahuan'): ?>
                 <p style="text-indent: 50px;">Demikian undangan kami sampaikan, atas kehadiran Bapak / Ibu <?php echo $surat['penerima']; ?> kami ucapkan terima kasih.</p>
                 
                 <p style="font-style: italic; font-weight: bold;">Wassalamu'alaikum Wr. Wb.</p>
+                <?php endif; ?>
             </div>
 
             <div class="ttd">

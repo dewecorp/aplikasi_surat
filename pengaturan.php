@@ -20,8 +20,9 @@ if (isset($_POST['update'])) {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $website = mysqli_real_escape_string($conn, $_POST['website']);
     $kepala_madrasah = mysqli_real_escape_string($conn, $_POST['kepala_madrasah']);
+    $nama_aplikasi = mysqli_real_escape_string($conn, $_POST['nama_aplikasi']);
 
-    $query_str = "UPDATE pengaturan SET nama_yayasan='$nama_yayasan', nama_madrasah='$nama_madrasah', alamat='$alamat', email='$email', website='$website', kepala_madrasah='$kepala_madrasah'";
+    $query_str = "UPDATE pengaturan SET nama_yayasan='$nama_yayasan', nama_madrasah='$nama_madrasah', alamat='$alamat', email='$email', website='$website', kepala_madrasah='$kepala_madrasah', nama_aplikasi='$nama_aplikasi'";
 
     // Upload Logo
     if ($_FILES['logo']['name']) {
@@ -146,6 +147,18 @@ if (isset($_POST['update'])) {
                                     <?php if ($data['stempel']): ?>
                                         <div class="m-t-10">
                                             <img src="uploads/<?php echo $data['stempel']; ?>" height="50" alt="Stempel">
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            
+                            <div class="row clearfix">
+                                <div class="col-sm-12">
+                                    <label>Background Login</label>
+                                    <input type="file" name="background_login" class="form-control">
+                                    <?php if (isset($data['background_login']) && $data['background_login']): ?>
+                                        <div class="m-t-10">
+                                            <img src="assets/images/<?php echo $data['background_login']; ?>" height="100" alt="Background Login">
                                         </div>
                                     <?php endif; ?>
                                 </div>

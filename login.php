@@ -2,6 +2,13 @@
 session_start();
 include 'config.php';
 
+// Get Settings
+$settings = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM pengaturan LIMIT 1"));
+$bg_login = isset($settings['background_login']) && !empty($settings['background_login']) ? 'assets/images/' . $settings['background_login'] : '';
+$logo = isset($settings['logo']) && !empty($settings['logo']) ? 'assets/images/' . $settings['logo'] : '';
+$nama_app = isset($settings['nama_aplikasi']) && !empty($settings['nama_aplikasi']) ? $settings['nama_aplikasi'] : 'SIMS';
+$nama_sekolah = isset($settings['nama_madrasah']) && !empty($settings['nama_madrasah']) ? $settings['nama_madrasah'] : 'MI Sultan Fattah Sukosono';
+
 if (isset($_POST['login'])) {
     $username = mysqli_real_escape_string($conn, $_POST['username']);
     $password = $_POST['password'];
@@ -58,21 +65,51 @@ if (isset($_POST['login'])) {
     <link href="assets/css/style.css" rel="stylesheet">
     <style>
         .login-page {
+            <?php if ($bg_login): ?>
+            background: url('<?php echo $bg_login; ?>') no-repeat center center fixed !important;
+            background-size: cover !important;
+            <?php else: ?>
             background: linear-gradient(45deg, #1e88e5, #4fc3f7) !important;
+            <?php endif; ?>
             max-width: 100% !important; /* Fix width issue if any */
+            overflow: hidden; /* Remove scroll */
+            height: 100vh;
         }
         .login-box {
-            width: 360px;
+            width: 100%;
+            max-width: 480px; /* Widened for long title */
             margin: 5% auto; /* Ensure centering */
+            padding: 0 15px;
+        }
+        .logo img {
+            display: block;
+            margin: 0 auto 10px;
+            max-width: 150px;
+            height: auto;
+        }
+        .logo a {
+            font-size: 26px !important; /* Adjusted font size */
+            display: block; /* Ensure it wraps if needed */
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+        .logo small {
+            display: block;
+            font-size: 18px !important; /* Increased font size */
+            font-weight: bold;
+            color: #fff;
         }
     </style>
 </head>
 
-<body class="login-page">
+<body class="login-page" style="<?php echo $bg_login ? "background: url('$bg_login') no-repeat center center fixed !important; background-size: cover !important;" : "background: linear-gradient(45deg, #1e88e5, #4fc3f7) !important;"; ?>">
     <div class="login-box">
         <div class="logo">
-            <a href="javascript:void(0);">SIMS <b>MI SF</b></a>
-            <small>MI Sultan Fattah Sukosono</small>
+            <?php if ($logo): ?>
+                <img src="<?php echo $logo; ?>" alt="Logo">
+            <?php endif; ?>
+            <a href="javascript:void(0);"><?php echo $nama_app; ?></a>
+            <small><?php echo $nama_sekolah; ?></small>
         </div>
         <div class="card">
             <div class="body">
@@ -100,10 +137,8 @@ if (isset($_POST['login'])) {
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-xs-8 p-t-5">
-                        </div>
-                        <div class="col-xs-4">
-                            <button class="btn btn-block bg-blue waves-effect" type="submit" name="login">SIGN IN</button>
+                        <div class="col-xs-6 col-xs-offset-3">
+                            <button class="btn btn-block bg-blue waves-effect" type="submit" name="login">MASUK</button>
                         </div>
                     </div>
                 </form>
