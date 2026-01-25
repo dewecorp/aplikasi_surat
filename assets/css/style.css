@@ -8397,7 +8397,37 @@ html.ie11 .bs-searchbox .form-control {
     background: #888; 
     border-radius: 3px;
 }
-.activity-scroll::-webkit-scrollbar-thumb:hover {
-    background: #555; 
+.activity-scroll::-webkit-scrollbar-thumb:hover { 
+    background: #555;
+}
+
+/* Mobile Fix for Header Dropdown */
+@media (max-width: 767px) {
+    .card .header .header-dropdown {
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        margin-top: 15px;
+        margin-right: 0 !important;
+    }
+    
+    .card .header .header-dropdown li {
+        display: block !important;
+        margin-bottom: 5px;
+    }
+    
+    .card .header .header-dropdown li.dropdown {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .card .header .header-dropdown li.dropdown button,
+    .card .header .header-dropdown li.dropdown a {
+        display: block;
+        width: 100%;
+        margin-right: 0 !important;
+        margin-bottom: 5px;
+    }
 }
 

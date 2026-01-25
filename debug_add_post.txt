@@ -1,0 +1,13 @@
+Array
+(
+    [jenis_surat] => Undangan
+    [tgl_surat] => 2026-01-25
+    [perihal] => Undangan Rapat TKA
+    [penerima] => Panitia TKA
+    [acara_hari_tanggal] => 2026-01-29
+    [acara_waktu] => 20:00
+    [acara_tempat] => Kantor MI
+    [keperluan] => Rapat Panitia TKA
+    [keterangan] => Mohon hadir tepat waktu
+    [add] => 
+)
