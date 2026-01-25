@@ -66,7 +66,7 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
         @page {
             size: 21.5cm 33cm; /* F4 Portrait */
             margin: 1cm;
-            margin-top: 0.3cm;
+            margin-top: <?php echo ($surat['jenis_surat'] == 'Keterangan Pindah' || $surat['jenis_surat'] == 'Tugas') ? '1.5cm' : '0.3cm'; ?>;
         }
         .letter-container {
             page-break-inside: avoid;
@@ -512,7 +512,7 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
                             </tr>
                         </table>
 
-                        <p>Telah mengajukan pindah sekolah ke : SD/MI <?php echo isset($surat['tujuan_pindah']) ? $surat['tujuan_pindah'] : '...................................................................................'; ?></p>
+                        <p>Telah mengajukan pindah sekolah ke SD/MI : <?php echo isset($surat['tujuan_pindah']) ? $surat['tujuan_pindah'] : '...................................................................................'; ?></p>
                         <div style="page-break-inside: avoid;">
                             <p style="text-indent: 50px;">Demikian surat ini kami buat dengan sebenarnya, agar dapat digunakan sebagaimana mestinya.</p>
                             <?php echo $principal_ttd; ?>
