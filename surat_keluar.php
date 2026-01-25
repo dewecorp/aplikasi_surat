@@ -452,9 +452,21 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                             <td><?php echo $row['perihal']; ?></td>
                                             <td><?php echo $row['penerima']; ?></td>
                                             <td>
-                                                <a href="print_surat_keluar.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-primary btn-xs waves-effect">
-                                                    <i class="material-icons">print</i> Lihat/Unduh
-                                                </a>
+                                                <?php if (in_array($row['jenis_surat'], ['Undangan', 'Pemberitahuan'])): ?>
+                                                    <div class="btn-group">
+                                                        <button type="button" class="btn btn-primary btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="material-icons">print</i> Cetak <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li><a href="print_surat_keluar.php?id=<?php echo $row['id']; ?>&mode=portrait" target="_blank">1 Halaman 1 Surat (Portrait)</a></li>
+                                                            <li><a href="print_surat_keluar.php?id=<?php echo $row['id']; ?>&mode=landscape" target="_blank">1 Halaman 2 Surat (Landscape)</a></li>
+                                                        </ul>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <a href="print_surat_keluar.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-primary btn-xs waves-effect">
+                                                        <i class="material-icons">print</i> Lihat/Unduh
+                                                    </a>
+                                                <?php endif; ?>
                                             </td>
                                             <td>
                                                 <button type="button" class="btn btn-warning btn-circle waves-effect waves-circle waves-float" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>">

@@ -15,22 +15,73 @@ $setting = mysqli_fetch_assoc($q_set);
 if (!$surat) {
     exit("Surat tidak ditemukan");
 }
+
+$mode = isset($_GET['mode']) ? $_GET['mode'] : 'portrait';
+// Only allow landscape for Undangan and Pemberitahuan
+if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pemberitahuan'])) {
+    $mode = 'portrait';
+}
 ?>
 <!DOCTYPE html>
 <html>
 <head>
     <title>Cetak Surat - <?php echo $surat['no_surat']; ?></title>
     <style>
+        <?php if ($mode == 'landscape'): ?>
         @page {
-            size: A4;
-            margin: 2cm;
+            size: 33cm 21.5cm; /* F4 Landscape */
+            margin: 0.5cm;
+            margin-left: 1.5cm;
+            margin-top: 0.3cm;
+            margin-bottom: 0;
         }
+        .letter-container {
+            width: 44%;
+            float: left;
+            margin-right: 12%;
+            font-size: 12pt;
+            page-break-inside: avoid;
+            /* border: 1px dashed #ccc; */
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .letter-container:nth-of-type(2n) {
+            margin-right: 0;
+        }
+        /* Adjust scaling for landscape */
+        .kop-surat h2 { font-size: 16pt; }
+        .kop-surat h3 { font-size: 12pt; }
+        .logo { width: 60px; }
+        .kop-surat { 
+            padding-left: 70px; 
+            min-height: 70px; 
+            margin-bottom: 5px !important;
+            padding-bottom: 5px !important;
+        }
+        .meta-table { margin-bottom: 5px !important; }
+        .content { line-height: 1.3 !important; }
+        .ttd { margin-top: 5px !important; }
+        .detail-table { margin-bottom: 5px !important; }
+        <?php else: ?>
+        @page {
+            size: 21.5cm 33cm; /* F4 Portrait */
+            margin: 1cm;
+            margin-top: 0.3cm;
+        }
+        .letter-container {
+            page-break-inside: avoid;
+            break-inside: avoid;
+            position: relative;
+        }
+        <?php endif; ?>
+        
         body {
             font-family: "Times New Roman", Times, serif;
             font-size: 12pt;
             margin: 0;
             padding: 0;
             background: white;
+            overflow: hidden; /* Prevent extra blank page */
         }
         
         .letter-container {
@@ -56,7 +107,7 @@ if (!$surat) {
             height: auto;
         }
         .kop-surat h3 { 
-            font-size: 14pt; 
+            font-size: 12pt; 
             font-weight: normal; 
             margin: 0;
             text-transform: uppercase;
@@ -66,7 +117,7 @@ if (!$surat) {
             font-size: 11pt;
         }
         .kop-surat h2 { 
-            font-size: 20pt; 
+            font-size: 14pt; 
             font-weight: bold; 
             margin: 5px 0;
             font-family: serif; 
@@ -98,34 +149,37 @@ if (!$surat) {
         }
         .detail-table td {
             vertical-align: top;
-            padding: 2px 0;
+            padding: 0;
+            line-height: 1.0;
         }
         
         .ttd {
             float: right;
             text-align: center;
             width: 300px;
-            margin-top: 20px;
+            margin-top: 10px;
             position: relative;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
         .ttd img.stempel {
             position: absolute;
             left: 20px;
-            top: 20px;
+            top: -20px;
             width: 170px;
             opacity: 0.8;
             transform: rotate(-5deg);
             z-index: 2;
         }
         .ttd img.ttd-img {
-            height: 100px;
-            margin-top: 5px;
-            margin-bottom: 0px;
+            height: 130px;
+            margin-top: -25px;
+            margin-bottom: -25px;
             position: relative;
             z-index: 1;
         }
         .ttd p {
-            margin: 5px 0;
+            margin: 2px 0;
         }
         
         @media print {
@@ -169,6 +223,27 @@ if (!$surat) {
             $penerima_list = ['ALL_RECIPIENTS'];
         }
         
+        
+        // Capture Principal TTD for reuse
+        ob_start();
+        ?>
+        <div class="ttd">
+            <p>Kepala Madrasah,</p>
+            <?php if (!empty($setting['stempel']) && file_exists('uploads/' . $setting['stempel'])): ?>
+                <img src="uploads/<?php echo $setting['stempel']; ?>" class="stempel">
+            <?php endif; ?>
+            
+            <?php if (!empty($setting['ttd']) && file_exists('uploads/' . $setting['ttd'])): ?>
+                <img src="uploads/<?php echo $setting['ttd']; ?>" class="ttd-img">
+            <?php else: ?>
+                <br><br><br>
+            <?php endif; ?>
+            
+            <p style="text-decoration: underline; font-weight: bold;"><?php echo $setting['kepala_madrasah']; ?></p>
+        </div>
+        <?php 
+        $principal_ttd = ob_get_clean();
+
         foreach ($penerima_list as $idx => $p_loop_item):
             // Use original string for non-Tugas to preserve formatting if any
             if ($surat['jenis_surat'] != 'Tugas') {
@@ -176,8 +251,10 @@ if (!$surat) {
             } else {
                 $p_nama = $surat['penerima'];
             }
+            
+            if ($mode == 'landscape') ob_start();
         ?>
-        <div class="letter-container" <?php if ($idx < count($penerima_list) - 1) echo 'style="page-break-after: always;"'; ?>>
+        <div class="letter-container" <?php if ($mode != 'landscape' && $idx < count($penerima_list) - 1) echo 'style="page-break-after: always;"'; ?>>
             <div class="kop-surat">
                 <!-- Logo -->
                 <?php
@@ -220,7 +297,7 @@ if (!$surat) {
                         <tr>
                             <td>Unit Kerja</td>
                             <td>:</td>
-                            <td><?php echo $setting['nama_madrasah']; ?></td>
+                            <td><?php echo ucwords(strtolower($setting['nama_madrasah'])); ?></td>
                         </tr>
                     </table>
 
@@ -274,7 +351,10 @@ if (!$surat) {
                         ?>.
                     </p>
                     
-                    <p style="text-indent: 50px; text-align: justify;">Demikian surat penugasan ini dikeluarkan untuk dapat dilaksanakan dengan baik dan penuh rasa tanggung jawab</p>
+                    <div style="page-break-inside: avoid;">
+                        <p style="text-indent: 50px; text-align: justify;">Demikian surat penugasan ini dikeluarkan untuk dapat dilaksanakan dengan baik dan penuh rasa tanggung jawab</p>
+                        <?php echo $principal_ttd; ?>
+                    </div>
                 </div>
             <?php else: ?>
                 <!-- NON TUGAS HEADER -->
@@ -284,7 +364,7 @@ if (!$surat) {
                         <p style="margin: 0;">Nomor : <?php echo $surat['no_surat']; ?></p>
                         
                         <p style="margin-top: 20px; text-align: justify;">
-                            Yang bertanda tangan di bawah ini Kepala <?php echo $setting['nama_madrasah']; ?> Menerangkan:
+                            Yang bertanda tangan di bawah ini Kepala <?php echo ucwords(strtolower($setting['nama_madrasah'])); ?> Menerangkan:
                         </p>
                     </div>
                 <?php else: ?>
@@ -300,7 +380,7 @@ if (!$surat) {
                         <tr>
                             <td>Perihal</td>
                             <td>:</td>
-                            <td style="text-decoration: underline; font-weight: bold;">
+                            <td style="font-weight: bold;">
                                 <?php echo $surat['perihal']; ?>
                             </td>
                             <td></td>
@@ -370,9 +450,12 @@ if (!$surat) {
                             ?>
                         </div>
 
-                        <?php if (!empty($surat['penutup_surat'])): ?>
-                            <p style="text-indent: 50px;"><?php echo nl2br($surat['penutup_surat']); ?></p>
-                        <?php endif; ?>
+                        <div style="page-break-inside: avoid;">
+                            <?php if (!empty($surat['penutup_surat'])): ?>
+                                <p style="text-indent: 50px;"><?php echo nl2br($surat['penutup_surat']); ?></p>
+                            <?php endif; ?>
+                            <?php echo $principal_ttd; ?>
+                        </div>
                         
                     <?php elseif ($surat['jenis_surat'] == 'Keterangan Pindah'): ?>
                         <table class="detail-table">
@@ -429,8 +512,11 @@ if (!$surat) {
                             </tr>
                         </table>
 
-                        <p>Telah mengajukan pindah sekolah ke SD/MI <?php echo isset($surat['tujuan_pindah']) ? $surat['tujuan_pindah'] : '...................................................................................'; ?></p>
-                        <p style="text-indent: 50px;">Demikian surat ini kami buat dengan sebenarnya, agar dapat digunakan sebagaimana mestinya.</p>
+                        <p>Telah mengajukan pindah sekolah ke : SD/MI <?php echo isset($surat['tujuan_pindah']) ? $surat['tujuan_pindah'] : '...................................................................................'; ?></p>
+                        <div style="page-break-inside: avoid;">
+                            <p style="text-indent: 50px;">Demikian surat ini kami buat dengan sebenarnya, agar dapat digunakan sebagaimana mestinya.</p>
+                            <?php echo $principal_ttd; ?>
+                        </div>
 
                     <?php else: ?>
                         <p style="text-indent: 50px;">Sehubungan dengan <?php echo strtolower($surat['perihal']); ?>, kami sampaikan:</p>
@@ -440,32 +526,28 @@ if (!$surat) {
                     <?php endif; ?>
 
                     <?php if ($surat['jenis_surat'] != 'Pemberitahuan' && $surat['jenis_surat'] != 'Keterangan Pindah'): ?>
-                    <p style="text-indent: 50px;">Demikian undangan kami sampaikan, atas kehadiran Bapak / Ibu <?php echo $surat['penerima']; ?> kami ucapkan terima kasih.</p>
-                    
-                    <p style="font-style: italic; font-weight: bold;">Wassalamu'alaikum Wr. Wb.</p>
+                    <div style="page-break-inside: avoid;">
+                        <p style="text-indent: 50px;">Demikian undangan kami sampaikan, atas kehadiran Bapak / Ibu <?php echo $surat['penerima']; ?> kami ucapkan terima kasih.</p>
+                        
+                        <p style="font-style: italic; font-weight: bold;">Wassalamu'alaikum Wr. Wb.</p>
+                        <?php echo $principal_ttd; ?>
+                    </div>
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
 
-            <!-- TTD -->
-            <div class="ttd">
-                <p><?php echo tgl_indo($surat['tgl_surat']); ?></p>
-                <p>Kepala Madrasah,</p>
-                <?php if (!empty($setting['stempel']) && file_exists('uploads/' . $setting['stempel'])): ?>
-                    <img src="uploads/<?php echo $setting['stempel']; ?>" class="stempel">
-                <?php endif; ?>
-                
-                <?php if (!empty($setting['ttd']) && file_exists('uploads/' . $setting['ttd'])): ?>
-                    <img src="uploads/<?php echo $setting['ttd']; ?>" class="ttd-img">
-                <?php else: ?>
-                    <br><br><br>
-                <?php endif; ?>
-                
-                <p style="text-decoration: underline; font-weight: bold;"><?php echo $setting['kepala_madrasah']; ?></p>
-            </div>
+            <!-- TTD REMOVED (Moved inside sections) -->
 
             <?php if ($surat['jenis_surat'] == 'Keterangan Pindah'): ?>
-                <div style="clear: both; margin-top: 30px; margin-bottom: 20px; page-break-inside: avoid; break-inside: avoid;">
+                <div style="clear: both;"></div>
+                <div style="height: 100px;"></div>
+                
+                <div style="margin-bottom: 20px; position: relative;">
+                    <div style="border-top: 1px dashed black;"></div>
+                    <div style="position: absolute; top: -12px; left: 0; background-color: #fff; padding-right: 10px; font-style: italic;">potong di sini....</div>
+                </div>
+
+                <div style="margin-top: 20px; margin-bottom: 20px; page-break-inside: avoid; break-inside: avoid;">
                     <p>Setelah anak tersebut diterima di sekolah tujuan, isian ini harap diisi dan dikirimkan kembali kepada kami.</p>
                     <table class="detail-table" style="width: 100%;">
                         <tr><td width="30%">NSM</td><td width="2%">:</td><td>............................................................</td></tr>
@@ -533,8 +615,16 @@ if (!$surat) {
                     <p style="text-decoration: underline; font-weight: bold;"><?php echo isset($surat['nama_wali']) ? strtoupper($surat['nama_wali']) : '..........................'; ?></p>
                 </div>
             <?php endif; ?>
+            <div style="clear: both;"></div>
         </div>
-        <?php endforeach; ?>
+        <?php 
+            if ($mode == 'landscape') {
+                $content = ob_get_clean();
+                echo $content;
+                echo $content;
+            }
+        endforeach; 
+        ?>
     </div>
 </body>
 </html>
