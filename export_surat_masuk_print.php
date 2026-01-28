@@ -1,14 +1,19 @@
 <?php
+session_start();
 include 'config.php';
+
+if (!isset($_SESSION['user_id'])) {
+    die("Unauthorized Access");
+}
 
 // Filter Logic
 $where = "WHERE 1=1";
 if (isset($_GET['filter_tahun']) && !empty($_GET['filter_tahun'])) {
-    $ft = $_GET['filter_tahun'];
+    $ft = mysqli_real_escape_string($conn, $_GET['filter_tahun']);
     $where .= " AND YEAR(tgl_terima) = '$ft'";
 }
 if (isset($_GET['filter_bulan']) && !empty($_GET['filter_bulan'])) {
-    $fb = $_GET['filter_bulan'];
+    $fb = mysqli_real_escape_string($conn, $_GET['filter_bulan']);
     $where .= " AND MONTH(tgl_terima) = '$fb'";
 }
 if (isset($_GET['filter_pengirim']) && !empty($_GET['filter_pengirim'])) {

@@ -2,14 +2,22 @@
 session_start();
 include 'config.php';
 
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
 // Handle Add
 if (isset($_POST['add'])) {
+    if (!verify_csrf_token($_POST['csrf_token'])) {
+        die("CSRF Token Verification Failed");
+    }
     $nuptk = mysqli_real_escape_string($conn, $_POST['nuptk']);
     $nama = mysqli_real_escape_string($conn, $_POST['nama']);
-    $jk = $_POST['jk'];
+    $jk = mysqli_real_escape_string($conn, $_POST['jk']);
     $tempat_lahir = mysqli_real_escape_string($conn, $_POST['tempat_lahir']);
-    $tgl_lahir = !empty($_POST['tgl_lahir']) ? "'" . $_POST['tgl_lahir'] . "'" : "NULL";
-    $status = $_POST['status'];
+    $tgl_lahir = !empty($_POST['tgl_lahir']) ? "'" . mysqli_real_escape_string($conn, $_POST['tgl_lahir']) . "'" : "NULL";
+    $status = mysqli_real_escape_string($conn, $_POST['status']);
 
     $query = "INSERT INTO guru (nuptk, nama, jk, tempat_lahir, tgl_lahir, status) VALUES ('$nuptk', '$nama', '$jk', '$tempat_lahir', $tgl_lahir, '$status')";
     if (mysqli_query($conn, $query)) {
@@ -25,13 +33,16 @@ if (isset($_POST['add'])) {
 
 // Handle Edit
 if (isset($_POST['edit'])) {
+    if (!verify_csrf_token($_POST['csrf_token'])) {
+        die("CSRF Token Verification Failed");
+    }
     $id = $_POST['id'];
     $nuptk = mysqli_real_escape_string($conn, $_POST['nuptk']);
     $nama = mysqli_real_escape_string($conn, $_POST['nama']);
-    $jk = isset($_POST['jk']) ? $_POST['jk'] : '';
+    $jk = isset($_POST['jk']) ? mysqli_real_escape_string($conn, $_POST['jk']) : '';
     $tempat_lahir = mysqli_real_escape_string($conn, $_POST['tempat_lahir']);
-    $tgl_lahir = !empty($_POST['tgl_lahir']) ? "'" . $_POST['tgl_lahir'] . "'" : "NULL";
-    $status = isset($_POST['status']) ? $_POST['status'] : '';
+    $tgl_lahir = !empty($_POST['tgl_lahir']) ? "'" . mysqli_real_escape_string($conn, $_POST['tgl_lahir']) . "'" : "NULL";
+    $status = isset($_POST['status']) ? mysqli_real_escape_string($conn, $_POST['status']) : '';
     
     if (empty($jk) || empty($status)) {
         $_SESSION['error'] = "Gagal mengubah data: Jenis Kelamin dan Status harus dipilih";
@@ -75,6 +86,9 @@ if (isset($_GET['delete'])) {
 
 // Handle Multiple Delete
 if (isset($_POST['hapus_multiple'])) {
+    if (!verify_csrf_token($_POST['csrf_token'])) {
+        die("CSRF Token Verification Failed");
+    }
     if (!empty($_POST['pilih'])) {
         $ids = $_POST['pilih'];
         $count = count($ids);
@@ -203,7 +217,7 @@ include 'template/sidebar.php';
                                                 <?php elseif ($row['status'] == 'Guru Mapel'): ?>
                                                     <span class="label bg-orange">Guru Mapel</span>
                                                 <?php else: ?>
-                                                    <?php echo $row['status']; ?>
+                                                    <?php echo htmlspecialchars($row['status']); ?>
                                                 <?php endif; ?>
                                             </td>
                                             <td>
@@ -298,6 +312,7 @@ include 'template/sidebar.php';
             </div>
             <form method="POST">
                 <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                     <label>NUPTK</label>
                     <div class="form-group">
                         <div class="form-line">
@@ -486,6 +501,7 @@ include 'template/sidebar.php';
 
             var formData = new FormData();
             formData.append('file', selectedFile);
+            formData.append('csrf_token', document.getElementById('csrf_token_import').value);
 
             var xhr = new XMLHttpRequest();
             xhr.open('POST', 'import_guru.php', true);

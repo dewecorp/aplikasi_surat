@@ -1,6 +1,20 @@
 <?php
 session_start();
 include 'config.php';
+
+// Security Checks
+if (!isset($_SESSION['user_id'])) {
+    header('Content-Type: application/json');
+    echo json_encode(['status' => 'error', 'message' => 'Unauthorized Access']);
+    exit;
+}
+
+if (!isset($_POST['csrf_token']) || !verify_csrf_token($_POST['csrf_token'])) {
+    header('Content-Type: application/json');
+    echo json_encode(['status' => 'error', 'message' => 'CSRF Token Verification Failed']);
+    exit;
+}
+
 require 'vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\IOFactory;

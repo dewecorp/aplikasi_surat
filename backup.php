@@ -12,6 +12,17 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+// Cek Role, hanya admin yang boleh akses
+if (strtolower(trim($_SESSION['role'])) != 'admin') {
+    if (isset($_POST['is_ajax'])) {
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'message' => 'Unauthorized Access']);
+        exit;
+    }
+    echo "<script>window.location='index.php';</script>";
+    exit();
+}
+
 // Function to format file size
 function formatSizeUnits($bytes) {
     if ($bytes >= 1073741824) {
@@ -32,6 +43,14 @@ function formatSizeUnits($bytes) {
 
 // Handle Backup
 if (isset($_POST['backup_now'])) {
+    if (!verify_csrf_token($_POST['csrf_token'])) {
+        if (isset($_POST['is_ajax'])) {
+            echo json_encode(['status' => 'error', 'message' => 'CSRF Verification Failed']); exit;
+        } else {
+            die("CSRF Verification Failed");
+        }
+    }
+
     $tables = array();
     $result = mysqli_query($conn, "SHOW TABLES");
     while ($row = mysqli_fetch_row($result)) {
@@ -97,7 +116,11 @@ if (isset($_POST['backup_now'])) {
 
 // Handle Delete
 if (isset($_GET['delete'])) {
-    $id = $_GET['delete'];
+    if (!verify_csrf_token($_GET['csrf_token'] ?? '')) {
+        die("CSRF Verification Failed");
+    }
+
+    $id = mysqli_real_escape_string($conn, $_GET['delete']);
     $q = mysqli_query($conn, "SELECT file_name FROM backup WHERE id='$id'");
     $row = mysqli_fetch_assoc($q);
     $file = 'backups/' . $row['file_name'];
@@ -172,7 +195,11 @@ if (isset($_POST['restore_upload'])) {
 
 // Handle Download
 if (isset($_GET['download'])) {
-    $id = $_GET['download'];
+    if (!verify_csrf_token($_GET['csrf_token'] ?? '')) {
+        die("CSRF Verification Failed");
+    }
+
+    $id = mysqli_real_escape_string($conn, $_GET['download']);
     $q = mysqli_query($conn, "SELECT file_name FROM backup WHERE id='$id'");
     $row = mysqli_fetch_assoc($q);
     $file = 'backups/' . $row['file_name'];
@@ -209,6 +236,7 @@ include 'template/sidebar.php';
                     <div class="body">
                         <p class="m-b-20">Klik tombol di bawah ini untuk membuat cadangan (backup) seluruh database aplikasi. File backup akan tersimpan di server dan dapat diunduh.</p>
                         <form method="POST" id="backupForm">
+                            <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                             <button type="submit" name="backup_now" class="btn btn-primary btn-lg btn-block waves-effect">
                                 <i class="material-icons">backup</i> BUAT BACKUP BARU
                             </button>
@@ -298,6 +326,7 @@ include 'template/sidebar.php';
                                                     </div>
                                                     <div class="modal-footer">
                                                         <form method="POST">
+                                                            <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                                                             <input type="hidden" name="backup_id" value="<?php echo $row['id']; ?>">
                                                             <button type="submit" name="restore" class="btn btn-warning waves-effect">YA, RESTORE</button>
                                                             <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">BATAL</button>

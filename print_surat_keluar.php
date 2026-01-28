@@ -1,11 +1,16 @@
 <?php
+session_start();
 include 'config.php';
+
+if (!isset($_SESSION['user_id'])) {
+    die("Unauthorized Access");
+}
 
 if (!isset($_GET['id'])) {
     exit("ID Surat tidak ditemukan");
 }
 
-$id = $_GET['id'];
+$id = mysqli_real_escape_string($conn, $_GET['id']);
 $query = mysqli_query($conn, "SELECT * FROM surat_keluar WHERE id='$id'");
 $surat = mysqli_fetch_assoc($query);
 

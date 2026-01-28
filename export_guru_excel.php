@@ -1,5 +1,10 @@
 <?php
+session_start();
 include 'config.php';
+
+if (!isset($_SESSION['user_id'])) {
+    die("Unauthorized Access");
+}
 
 // Check for sorting or filtering if added later (currently all data)
 $query = mysqli_query($conn, "SELECT * FROM guru ORDER BY nama ASC");

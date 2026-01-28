@@ -8,12 +8,12 @@ $where_masuk = "WHERE 1=1";
 $where_keluar = "WHERE 1=1";
 
 if (isset($_GET['filter_tahun']) && !empty($_GET['filter_tahun'])) {
-    $ft = $_GET['filter_tahun'];
+    $ft = mysqli_real_escape_string($conn, $_GET['filter_tahun']);
     $where_masuk .= " AND YEAR(tgl_surat) = '$ft'";
     $where_keluar .= " AND YEAR(tgl_surat) = '$ft'";
 }
 if (isset($_GET['filter_bulan']) && !empty($_GET['filter_bulan'])) {
-    $fb = $_GET['filter_bulan'];
+    $fb = mysqli_real_escape_string($conn, $_GET['filter_bulan']);
     $where_masuk .= " AND MONTH(tgl_surat) = '$fb'";
     $where_keluar .= " AND MONTH(tgl_surat) = '$fb'";
 }

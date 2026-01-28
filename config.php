@@ -1,8 +1,8 @@
 <?php
-$host = 'localhost';
-$user = 'root';
-$pass = '';
-$db   = 'sims';
+$host = getenv('DB_HOST') ?: 'localhost';
+$user = getenv('DB_USER') ?: 'root';
+$pass = getenv('DB_PASS') ?: '';
+$db   = getenv('DB_NAME') ?: 'sims';
 
 $conn = mysqli_connect($host, $user, $pass, $db);
 
@@ -100,46 +100,62 @@ function time_ago($timestamp) {
     $months       = round($seconds / 2629440);
     $years        = round($seconds / 31553280);
 
-    if($seconds <= 60) {
+    if ($seconds <= 60) {
         return "Baru saja";
-    } else if($minutes <= 60) {
-        if($minutes==1){
-            return "1 menit yang lalu";
+    } else if ($minutes <= 60) {
+        if ($minutes == 1) {
+            return "satu menit yang lalu";
         } else {
             return "$minutes menit yang lalu";
         }
-    } else if($hours <= 24) {
-        if($hours==1){
-            return "1 jam yang lalu";
+    } else if ($hours <= 24) {
+        if ($hours == 1) {
+            return "satu jam yang lalu";
         } else {
             return "$hours jam yang lalu";
         }
-    } else if($days <= 7) {
-        if($days==1){
+    } else if ($days <= 7) {
+        if ($days == 1) {
             return "kemarin";
         } else {
             return "$days hari yang lalu";
         }
-    } else if($weeks <= 4.3) {
-        if($weeks==1){
-            return "1 minggu yang lalu";
+    } else if ($weeks <= 4.3) {
+        if ($weeks == 1) {
+            return "satu minggu yang lalu";
         } else {
             return "$weeks minggu yang lalu";
         }
-    } else if($months <= 12) {
-        if($months==1){
-            return "1 bulan yang lalu";
+    } else if ($months <= 12) {
+        if ($months == 1) {
+            return "satu bulan yang lalu";
         } else {
             return "$months bulan yang lalu";
         }
     } else {
-        if($years==1){
-            return "1 tahun yang lalu";
+        if ($years == 1) {
+            return "satu tahun yang lalu";
         } else {
             return "$years tahun yang lalu";
         }
     }
 }
+
+// CSRF Protection Functions
+function generate_csrf_token() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function verify_csrf_token($token) {
+    if (isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token)) {
+        return true;
+    }
+    return false;
+}
+
 
 // Auto delete logs older than 24 hours
 mysqli_query($conn, "DELETE FROM activity_log WHERE timestamp < NOW() - INTERVAL 1 DAY");

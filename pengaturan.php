@@ -19,6 +19,10 @@ $data = mysqli_fetch_assoc($check);
 
 // Handle Update
 if (isset($_POST['update'])) {
+    if (!verify_csrf_token($_POST['csrf_token'])) {
+        die("CSRF Token Verification Failed");
+    }
+
     $id = $_POST['id'];
     $nama_yayasan = mysqli_real_escape_string($conn, $_POST['nama_yayasan']);
     $nama_madrasah = mysqli_real_escape_string($conn, $_POST['nama_madrasah']);
@@ -30,33 +34,37 @@ if (isset($_POST['update'])) {
 
     $query_str = "UPDATE pengaturan SET nama_yayasan='$nama_yayasan', nama_madrasah='$nama_madrasah', alamat='$alamat', email='$email', website='$website', kepala_madrasah='$kepala_madrasah', nama_aplikasi='$nama_aplikasi'";
 
-    // Upload Logo
-    if ($_FILES['logo']['name']) {
-        $logo = time() . '_logo_' . basename($_FILES["logo"]["name"]);
-        move_uploaded_file($_FILES["logo"]["tmp_name"], "assets/images/" . $logo);
-        $query_str .= ", logo='$logo'";
+    $allowed_ext = ['jpg', 'jpeg', 'png', 'gif'];
+
+    // Function to handle upload securely
+    function process_upload_pengaturan($input_name, $prefix, $target_dir, $allowed_ext) {
+        if (!empty($_FILES[$input_name]['name'])) {
+            $ext = strtolower(pathinfo($_FILES[$input_name]['name'], PATHINFO_EXTENSION));
+            if (in_array($ext, $allowed_ext)) {
+                $filename = uniqid() . '_' . $prefix . '.' . $ext;
+                if (move_uploaded_file($_FILES[$input_name]['tmp_name'], $target_dir . $filename)) {
+                    return $filename;
+                }
+            }
+        }
+        return false;
     }
+
+    // Upload Logo
+    $logo = process_upload_pengaturan('logo', 'logo', 'assets/images/', $allowed_ext);
+    if ($logo) $query_str .= ", logo='$logo'";
 
     // Upload TTD
-    if ($_FILES['ttd']['name']) {
-        $ttd = time() . '_ttd_' . basename($_FILES["ttd"]["name"]);
-        move_uploaded_file($_FILES["ttd"]["tmp_name"], "uploads/" . $ttd);
-        $query_str .= ", ttd='$ttd'";
-    }
+    $ttd = process_upload_pengaturan('ttd', 'ttd', 'uploads/', $allowed_ext);
+    if ($ttd) $query_str .= ", ttd='$ttd'";
 
     // Upload Stempel
-    if ($_FILES['stempel']['name']) {
-        $stempel = time() . '_stempel_' . basename($_FILES["stempel"]["name"]);
-        move_uploaded_file($_FILES["stempel"]["tmp_name"], "uploads/" . $stempel);
-        $query_str .= ", stempel='$stempel'";
-    }
+    $stempel = process_upload_pengaturan('stempel', 'stempel', 'uploads/', $allowed_ext);
+    if ($stempel) $query_str .= ", stempel='$stempel'";
 
     // Upload Background Login
-    if ($_FILES['background_login']['name']) {
-        $bg_login = time() . '_bg_' . basename($_FILES["background_login"]["name"]);
-        move_uploaded_file($_FILES["background_login"]["tmp_name"], "assets/images/" . $bg_login);
-        $query_str .= ", background_login='$bg_login'";
-    }
+    $bg_login = process_upload_pengaturan('background_login', 'bg', 'assets/images/', $allowed_ext);
+    if ($bg_login) $query_str .= ", background_login='$bg_login'";
 
     $query_str .= " WHERE id='$id'";
 
@@ -86,13 +94,14 @@ if (isset($_POST['update'])) {
                     </div>
                     <div class="body">
                         <form method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                             <input type="hidden" name="id" value="<?php echo $data['id']; ?>">
                             <div class="row clearfix">
                                 <div class="col-sm-6">
                                     <label>Nama Yayasan</label>
                                     <div class="form-group">
                                         <div class="form-line">
-                                            <input type="text" class="form-control" name="nama_yayasan" value="<?php echo $data['nama_yayasan']; ?>" required>
+                                            <input type="text" class="form-control" name="nama_yayasan" value="<?php echo htmlspecialchars($data['nama_yayasan']); ?>" required>
                                         </div>
                                     </div>
                                 </div>
@@ -100,7 +109,7 @@ if (isset($_POST['update'])) {
                                     <label>Nama Madrasah</label>
                                     <div class="form-group">
                                         <div class="form-line">
-                                            <input type="text" class="form-control" name="nama_madrasah" value="<?php echo $data['nama_madrasah']; ?>" required>
+                                            <input type="text" class="form-control" name="nama_madrasah" value="<?php echo htmlspecialchars($data['nama_madrasah']); ?>" required>
                                         </div>
                                     </div>
                                 </div>
@@ -108,7 +117,7 @@ if (isset($_POST['update'])) {
                             <label>Alamat</label>
                             <div class="form-group">
                                 <div class="form-line">
-                                    <textarea name="alamat" cols="30" rows="3" class="form-control no-resize" required><?php echo $data['alamat']; ?></textarea>
+                                    <textarea name="alamat" cols="30" rows="3" class="form-control no-resize" required><?php echo htmlspecialchars($data['alamat']); ?></textarea>
                                 </div>
                             </div>
                             <div class="row clearfix">
@@ -116,7 +125,7 @@ if (isset($_POST['update'])) {
                                     <label>Email</label>
                                     <div class="form-group">
                                         <div class="form-line">
-                                            <input type="email" class="form-control" name="email" value="<?php echo $data['email']; ?>">
+                                            <input type="email" class="form-control" name="email" value="<?php echo htmlspecialchars($data['email']); ?>">
                                         </div>
                                     </div>
                                 </div>
@@ -124,7 +133,7 @@ if (isset($_POST['update'])) {
                                     <label>Website</label>
                                     <div class="form-group">
                                         <div class="form-line">
-                                            <input type="text" class="form-control" name="website" value="<?php echo $data['website']; ?>">
+                                            <input type="text" class="form-control" name="website" value="<?php echo htmlspecialchars($data['website']); ?>">
                                         </div>
                                     </div>
                                 </div>
@@ -132,7 +141,7 @@ if (isset($_POST['update'])) {
                             <label>Nama Kepala Madrasah</label>
                             <div class="form-group">
                                 <div class="form-line">
-                                    <input type="text" class="form-control" name="kepala_madrasah" value="<?php echo $data['kepala_madrasah']; ?>" required>
+                                    <input type="text" class="form-control" name="kepala_madrasah" value="<?php echo htmlspecialchars($data['kepala_madrasah']); ?>" required>
                                 </div>
                             </div>
                             <div class="row clearfix">

@@ -10,6 +10,9 @@ $nama_app = isset($settings['nama_aplikasi']) && !empty($settings['nama_aplikasi
 $nama_sekolah = isset($settings['nama_madrasah']) && !empty($settings['nama_madrasah']) ? $settings['nama_madrasah'] : 'MI Sultan Fattah Sukosono';
 
 if (isset($_POST['login'])) {
+    if (!verify_csrf_token($_POST['csrf_token'])) {
+        die("CSRF Token Verification Failed");
+    }
     $username = mysqli_real_escape_string($conn, $_POST['username']);
     $password = $_POST['password'];
 
@@ -111,6 +114,7 @@ if (isset($_POST['login'])) {
         <div class="card">
             <div class="body">
                 <form id="sign_in" method="POST">
+                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                     <?php if (isset($error)): ?>
                         <div class="alert alert-danger">
                             <?php echo $error; ?>

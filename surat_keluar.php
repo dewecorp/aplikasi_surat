@@ -1,17 +1,23 @@
 <?php
 session_start();
 include 'config.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
 // Enable Error Reporting for Debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Handle Add
 if (isset($_POST['add'])) {
-    // DEBUG: Log POST data
-    file_put_contents('debug_add_post.txt', print_r($_POST, true));
-
-    $tgl_surat = $_POST['tgl_surat'];
-    $jenis_surat = $_POST['jenis_surat'];
+    if (!verify_csrf_token($_POST['csrf_token'])) {
+        die("CSRF Token Verification Failed");
+    }
+    $tgl_surat = mysqli_real_escape_string($conn, $_POST['tgl_surat']);
+    $jenis_surat = mysqli_real_escape_string($conn, $_POST['jenis_surat']);
     
     // Prepare variables based on Type
     $penerima_list = [];
@@ -64,8 +70,8 @@ if (isset($_POST['add'])) {
     // Fields for Surat Pindah
     $nis_siswa = !empty($_POST['nis_siswa']) ? mysqli_real_escape_string($conn, $_POST['nis_siswa']) : NULL;
     $tempat_lahir_siswa = !empty($_POST['tempat_lahir_siswa']) ? mysqli_real_escape_string($conn, $_POST['tempat_lahir_siswa']) : NULL;
-    $tgl_lahir_siswa = !empty($_POST['tgl_lahir_siswa']) ? $_POST['tgl_lahir_siswa'] : NULL;
-    $jenis_kelamin_siswa = !empty($_POST['jenis_kelamin_siswa']) ? $_POST['jenis_kelamin_siswa'] : NULL;
+    $tgl_lahir_siswa = !empty($_POST['tgl_lahir_siswa']) ? mysqli_real_escape_string($conn, $_POST['tgl_lahir_siswa']) : NULL;
+    $jenis_kelamin_siswa = !empty($_POST['jenis_kelamin_siswa']) ? mysqli_real_escape_string($conn, $_POST['jenis_kelamin_siswa']) : NULL;
     $kelas_siswa = !empty($_POST['kelas_siswa']) ? mysqli_real_escape_string($conn, $_POST['kelas_siswa']) : NULL;
     $nama_wali = !empty($_POST['nama_wali']) ? mysqli_real_escape_string($conn, $_POST['nama_wali']) : NULL;
     $pekerjaan_wali = !empty($_POST['pekerjaan_wali']) ? mysqli_real_escape_string($conn, $_POST['pekerjaan_wali']) : NULL;
@@ -397,7 +403,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                             $q_penerima = mysqli_query($conn, "SELECT DISTINCT penerima FROM surat_keluar ORDER BY penerima ASC");
                                             while($r_penerima = mysqli_fetch_assoc($q_penerima)){
                                                 $selected = (isset($_GET['filter_penerima']) && $_GET['filter_penerima'] == $r_penerima['penerima']) ? 'selected' : '';
-                                                echo "<option value='".$r_penerima['penerima']."' $selected>".$r_penerima['penerima']."</option>";
+                                                echo "<option value='".htmlspecialchars($r_penerima['penerima'])."' $selected>".htmlspecialchars($r_penerima['penerima'])."</option>";
                                             }
                                             ?>
                                         </select>
@@ -448,9 +454,9 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                         <tr>
                                             <td><?php echo $no++; ?></td>
                                             <td><?php echo tgl_indo($row['tgl_surat']); ?></td>
-                                            <td><?php echo $row['no_surat']; ?></td>
-                                            <td><?php echo $row['perihal']; ?></td>
-                                            <td><?php echo $row['penerima']; ?></td>
+                                            <td><?php echo htmlspecialchars($row['no_surat']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['perihal']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['penerima']); ?></td>
                                             <td>
                                                 <?php if (in_array($row['jenis_surat'], ['Undangan', 'Pemberitahuan'])): ?>
                                                     <div class="btn-group">
@@ -487,6 +493,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                     </div>
                                                     <form method="POST">
                                                         <div class="modal-body">
+                                                            <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                                                             <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
                                                             <input type="hidden" name="jenis_surat" value="<?php echo $row['jenis_surat']; ?>">
                                                             
@@ -501,7 +508,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                 <label><?php echo ($row['jenis_surat'] == 'Tugas') ? 'Nama Kegiatan' : 'Perihal'; ?></label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <textarea name="perihal" class="form-control no-resize" required><?php echo $row['perihal']; ?></textarea>
+                                                                        <textarea name="perihal" class="form-control no-resize" required><?php echo htmlspecialchars($row['perihal']); ?></textarea>
                                                                     </div>
                                                                 </div>
                                                             <?php endif; ?>
@@ -558,7 +565,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                             <?php endforeach; ?>
                                         </div>
                                                                     <?php else: ?>
-                                                                        <input type="text" class="form-control" name="penerima" value="<?php echo $row['penerima']; ?>" required>
+                                                                        <input type="text" class="form-control" name="penerima" value="<?php echo htmlspecialchars($row['penerima']); ?>" required>
                                                                     <?php endif; ?>
                                                                 </div>
                                                             </div>
@@ -580,19 +587,19 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                 <label>Tempat Acara</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <input type="text" class="form-control" name="acara_tempat" value="<?php echo $row['acara_tempat']; ?>">
+                                                                        <input type="text" class="form-control" name="acara_tempat" value="<?php echo htmlspecialchars($row['acara_tempat']); ?>">
                                                                     </div>
                                                                 </div>
                                                                 <label>Keperluan</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <textarea name="keperluan" class="form-control no-resize"><?php echo $row['keperluan']; ?></textarea>
+                                                                        <textarea name="keperluan" class="form-control no-resize"><?php echo htmlspecialchars($row['keperluan']); ?></textarea>
                                                                     </div>
                                                                 </div>
                                                                 <label>Keterangan</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <textarea name="keterangan" class="form-control no-resize"><?php echo $row['keterangan']; ?></textarea>
+                                                                        <textarea name="keterangan" class="form-control no-resize"><?php echo htmlspecialchars($row['keterangan']); ?></textarea>
                                                                     </div>
                                                                 </div>
 
@@ -600,7 +607,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                 <label>Pembuka Surat</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <textarea name="pembuka_surat" class="form-control no-resize" rows="4"><?php echo $row['pembuka_surat']; ?></textarea>
+                                                                        <textarea name="pembuka_surat" class="form-control no-resize" rows="4"><?php echo htmlspecialchars($row['pembuka_surat']); ?></textarea>
                                                                     </div>
                                                                 </div>
                                                                 <label>Isi Surat</label>
@@ -684,7 +691,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                         <label>NIS / NISN</label>
                                                                         <div class="form-group">
                                                                             <div class="form-line">
-                                                                                <input type="text" class="form-control" name="nis_siswa" value="<?php echo isset($row['nis_siswa']) ? $row['nis_siswa'] : ''; ?>">
+                                                                                <input type="text" class="form-control" name="nis_siswa" value="<?php echo isset($row['nis_siswa']) ? htmlspecialchars($row['nis_siswa']) : ''; ?>">
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -703,7 +710,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                         <label>Tempat Lahir</label>
                                                                         <div class="form-group">
                                                                             <div class="form-line">
-                                                                                <input type="text" class="form-control" name="tempat_lahir_siswa" value="<?php echo isset($row['tempat_lahir_siswa']) ? $row['tempat_lahir_siswa'] : ''; ?>">
+                                                                                <input type="text" class="form-control" name="tempat_lahir_siswa" value="<?php echo isset($row['tempat_lahir_siswa']) ? htmlspecialchars($row['tempat_lahir_siswa']) : ''; ?>">
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -727,7 +734,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                 <label>Nama Orang Tua / Wali</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <input type="text" class="form-control" name="nama_wali" value="<?php echo isset($row['nama_wali']) ? $row['nama_wali'] : ''; ?>">
+                                                                        <input type="text" class="form-control" name="nama_wali" value="<?php echo isset($row['nama_wali']) ? htmlspecialchars($row['nama_wali']) : ''; ?>">
                                                                     </div>
                                                                 </div>
                                                                 <label>Pekerjaan</label>
@@ -747,7 +754,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                 <label>Pindah ke Sekolah (SD/MI)</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <input type="text" class="form-control" name="tujuan_pindah" value="<?php echo isset($row['tujuan_pindah']) ? $row['tujuan_pindah'] : ''; ?>">
+                                                                        <input type="text" class="form-control" name="tujuan_pindah" value="<?php echo isset($row['tujuan_pindah']) ? htmlspecialchars($row['tujuan_pindah']) : ''; ?>">
                                                                     </div>
                                                                 </div>
 
@@ -755,7 +762,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                 <label>Keterangan</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <textarea name="keterangan" class="form-control no-resize"><?php echo $row['keterangan']; ?></textarea>
+                                                                        <textarea name="keterangan" class="form-control no-resize"><?php echo htmlspecialchars($row['keterangan']); ?></textarea>
                                                                     </div>
                                                                 </div>
                                                             <?php endif; ?>
@@ -1019,6 +1026,7 @@ Wassalamu'alaikum Wr. Wb.</textarea>
             </div>
             <form method="POST">
                 <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                     <input type="hidden" name="jenis_surat" value="Keterangan Pindah">
                     <label>Tanggal Surat</label>
                     <div class="form-group">

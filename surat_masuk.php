@@ -2,8 +2,16 @@
 session_start();
 include 'config.php';
 
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
 // Handle Add
 if (isset($_POST['add'])) {
+    if (!verify_csrf_token($_POST['csrf_token'])) {
+        die("CSRF Token Verification Failed");
+    }
     $tgl_terima = $_POST['tgl_terima'];
     $no_surat = mysqli_real_escape_string($conn, $_POST['no_surat']);
     $tgl_surat = $_POST['tgl_surat'];
@@ -13,10 +21,24 @@ if (isset($_POST['add'])) {
     // Upload File
     $file_surat = '';
     if ($_FILES['file_surat']['name']) {
-        $target_dir = "uploads/";
-        $file_surat = time() . '_' . basename($_FILES["file_surat"]["name"]);
-        $target_file = $target_dir . $file_surat;
-        move_uploaded_file($_FILES["file_surat"]["tmp_name"], $target_file);
+        $allowed = array('pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx');
+        $ext = strtolower(pathinfo($_FILES["file_surat"]["name"], PATHINFO_EXTENSION));
+        
+        if (in_array($ext, $allowed)) {
+            $target_dir = "uploads/";
+            // Ensure uploads directory exists
+            if (!file_exists($target_dir)) {
+                mkdir($target_dir, 0777, true);
+            }
+            // Use random name to prevent overwriting and predictable naming
+            $file_surat = time() . '_' . uniqid() . '.' . $ext;
+            $target_file = $target_dir . $file_surat;
+            move_uploaded_file($_FILES["file_surat"]["tmp_name"], $target_file);
+        } else {
+            $_SESSION['error'] = "Format file tidak diizinkan! Hanya PDF, JPG, PNG, DOC, DOCX, XLS, XLSX.";
+            header("Location: surat_masuk.php");
+            exit();
+        }
     }
 
     $query = "INSERT INTO surat_masuk (tgl_terima, no_surat, tgl_surat, perihal, pengirim, file) VALUES ('$tgl_terima', '$no_surat', '$tgl_surat', '$perihal', '$pengirim', '$file_surat')";
@@ -44,11 +66,28 @@ if (isset($_POST['edit'])) {
     $query_str = "UPDATE surat_masuk SET tgl_terima='$tgl_terima', no_surat='$no_surat', tgl_surat='$tgl_surat', perihal='$perihal', pengirim='$pengirim'";
 
     if ($_FILES['file_surat']['name']) {
+        $allowed_types = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx'];
+        $file_ext = strtolower(pathinfo($_FILES["file_surat"]["name"], PATHINFO_EXTENSION));
+
+        if (!in_array($file_ext, $allowed_types)) {
+            echo "<script>alert('Format file tidak valid! Hanya diperbolehkan: PDF, JPG, JPEG, PNG, DOC, DOCX, XLS, XLSX'); window.history.back();</script>";
+            exit;
+        }
+
         $target_dir = "uploads/";
-        $file_surat = time() . '_' . basename($_FILES["file_surat"]["name"]);
+        if (!file_exists($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
+
+        $file_surat = time() . '_' . bin2hex(random_bytes(8)) . '.' . $file_ext;
         $target_file = $target_dir . $file_surat;
-        move_uploaded_file($_FILES["file_surat"]["tmp_name"], $target_file);
-        $query_str .= ", file='$file_surat'";
+
+        if (move_uploaded_file($_FILES["file_surat"]["tmp_name"], $target_file)) {
+            $query_str .= ", file='$file_surat'";
+        } else {
+            echo "<script>alert('Gagal mengupload file.'); window.history.back();</script>";
+            exit;
+        }
     }
 
     $query_str .= " WHERE id='$id'";
@@ -66,7 +105,7 @@ if (isset($_POST['edit'])) {
 
 // Handle Delete
 if (isset($_GET['delete'])) {
-    $id = $_GET['delete'];
+    $id = mysqli_real_escape_string($conn, $_GET['delete']);
     $q_del = mysqli_query($conn, "SELECT no_surat FROM surat_masuk WHERE id='$id'");
     $d_del = mysqli_fetch_assoc($q_del);
     $no_surat_del = $d_del['no_surat'];
@@ -170,7 +209,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                             $q_pengirim = mysqli_query($conn, "SELECT DISTINCT pengirim FROM surat_masuk ORDER BY pengirim ASC");
                                             while($r_pengirim = mysqli_fetch_assoc($q_pengirim)){
                                                 $selected = (isset($_GET['filter_pengirim']) && $_GET['filter_pengirim'] == $r_pengirim['pengirim']) ? 'selected' : '';
-                                                echo "<option value='".$r_pengirim['pengirim']."' $selected>".$r_pengirim['pengirim']."</option>";
+                                                echo "<option value='".htmlspecialchars($r_pengirim['pengirim'])."' $selected>".htmlspecialchars($r_pengirim['pengirim'])."</option>";
                                             }
                                             ?>
                                         </select>
@@ -215,10 +254,10 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                         <tr>
                                             <td><?php echo $no++; ?></td>
                                             <td><?php echo tgl_indo($row['tgl_terima']); ?></td>
-                                            <td><?php echo $row['no_surat']; ?></td>
+                                            <td><?php echo htmlspecialchars($row['no_surat']); ?></td>
                                             <td><?php echo tgl_indo($row['tgl_surat']); ?></td>
-                                            <td><?php echo $row['perihal']; ?></td>
-                                            <td><?php echo $row['pengirim']; ?></td>
+                                            <td><?php echo htmlspecialchars($row['perihal']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['pengirim']); ?></td>
                                             <td>
                                                 <?php if (!empty($row['file']) && file_exists('uploads/' . $row['file'])): ?>
                                                     <a href="uploads/<?php echo $row['file']; ?>" target="_blank" class="btn btn-primary btn-xs waves-effect">
@@ -247,6 +286,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                     </div>
                                                     <form method="POST" enctype="multipart/form-data">
                                                         <div class="modal-body">
+                                                            <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                                                             <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
                                                             <label>Tanggal Terima</label>
                                                             <div class="form-group">
@@ -257,7 +297,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                             <label>Nomor Surat</label>
                                                             <div class="form-group">
                                                                 <div class="form-line">
-                                                                    <input type="text" class="form-control" name="no_surat" value="<?php echo $row['no_surat']; ?>" required>
+                                                                    <input type="text" class="form-control" name="no_surat" value="<?php echo htmlspecialchars($row['no_surat']); ?>" required>
                                                                 </div>
                                                             </div>
                                                             <label>Tanggal Surat</label>
@@ -269,13 +309,13 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                             <label>Perihal</label>
                                                             <div class="form-group">
                                                                 <div class="form-line">
-                                                                    <textarea name="perihal" class="form-control no-resize" required><?php echo $row['perihal']; ?></textarea>
+                                                                    <textarea name="perihal" class="form-control no-resize" required><?php echo htmlspecialchars($row['perihal']); ?></textarea>
                                                                 </div>
                                                             </div>
                                                             <label>Pengirim</label>
                                                             <div class="form-group">
                                                                 <div class="form-line">
-                                                                    <input type="text" class="form-control" name="pengirim" value="<?php echo $row['pengirim']; ?>" required>
+                                                                    <input type="text" class="form-control" name="pengirim" value="<?php echo htmlspecialchars($row['pengirim']); ?>" required>
                                                                 </div>
                                                             </div>
                                                             <div class="form-group">

@@ -1,5 +1,10 @@
 <?php
+session_start();
 include 'config.php';
+
+if (!isset($_SESSION['user_id'])) {
+    die("Unauthorized Access");
+}
 
 // School Info
 $q_set = mysqli_query($conn, "SELECT * FROM pengaturan LIMIT 1");

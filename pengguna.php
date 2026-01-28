@@ -12,6 +12,9 @@ if (strtolower(trim($_SESSION['role'])) != 'admin') {
 
 // Handle Add
 if (isset($_POST['add'])) {
+    if (!verify_csrf_token($_POST['csrf_token'])) {
+        die("CSRF Token Verification Failed");
+    }
     $nama = mysqli_real_escape_string($conn, $_POST['nama']);
     $username = mysqli_real_escape_string($conn, $_POST['username']);
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
@@ -20,10 +23,22 @@ if (isset($_POST['add'])) {
     // Upload Foto
     $foto = 'default.jpg';
     if ($_FILES['foto']['name']) {
-        $target_dir = "uploads/";
-        $foto = time() . '_' . basename($_FILES["foto"]["name"]);
-        $target_file = $target_dir . $foto;
-        move_uploaded_file($_FILES["foto"]["tmp_name"], $target_file);
+        $allowed = array('jpg', 'jpeg', 'png');
+        $ext = strtolower(pathinfo($_FILES["foto"]["name"], PATHINFO_EXTENSION));
+        
+        if (in_array($ext, $allowed)) {
+            $target_dir = "uploads/";
+            if (!file_exists($target_dir)) {
+                mkdir($target_dir, 0777, true);
+            }
+            $foto = time() . '_' . uniqid() . '.' . $ext;
+            $target_file = $target_dir . $foto;
+            move_uploaded_file($_FILES["foto"]["tmp_name"], $target_file);
+        } else {
+            $_SESSION['error'] = "Format foto tidak diizinkan! Hanya JPG dan PNG.";
+            echo "<script>window.location='pengguna.php';</script>";
+            exit();
+        }
     }
 
     $query = "INSERT INTO users (nama, username, password, role, foto) VALUES ('$nama', '$username', '$password', '$role', '$foto')";
@@ -56,11 +71,28 @@ if (isset($_POST['edit'])) {
     }
 
     if ($_FILES['foto']['name']) {
+        $allowed_types = ['jpg', 'jpeg', 'png'];
+        $file_ext = strtolower(pathinfo($_FILES["foto"]["name"], PATHINFO_EXTENSION));
+
+        if (!in_array($file_ext, $allowed_types)) {
+            echo "<script>alert('Format foto tidak valid! Hanya diperbolehkan: JPG, JPEG, PNG'); window.history.back();</script>";
+            exit;
+        }
+
         $target_dir = "uploads/";
-        $foto = time() . '_' . basename($_FILES["foto"]["name"]);
+        if (!file_exists($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
+
+        $foto = time() . '_' . bin2hex(random_bytes(8)) . '.' . $file_ext;
         $target_file = $target_dir . $foto;
-        move_uploaded_file($_FILES["foto"]["tmp_name"], $target_file);
-        $query_str .= ", foto='$foto'";
+
+        if (move_uploaded_file($_FILES["foto"]["tmp_name"], $target_file)) {
+            $query_str .= ", foto='$foto'";
+        } else {
+            echo "<script>alert('Gagal mengupload foto.'); window.history.back();</script>";
+            exit;
+        }
     }
 
     $query_str .= " WHERE id='$id'";
@@ -91,7 +123,7 @@ if (isset($_POST['edit'])) {
 
 // Handle Delete
 if (isset($_GET['delete'])) {
-    $id = $_GET['delete'];
+    $id = mysqli_real_escape_string($conn, $_GET['delete']);
     
     // Cek admin
     $cek = mysqli_fetch_assoc(mysqli_query($conn, "SELECT role FROM users WHERE id='$id'"));
@@ -159,15 +191,16 @@ if (isset($_GET['delete'])) {
                                             <td><?php echo $no++; ?></td>
                                             <td>
                                                 <?php if ($row['foto'] != 'default.jpg' && file_exists('uploads/' . $row['foto'])): ?>
-                                                    <img src="uploads/<?php echo $row['foto']; ?>" width="50" height="50" alt="User" style="border-radius: 50%; object-fit: cover;">
+                                                    <img src="uploads/<?php echo htmlspecialchars($row['foto']); ?>" width="50" height="50" alt="User" style="border-radius: 50%; object-fit: cover;">
                                                 <?php else: ?>
                                                     <div style="width: 50px; height: 50px; background-color: <?php echo getAvatarColor($row['nama']); ?>; color: white; border-radius: 50%; text-align: center; line-height: 50px; font-weight: bold; font-size: 20px; display: inline-block;">
                                                         <?php echo getInitials($row['nama']); ?>
                                                     </div>
                                                 <?php endif; ?>
                                             </td>
-                                            <td><?php echo $row['nama']; ?></td>
-                                            <td><?php echo $row['username']; ?></td>
+                                            <td><?php echo htmlspecialchars($row['nama']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['username']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['role']); ?></td>
                                             <td>
                                                 <?php if ($row['role'] == 'admin'): ?>
                                                     <span class="label label-success">Admin</span>
@@ -196,17 +229,18 @@ if (isset($_GET['delete'])) {
                                                     </div>
                                                     <form method="POST" enctype="multipart/form-data">
                                                         <div class="modal-body">
+                                                            <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                                                             <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
                                                             <label>Nama Lengkap</label>
                                                             <div class="form-group">
                                                                 <div class="form-line">
-                                                                    <input type="text" class="form-control" name="nama" value="<?php echo $row['nama']; ?>" required>
+                                                                    <input type="text" class="form-control" name="nama" value="<?php echo htmlspecialchars($row['nama']); ?>" required>
                                                                 </div>
                                                             </div>
                                                             <label>Username</label>
                                                             <div class="form-group">
                                                                 <div class="form-line">
-                                                                    <input type="text" class="form-control" name="username" value="<?php echo $row['username']; ?>" required>
+                                                                    <input type="text" class="form-control" name="username" value="<?php echo htmlspecialchars($row['username']); ?>" required>
                                                                 </div>
                                                             </div>
                                                             <label>Password (Kosongkan jika tidak diubah)</label>
@@ -256,6 +290,7 @@ if (isset($_GET['delete'])) {
             </div>
             <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                     <label>Nama Lengkap</label>
                     <div class="form-group">
                         <div class="form-line">

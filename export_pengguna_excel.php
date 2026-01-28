@@ -1,5 +1,10 @@
 <?php
+session_start();
 include 'config.php';
+
+if (!isset($_SESSION['user_id'])) {
+    die("Unauthorized Access");
+}
 
 $query = mysqli_query($conn, "SELECT * FROM users ORDER BY id DESC");
 

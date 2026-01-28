@@ -1,5 +1,11 @@
 <?php
+session_start();
 include 'config.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header('HTTP/1.0 403 Forbidden');
+    exit;
+}
 
 if (isset($_POST['ids'])) {
     $ids = $_POST['ids'];
