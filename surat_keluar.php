@@ -762,8 +762,8 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
 
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="submit" name="edit" class="btn btn-link waves-effect">SIMPAN</button>
-                                                            <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">TUTUP</button>
+                                                            <button type="submit" name="edit" class="btn btn-success waves-effect">SIMPAN</button>
+                                                            <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -840,8 +840,8 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="add" class="btn btn-link waves-effect">SIMPAN</button>
-                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" name="add" class="btn btn-success waves-effect">SIMPAN</button>
+                    <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
                 </div>
             </form>
         </div>
@@ -900,8 +900,8 @@ Wassalamu'alaikum Wr. Wb.</textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="add" class="btn btn-link waves-effect">SIMPAN</button>
-                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" name="add" class="btn btn-success waves-effect">SIMPAN</button>
+                    <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
                 </div>
             </form>
         </div>
@@ -1002,8 +1002,8 @@ Wassalamu'alaikum Wr. Wb.</textarea>
 
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="add" class="btn btn-link waves-effect">SIMPAN</button>
-                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" name="add" class="btn btn-success waves-effect">SIMPAN</button>
+                    <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
                 </div>
             </form>
         </div>
@@ -1106,8 +1106,8 @@ Wassalamu'alaikum Wr. Wb.</textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="add" class="btn btn-link waves-effect">SIMPAN</button>
-                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" name="add" class="btn btn-success waves-effect">SIMPAN</button>
+                    <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
                 </div>
             </form>
         </div>

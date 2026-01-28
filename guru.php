@@ -270,8 +270,8 @@ include 'template/sidebar.php';
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="submit" name="edit" class="btn btn-link waves-effect">SIMPAN</button>
-                                                            <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">TUTUP</button>
+                                                            <button type="submit" name="edit" class="btn btn-success waves-effect">SIMPAN</button>
+                                                            <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -342,8 +342,8 @@ include 'template/sidebar.php';
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="add" class="btn btn-link waves-effect">SIMPAN</button>
-                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" name="add" class="btn btn-success waves-effect">SIMPAN</button>
+                    <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
                 </div>
             </form>
         </div>
@@ -380,8 +380,8 @@ include 'template/sidebar.php';
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-link waves-effect">SIMPAN PERUBAHAN</button>
-                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" class="btn btn-success waves-effect">SIMPAN PERUBAHAN</button>
+                        <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
                 </div>
             </form>
         </div>
@@ -417,7 +417,7 @@ include 'template/sidebar.php';
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary waves-effect" id="btnUpload" disabled>UPLOAD</button>
-                <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">TUTUP</button>
+                <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
             </div>
         </div>
     </div>
