@@ -12,14 +12,25 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Cek Role, hanya admin yang boleh akses
-if (strtolower(trim($_SESSION['role'])) != 'admin') {
+// Re-fetch role if empty (Safety Check)
+if (empty($_SESSION['role'])) {
+    $uid = $_SESSION['user_id'];
+    $q_role = mysqli_query($conn, "SELECT role FROM users WHERE id='$uid'");
+    if ($r_role = mysqli_fetch_assoc($q_role)) {
+        $_SESSION['role'] = $r_role['role'];
+    }
+}
+
+// Cek Role, hanya admin dan tu yang boleh akses
+$current_role = strtolower(trim($_SESSION['role'] ?? ''));
+if ($current_role != 'admin' && $current_role != 'tu' && $current_role != 'tata usaha') {
     if (isset($_POST['is_ajax'])) {
         header('Content-Type: application/json');
         echo json_encode(['status' => 'error', 'message' => 'Unauthorized Access']);
         exit;
     }
-    echo "<script>window.location='index.php';</script>";
+    
+    echo "<script>alert('Akses Ditolak! Anda tidak memiliki izin untuk mengakses halaman ini.'); window.location='index.php';</script>";
     exit();
 }
 

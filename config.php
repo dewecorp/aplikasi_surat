@@ -84,8 +84,13 @@ function log_activity($user_id, $type, $description) {
     $user_id = mysqli_real_escape_string($conn, $user_id);
     $type = mysqli_real_escape_string($conn, $type);
     $description = mysqli_real_escape_string($conn, $description);
-    $query = "INSERT INTO activity_log (user_id, activity_type, description) VALUES ('$user_id', '$type', '$description')";
-    mysqli_query($conn, $query);
+
+    // Cek apakah user_id masih ada di tabel users
+    $check_user = mysqli_query($conn, "SELECT id FROM users WHERE id='$user_id'");
+    if (mysqli_num_rows($check_user) > 0) {
+        $query = "INSERT INTO activity_log (user_id, activity_type, description) VALUES ('$user_id', '$type', '$description')";
+        mysqli_query($conn, $query);
+    }
 }
 
 function time_ago($timestamp) {

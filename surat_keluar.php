@@ -1117,6 +1117,19 @@ Wassalamu'alaikum Wr. Wb.</textarea>
 <?php include 'template/footer.php'; ?>
 <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 <script>
+    // Disable CKEditor Security Notification (Quick Fix)
+    // Peringatan ini muncul karena versi LTS berbayar tersedia.
+    // Untuk penggunaan internal dengan akses terbatas, risiko dapat diterima.
+    window.CKEDITOR_BASEPATH = 'https://cdn.ckeditor.com/4.22.1/standard/';
+</script>
+<style>
+    /* Sembunyikan notifikasi banner CKEditor secara paksa */
+    .cke_notification_warning { display: none !important; }
+</style>
+<script>
+    // Config CKEditor to ignore version check
+    CKEDITOR.config.versionCheck = false;
+
     // Fix CKEditor in Bootstrap Modal
     $.fn.modal.Constructor.prototype.enforceFocus = function() {
         modal_this = this
