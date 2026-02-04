@@ -168,42 +168,42 @@ if (isset($_POST['update'])) {
                                 </div>
                             </div>
                             <div class="row clearfix">
-                                <div class="col-sm-4">
+                                <div class="col-sm-4 mb-3">
                                     <label>Upload Logo Madrasah</label>
                                     <input type="file" name="logo" class="form-control">
                                     <?php if (isset($data['logo']) && $data['logo']): ?>
-                                        <div class="m-t-10">
-                                            <img src="assets/images/<?php echo $data['logo']; ?>" height="50" alt="Logo">
+                                        <div class="mt-2">
+                                            <img src="assets/images/<?php echo $data['logo']; ?>" class="img-thumbnail" style="max-height: 100px; max-width: 100%;" alt="Logo">
                                         </div>
                                     <?php endif; ?>
                                 </div>
-                                <div class="col-sm-4">
+                                <div class="col-sm-4 mb-3">
                                     <label>Upload Tanda Tangan (PNG/Transparan)</label>
                                     <input type="file" name="ttd" class="form-control">
                                     <?php if ($data['ttd']): ?>
-                                        <div class="m-t-10">
-                                            <img src="uploads/<?php echo $data['ttd']; ?>" height="50" alt="TTD">
+                                        <div class="mt-2">
+                                            <img src="uploads/<?php echo $data['ttd']; ?>" class="img-thumbnail" style="max-height: 100px; max-width: 100%;" alt="TTD">
                                         </div>
                                     <?php endif; ?>
                                 </div>
-                                <div class="col-sm-4">
+                                <div class="col-sm-4 mb-3">
                                     <label>Upload Stempel (PNG/Transparan)</label>
                                     <input type="file" name="stempel" class="form-control">
                                     <?php if ($data['stempel']): ?>
-                                        <div class="m-t-10">
-                                            <img src="uploads/<?php echo $data['stempel']; ?>" height="50" alt="Stempel">
+                                        <div class="mt-2">
+                                            <img src="uploads/<?php echo $data['stempel']; ?>" class="img-thumbnail" style="max-height: 100px; max-width: 100%;" alt="Stempel">
                                         </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
                             
                             <div class="row clearfix">
-                                <div class="col-sm-12">
+                                <div class="col-sm-12 mb-3">
                                     <label>Background Login</label>
                                     <input type="file" name="background_login" class="form-control">
                                     <?php if (isset($data['background_login']) && $data['background_login']): ?>
-                                        <div class="m-t-10">
-                                            <img src="assets/images/<?php echo $data['background_login']; ?>" height="100" alt="Background Login">
+                                        <div class="mt-2">
+                                            <img src="assets/images/<?php echo $data['background_login']; ?>" class="img-thumbnail" style="max-height: 200px; max-width: 100%;" alt="Background Login">
                                         </div>
                                     <?php endif; ?>
                                 </div>

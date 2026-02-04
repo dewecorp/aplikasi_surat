@@ -1111,6 +1111,7 @@ Wassalamu'alaikum Wr. Wb.</textarea>
 </div>
 
 <?php include 'template/footer.php'; ?>
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 <script>
     // Fix CKEditor in Bootstrap Modal
     $.fn.modal.Constructor.prototype.enforceFocus = function() {

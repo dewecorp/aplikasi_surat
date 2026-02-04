@@ -223,11 +223,11 @@ include 'template/sidebar.php';
                                             <td><?php echo $row['tempat_lahir'] . ', ' . (!empty($row['tgl_lahir']) ? date('d-m-Y', strtotime($row['tgl_lahir'])) : ''); ?></td>
                                             <td>
                                                 <?php if ($row['status'] == 'Guru Kelas'): ?>
-                                                    <span class="label bg-blue">Guru Kelas</span>
+                                                    <span class="badge badge-success">Guru Kelas</span>
                                                 <?php elseif ($row['status'] == 'Guru Mapel'): ?>
-                                                    <span class="label bg-orange">Guru Mapel</span>
+                                                    <span class="badge badge-warning">Guru Mapel</span>
                                                 <?php else: ?>
-                                                    <?php echo htmlspecialchars($row['status']); ?>
+                                                    <span class="badge badge-secondary"><?php echo htmlspecialchars($row['status']); ?></span>
                                                 <?php endif; ?>
                                             </td>
                                             <td>
