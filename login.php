@@ -42,125 +42,128 @@ if (isset($_POST['login'])) {
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Sistem Manajemen Surat">
+    <meta name="author" content="">
+
     <title>Login | SIMS</title>
-    <!-- Favicon-->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%231e88e5%22><path d=%22M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z%22/></svg>" type="image/svg+xml">
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css">
+    <!-- Custom fonts for this template-->
+    <link href="assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
-    <!-- Bootstrap Core Css -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template-->
+    <link href="assets/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" rel="stylesheet">
 
-    <!-- Waves Effect Css -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/node-waves/0.7.6/waves.min.css" rel="stylesheet" />
-
-    <!-- Animation Css -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" rel="stylesheet" />
-
-    <!-- Custom Css -->
-    <link href="assets/css/style.css" rel="stylesheet">
     <style>
-        .login-page {
-            max-width: 100% !important; /* Fix width issue if any */
-            overflow: hidden; /* Remove scroll */
-            height: 100vh;
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .login-box {
-            width: 100%;
-            max-width: 480px; /* Widened for long title */
-            margin: 5% auto; /* Ensure centering */
-            padding: 0 15px;
+        .bg-login-image {
+            background: url('<?php echo $logo ? $logo : "assets/img/undraw_posting_photo.svg"; ?>');
+            background-position: center;
+            background-size: 50%; /* Adjusted for better proportion */
+            background-repeat: no-repeat;
+            background-color: #fff;
+            padding: 2rem;
         }
-        .logo img {
-            display: block;
-            margin: 0 auto 10px;
-            max-width: 150px;
-            height: auto;
+        /* Custom transparent card logic if background image is set */
+        <?php if($bg_login): ?>
+        .card {
+            background-color: rgba(255, 255, 255, 0.95);
         }
-        .logo a {
-            font-size: 26px !important; /* Adjusted font size */
-            display: block; /* Ensure it wraps if needed */
-            line-height: 1.2;
-            margin-bottom: 8px;
-            color: <?php echo $bg_login ? '#0d47a1' : '#fff'; ?> !important;
-            text-shadow: <?php echo $bg_login ? '1px 1px 0 rgba(255,255,255,0.5)' : 'none'; ?>;
-        }
-        .logo small {
-            display: block;
-            font-size: 18px !important; /* Increased font size */
-            font-weight: bold;
-            color: <?php echo $bg_login ? '#0d47a1' : '#fff'; ?> !important;
-            text-shadow: <?php echo $bg_login ? '1px 1px 0 rgba(255,255,255,0.5)' : 'none'; ?>;
-        }
+        <?php endif; ?>
     </style>
+
 </head>
 
-<body class="login-page" style="<?php echo $bg_login ? "background: url('$bg_login') no-repeat center center fixed !important; background-size: cover !important;" : "background: linear-gradient(45deg, #0d47a1, #1976d2) !important;"; ?>">
-    <div class="login-box">
-        <div class="logo">
-            <?php if ($logo): ?>
-                <img src="<?php echo $logo; ?>" alt="Logo">
-            <?php endif; ?>
-            <a href="javascript:void(0);">SISTEM MANAJEMEN SURAT</a>
-            <small><?php echo $nama_sekolah; ?></small>
-        </div>
-        <div class="card">
-            <div class="body">
-                <form id="sign_in" method="POST">
-                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
-                    <?php if (isset($error)): ?>
-                        <div class="alert alert-danger">
-                            <?php echo $error; ?>
-                        </div>
-                    <?php endif; ?>
-                    <div class="input-group">
-                        <span class="input-group-addon">
-                            <i class="material-icons">person</i>
-                        </span>
-                        <div class="form-line">
-                            <input type="text" class="form-control" name="username" placeholder="Username" required autofocus>
+<body class="bg-gradient-primary" style="<?php echo $bg_login ? "background: url('$bg_login'); background-size: cover; background-position: center;" : ""; ?>">
+
+    <div class="container">
+
+        <!-- Outer Row -->
+        <div class="row justify-content-center">
+
+            <div class="col-xl-10 col-lg-12 col-md-9">
+
+                <div class="card o-hidden border-0 shadow-lg my-5">
+                    <div class="card-body p-0">
+                        <!-- Nested Row within Card Body -->
+                        <div class="row">
+                            <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
+                            <div class="col-lg-6">
+                                <div class="p-5">
+                                    <div class="text-center">
+                                        <h1 class="h4 text-gray-900 mb-2">SISTEM MANAJEMEN SURAT</h1>
+                                        <p class="mb-4 text-gray-800 font-weight-bold"><?php echo $nama_sekolah; ?></p>
+                                    </div>
+                                    <form class="user" id="sign_in" method="POST">
+                                        <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control form-control-user"
+                                                name="username" aria-describedby="emailHelp"
+                                                placeholder="Username" required autofocus>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="password" class="form-control form-control-user"
+                                                name="password" placeholder="Password" required>
+                                        </div>
+                                        <button type="submit" name="login" class="btn btn-primary btn-user btn-block">
+                                            MASUK
+                                        </button>
+                                    </form>
+                                    <hr>
+                                    <div class="text-center small text-gray-600">
+                                        &copy; <?php echo date('Y'); ?> SIMS - <?php echo $nama_sekolah; ?>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="input-group">
-                        <span class="input-group-addon">
-                            <i class="material-icons">lock</i>
-                        </span>
-                        <div class="form-line">
-                            <input type="password" class="form-control" name="password" placeholder="Password" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-6 col-xs-offset-3">
-                            <button class="btn btn-block bg-blue waves-effect" type="submit" name="login" style="background: linear-gradient(45deg, #0d47a1, #1976d2) !important;">MASUK</button>
-                        </div>
-                    </div>
-                </form>
+                </div>
+
             </div>
+
         </div>
+
     </div>
 
-    <!-- Jquery Core Js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript-->
+    <script src="assets/vendor/jquery/jquery.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Bootstrap Core Js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <!-- Core plugin JavaScript-->
+    <script src="assets/vendor/jquery-easing/jquery.easing.min.js"></script>
 
-    <!-- Waves Effect Plugin Js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/node-waves/0.7.6/waves.min.js"></script>
+    <!-- Custom scripts for all pages-->
+    <script src="assets/js/sb-admin-2.min.js"></script>
+    
+    <!-- SweetAlert -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
 
-    <!-- Validation Plugin Js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.16.0/jquery.validate.min.js"></script>
+    <?php if (isset($error)): ?>
+        <script>
+            $(document).ready(function() {
+                swal({
+                    title: "Gagal Login!",
+                    text: "<?php echo $error; ?>",
+                    type: "error",
+                    confirmButtonText: "OK"
+                });
+            });
+        </script>
+    <?php endif; ?>
 
-    <!-- Custom Js -->
-    <script src="assets/js/admin.js"></script>
-    <script src="assets/js/pages/examples/sign-in.js"></script>
 </body>
 
 </html>

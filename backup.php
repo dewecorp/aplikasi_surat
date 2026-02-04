@@ -220,10 +220,9 @@ include 'template/header.php';
 include 'template/sidebar.php';
 ?>
 
-<section class="content">
-    <div class="container-fluid">
+<div class="container-fluid px-5">
         <div class="block-header">
-            <h2>BACKUP & RESTORE DATABASE</h2>
+            <h2>Backup & Restore Database</h2>
         </div>
 
         <div class="row clearfix">
@@ -231,14 +230,13 @@ include 'template/sidebar.php';
             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                 <div class="card">
                     <div class="header">
-                        <h2>BACKUP DATABASE</h2>
                     </div>
                     <div class="body">
                         <p class="m-b-20">Klik tombol di bawah ini untuk membuat cadangan (backup) seluruh database aplikasi. File backup akan tersimpan di server dan dapat diunduh.</p>
                         <form method="POST" id="backupForm">
                             <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
-                            <button type="submit" name="backup_now" class="btn btn-primary btn-lg btn-block waves-effect">
-                                <i class="material-icons">backup</i> BUAT BACKUP BARU
+                            <button type="submit" name="backup_now" class="btn btn-primary btn-lg btn-block">
+                                <i class="fas fa-database"></i> BUAT BACKUP BARU
                             </button>
                         </form>
                     </div>
@@ -249,7 +247,6 @@ include 'template/sidebar.php';
             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                 <div class="card">
                     <div class="header">
-                        <h2>RESTORE DATABASE (UPLOAD)</h2>
                     </div>
                     <div class="body">
                         <p class="m-b-20">Upload file database (.sql) yang sebelumnya telah diunduh untuk mengembalikan data.</p>
@@ -260,8 +257,8 @@ include 'template/sidebar.php';
                                 </div>
                                 <small class="col-red">PERINGATAN: Tindakan ini akan menimpa seluruh data saat ini!</small>
                             </div>
-                            <button type="submit" name="restore_upload" class="btn btn-warning btn-lg btn-block waves-effect" onclick="return confirm('Apakah Anda yakin ingin merestore database? Data saat ini akan ditimpa dan tidak dapat dikembalikan!')">
-                                <i class="material-icons">restore</i> UPLOAD & RESTORE
+                            <button type="submit" name="restore_upload" class="btn btn-warning btn-lg btn-block" onclick="return confirm('Apakah Anda yakin ingin merestore database? Data saat ini akan ditimpa dan tidak dapat dikembalikan!')">
+                                <i class="fas fa-file-upload"></i> UPLOAD & RESTORE
                             </button>
                         </form>
                     </div>
@@ -301,15 +298,15 @@ include 'template/sidebar.php';
                                             <td><?php echo $row['file_size']; ?></td>
                                             <td><?php echo tgl_indo(date('Y-m-d', strtotime($row['created_at']))) . ' ' . date('H:i', strtotime($row['created_at'])); ?></td>
                                             <td>
-                                                <a href="backup.php?download=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>" class="btn btn-success btn-xs waves-effect">
-                                                    <i class="material-icons">file_download</i> Download
+                                                <a href="backup.php?download=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>" class="btn btn-success btn-sm">
+                                                    <i class="fas fa-download"></i> Download
                                                 </a>
-                                                <button type="button" class="btn btn-warning btn-xs waves-effect" data-toggle="modal" data-target="#restoreModal<?php echo $row['id']; ?>">
-                                                    <i class="material-icons">restore</i> Restore
+                                                <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#restoreModal<?php echo $row['id']; ?>">
+                                                    <i class="fas fa-undo-alt"></i> Restore
                                                 </button>
-                                                <a href="javascript:void(0);" onclick="confirmDelete('backup.php?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>')" class="btn btn-danger btn-xs waves-effect">
-                                                    <i class="material-icons">delete</i> Hapus
-                                                </a>
+                                                 <a href="javascript:void(0);" onclick="confirmDelete('backup.php?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>')" class="btn btn-danger btn-circle" title="Hapus">
+                                                     <i class="fas fa-trash"></i>
+                                                 </a>
                                             </td>
                                         </tr>
 
@@ -328,8 +325,8 @@ include 'template/sidebar.php';
                                                         <form method="POST">
                                                             <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                                                             <input type="hidden" name="backup_id" value="<?php echo $row['id']; ?>">
-                                                            <button type="submit" name="restore" class="btn btn-warning waves-effect">YA, RESTORE</button>
-                                                            <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">BATAL</button>
+                                                            <button type="submit" name="restore" class="btn btn-warning">YA, RESTORE</button>
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">BATAL</button>
                                                         </form>
                                                     </div>
                                                 </div>
@@ -344,8 +341,7 @@ include 'template/sidebar.php';
                 </div>
             </div>
         </div>
-    </div>
-</section>
+</div>
 
 <?php include 'template/footer.php'; ?>
 <script>

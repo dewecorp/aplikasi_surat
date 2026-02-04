@@ -30,7 +30,7 @@ if (isset($_POST['update'])) {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $website = mysqli_real_escape_string($conn, $_POST['website']);
     $kepala_madrasah = mysqli_real_escape_string($conn, $_POST['kepala_madrasah']);
-    $nama_aplikasi = mysqli_real_escape_string($conn, $_POST['nama_aplikasi']);
+    $nama_aplikasi = isset($_POST['nama_aplikasi']) ? mysqli_real_escape_string($conn, $_POST['nama_aplikasi']) : '';
 
     $query_str = "UPDATE pengaturan SET nama_yayasan='$nama_yayasan', nama_madrasah='$nama_madrasah', alamat='$alamat', email='$email', website='$website', kepala_madrasah='$kepala_madrasah', nama_aplikasi='$nama_aplikasi'";
 
@@ -39,12 +39,27 @@ if (isset($_POST['update'])) {
     // Function to handle upload securely
     function process_upload_pengaturan($input_name, $prefix, $target_dir, $allowed_ext) {
         if (!empty($_FILES[$input_name]['name'])) {
+            // Check for upload errors
+            if ($_FILES[$input_name]['error'] !== UPLOAD_ERR_OK) {
+                $_SESSION['error'] = "Upload failed with error code: " . $_FILES[$input_name]['error'];
+                return false;
+            }
+            
             $ext = strtolower(pathinfo($_FILES[$input_name]['name'], PATHINFO_EXTENSION));
             if (in_array($ext, $allowed_ext)) {
+                // Ensure target directory exists
+                if (!file_exists($target_dir)) {
+                    mkdir($target_dir, 0777, true);
+                }
+                
                 $filename = uniqid() . '_' . $prefix . '.' . $ext;
                 if (move_uploaded_file($_FILES[$input_name]['tmp_name'], $target_dir . $filename)) {
                     return $filename;
+                } else {
+                    $_SESSION['error'] = "Failed to move uploaded file to $target_dir";
                 }
+            } else {
+                $_SESSION['error'] = "Invalid file type. Allowed: " . implode(', ', $allowed_ext);
             }
         }
         return false;
@@ -78,24 +93,32 @@ if (isset($_POST['update'])) {
 }
 ?>
 
-<section class="content">
-    <div class="container-fluid">
+<div class="container-fluid px-5">
         <div class="block-header">
-            <h2>PENGATURAN</h2>
+            <h2>Pengaturan</h2>
         </div>
 
         <div class="row clearfix">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="card">
                     <div class="header">
-                        <h2>
-                            INFORMASI MADRASAH
-                        </h2>
                     </div>
                     <div class="body">
                         <form method="POST" enctype="multipart/form-data">
                             <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                             <input type="hidden" name="id" value="<?php echo $data['id']; ?>">
+                            
+                            <div class="row clearfix">
+                                <div class="col-sm-12">
+                                    <label>Nama Aplikasi</label>
+                                    <div class="form-group">
+                                        <div class="form-line">
+                                            <input type="text" class="form-control" name="nama_aplikasi" value="<?php echo isset($data['nama_aplikasi']) ? htmlspecialchars($data['nama_aplikasi']) : ''; ?>" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="row clearfix">
                                 <div class="col-sm-6">
                                     <label>Nama Yayasan</label>
@@ -186,13 +209,12 @@ if (isset($_POST['update'])) {
                                 </div>
                             </div>
                             
-                            <button type="submit" name="update" class="btn btn-primary m-t-15 waves-effect">SIMPAN PENGATURAN</button>
+                            <button type="submit" name="update" class="btn btn-primary m-t-15"><i class="fas fa-save"></i> SIMPAN PENGATURAN</button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+</div>
 
 <?php include 'template/footer.php'; ?>

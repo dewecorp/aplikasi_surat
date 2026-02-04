@@ -35,6 +35,11 @@ a {
   padding-right: $grid-gutter-width;
 }
 
+.content {
+  padding-left: $grid-gutter-width;
+  padding-right: $grid-gutter-width;
+}
+
 // Scroll to top button
 .scroll-to-top {
   position: fixed;

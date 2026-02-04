@@ -145,26 +145,20 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
 
 ?>
 
-<section class="content">
-    <div class="container-fluid">
+<div class="container-fluid px-5">
         <div class="block-header">
-            <h2>SURAT MASUK</h2>
+            <h2>Surat Masuk</h2>
         </div>
 
         <div class="row clearfix">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="card">
                     <div class="header">
-                        <h2>
-                            DATA SURAT MASUK
-                        </h2>
-                        <ul class="header-dropdown m-r--5">
-                            <li class="dropdown">
+                        <div class="header-dropdown m-r--5">
                                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
                                     <i class="fas fa-plus"></i> Tambah Surat Masuk
                                 </button>
-                            </li>
-                        </ul>
+                        </div>
                     </div>
                     <div class="body">
                          <!-- Filter -->
@@ -268,8 +262,8 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>">
-                                                    <i class="fas fa-pen"></i>
+                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>" title="Edit">
+                                                    <i class="fas fa-edit"></i>
                                                 </button>
                                                 <a href="javascript:void(0);" onclick="confirmDelete('surat_masuk.php?delete=<?php echo $row['id']; ?>')" class="btn btn-danger btn-circle">
                                                     <i class="fas fa-trash"></i>
@@ -339,8 +333,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                 </div>
             </div>
         </div>
-    </div>
-</section>
+</div>
 
 <!-- Add Modal -->
 <div class="modal fade" id="addModal" tabindex="-1" role="dialog">
@@ -387,8 +380,8 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="add" class="btn btn-success waves-effect">SIMPAN</button>
-                    <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" name="add" class="btn btn-success">SIMPAN</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">TUTUP</button>
                 </div>
             </form>
         </div>

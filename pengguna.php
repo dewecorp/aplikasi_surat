@@ -145,28 +145,22 @@ if (isset($_GET['delete'])) {
 }
 ?>
 
-<section class="content">
-    <div class="container-fluid">
+<div class="container-fluid px-5">
         <div class="block-header">
-            <h2>DATA PENGGUNA</h2>
+            <h2>Data Pengguna</h2>
         </div>
 
         <div class="row clearfix">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="card">
                     <div class="header">
-                        <h2>
-                            DAFTAR PENGGUNA
-                        </h2>
-                        <ul class="header-dropdown m-r--5">
-                            <li class="dropdown">
-                                <a href="export_pengguna_excel.php" target="_blank" class="btn btn-success waves-effect" title="Export Excel"><i class="material-icons">grid_on</i></a>
-                                <a href="export_pengguna_print.php" target="_blank" class="btn btn-warning waves-effect" title="Cetak PDF"><i class="material-icons">print</i></a>
-                                <button type="button" class="btn btn-primary waves-effect" data-toggle="modal" data-target="#addModal">
-                                    <i class="material-icons">add</i> Tambah Pengguna
+                        <div class="header-dropdown m-r--5">
+                                <a href="export_pengguna_excel.php" target="_blank" class="btn btn-success" title="Export Excel"><i class="fas fa-file-excel"></i></a>
+                                <a href="export_pengguna_print.php" target="_blank" class="btn btn-warning" title="Cetak PDF"><i class="fas fa-print"></i></a>
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
+                                    <i class="fas fa-plus"></i> Tambah Pengguna
                                 </button>
-                            </li>
-                        </ul>
+                        </div>
                     </div>
                     <div class="body">
                         <div class="table-responsive">
@@ -208,12 +202,12 @@ if (isset($_GET['delete'])) {
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <button type="button" class="btn btn-warning btn-circle waves-effect waves-circle waves-float" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>">
-                                                    <i class="material-icons">edit</i>
+                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>" title="Edit">
+                                                    <i class="fas fa-edit"></i>
                                                 </button>
                                                 <?php if ($row['role'] != 'admin'): ?>
-                                                    <a href="javascript:void(0);" onclick="confirmDelete('pengguna.php?delete=<?php echo $row['id']; ?>')" class="btn btn-danger btn-circle waves-effect waves-circle waves-float">
-                                                        <i class="material-icons">delete</i>
+                                                    <a href="javascript:void(0);" onclick="confirmDelete('pengguna.php?delete=<?php echo $row['id']; ?>')" class="btn btn-danger btn-circle">
+                                                        <i class="fas fa-trash"></i>
                                                     </a>
                                                 <?php endif; ?>
                                             </td>
@@ -262,8 +256,8 @@ if (isset($_GET['delete'])) {
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="submit" name="edit" class="btn btn-success waves-effect">SIMPAN</button>
-                                                            <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
+                                                            <button type="submit" name="edit" class="btn btn-success">SIMPAN</button>
+                                                            <button type="button" class="btn btn-danger" data-dismiss="modal">TUTUP</button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -277,8 +271,7 @@ if (isset($_GET['delete'])) {
                 </div>
             </div>
         </div>
-    </div>
-</section>
+</div>
 
 <!-- Add Modal -->
 <div class="modal fade" id="addModal" tabindex="-1" role="dialog">
@@ -321,8 +314,8 @@ if (isset($_GET['delete'])) {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="add" class="btn btn-success waves-effect">SIMPAN</button>
-                    <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" name="add" class="btn btn-success">SIMPAN</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">TUTUP</button>
                 </div>
             </form>
         </div>

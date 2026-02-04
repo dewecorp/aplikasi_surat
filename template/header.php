@@ -41,6 +41,111 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
     <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900" rel="stylesheet">
     <link href="assets/css/sb-admin-2.min.css" rel="stylesheet">
     <link href="assets/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" rel="stylesheet">
+    <style>
+        #wrapper {
+            display: flex;
+        }
+        #content-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #content {
+            flex: 1 0 auto;
+        }
+        #content-wrapper footer.sticky-footer {
+            margin-top: auto;
+        }
+        #content > .container-fluid {
+            padding-left: 3rem;
+            padding-right: 3rem;
+        }
+        .card .header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #e3e6f0;
+            background-color: #fff;
+        }
+        .card .body {
+            padding: 1.25rem;
+            background-color: #fff;
+        }
+        .block-header {
+            margin-bottom: 1rem;
+        }
+        /* Override default text colors to black for better visibility */
+        body {
+            color: #000 !important;
+        }
+        .text-gray-100, .text-gray-200, .text-gray-300, .text-gray-400, .text-gray-500, .text-gray-600, .text-gray-700, .text-gray-800, .text-gray-900, .text-muted {
+            color: #000 !important;
+        }
+        .table {
+            color: #000 !important;
+        }
+        /* Ensure form labels and inputs are black */
+        label, .form-control, input, select, textarea {
+            color: #000 !important;
+        }
+
+        /* STICKY SIDEBAR & NAVBAR */
+        /* Enable sticky behavior by removing overflow clipping from ancestors */
+        #content-wrapper {
+            overflow: visible !important; 
+        }
+
+        #accordionSidebar {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 50;
+        }
+        
+        /* Minimalist scrollbar for sidebar */
+        #accordionSidebar::-webkit-scrollbar {
+            width: 5px;
+            display: none; /* Hide scrollbar for cleaner look */
+        }
+        #accordionSidebar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        #accordionSidebar::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        #content > .navbar {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            width: 100%;
+        }
+
+        /* Fixed Sidebar Header */
+        #accordionSidebar .sidebar-brand {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            z-index: 51;
+            background-color: inherit; /* Fallback */
+            background-image: inherit; /* Ensure gradient matches */
+            width: 100%;
+        }
+        /* Ensure the background covers the scrolling content */
+        .bg-gradient-primary {
+            background-color: #4e73df;
+            background-image: linear-gradient(180deg,#4e73df 10%,#224abe 100%);
+            background-size: cover;
+        }
+        /* Specifically for the sticky header to match the sidebar background */
+        #accordionSidebar .sidebar-brand {
+             background: #4e73df; /* Match the top color of the gradient */
+        }
+    </style>
 </head>
 
 <body id="page-top">
@@ -104,10 +209,10 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span></a>
             </li>
-            <hr class="sidebar-divider d-none d-md-block">
-            <div class="text-center d-none d-md-inline">
+            <!-- Sidebar Toggler (Sidebar) -->
+            <!-- <div class="text-center d-none d-md-inline">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
-            </div>
+            </div> -->
         </ul>
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">

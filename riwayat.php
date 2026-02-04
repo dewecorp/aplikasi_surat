@@ -25,19 +25,15 @@ if (isset($_GET['filter_pihak']) && !empty($_GET['filter_pihak'])) {
 
 ?>
 
-<section class="content">
-    <div class="container-fluid">
+<div class="container-fluid px-5">
         <div class="block-header">
-            <h2>RIWAYAT SURAT</h2>
+            <h2>Riwayat Surat</h2>
         </div>
 
         <div class="row clearfix">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="card">
                     <div class="header">
-                        <h2>
-                            DATA RIWAYAT SURAT (MASUK & KELUAR)
-                        </h2>
                     </div>
                     <div class="body">
                          <!-- Filter -->
@@ -104,10 +100,10 @@ if (isset($_GET['filter_pihak']) && !empty($_GET['filter_pihak'])) {
                                 </div>
                             </div>
                             <div class="col-sm-3">
-                                <button type="submit" class="btn btn-info waves-effect" title="Cari"><i class="material-icons">search</i></button>
-                                <a href="riwayat.php" class="btn btn-default waves-effect" title="Reset"><i class="material-icons">refresh</i></a>
-                                <a href="export_riwayat_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success waves-effect" title="Export Excel"><i class="material-icons">grid_on</i></a>
-                                <a href="export_riwayat_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning waves-effect" title="Cetak PDF"><i class="material-icons">print</i></a>
+                                <button type="submit" class="btn btn-info" title="Cari"><i class="fas fa-search"></i></button>
+                                <a href="riwayat.php" class="btn btn-secondary" title="Reset"><i class="fas fa-sync"></i></a>
+                                <a href="export_riwayat_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success" title="Export Excel"><i class="fas fa-file-excel"></i></a>
+                                <a href="export_riwayat_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning" title="Cetak PDF"><i class="fas fa-print"></i></a>
                             </div>
                         </form>
 
@@ -148,12 +144,12 @@ if (isset($_GET['filter_pihak']) && !empty($_GET['filter_pihak'])) {
                                             <td><?php echo $row['pihak_lain']; ?></td>
                                             <td>
                                                 <?php if ($row['tipe'] == 'Keluar'): ?>
-                                                    <a href="print_surat_keluar.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-primary btn-xs waves-effect">
-                                                        <i class="material-icons">print</i> Lihat PDF
+                                                    <a href="print_surat_keluar.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-primary btn-sm">
+                                                        <i class="fas fa-print"></i> Lihat PDF
                                                     </a>
                                                 <?php elseif (!empty($row['file']) && file_exists('uploads/' . $row['file'])): ?>
-                                                    <a href="uploads/<?php echo $row['file']; ?>" target="_blank" class="btn btn-primary btn-xs waves-effect">
-                                                        <i class="material-icons">file_download</i> Lihat
+                                                    <a href="uploads/<?php echo $row['file']; ?>" target="_blank" class="btn btn-primary btn-sm">
+                                                        <i class="fas fa-download"></i> Lihat
                                                     </a>
                                                 <?php else: ?>
                                                     -
@@ -171,7 +167,6 @@ if (isset($_GET['filter_pihak']) && !empty($_GET['filter_pihak'])) {
                 </div>
             </div>
         </div>
-    </div>
-</section>
+</div>
 
 <?php include 'template/footer.php'; ?>

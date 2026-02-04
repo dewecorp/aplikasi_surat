@@ -156,23 +156,21 @@ include 'template/header.php';
 include 'template/sidebar.php';
 ?>
 
-<section class="content">
-    <div class="container-fluid">
+<div class="container-fluid px-5">
         <div class="block-header">
-            <h2>DATA GURU</h2>
+            <h2>Data Guru</h2>
         </div>
 
         <div class="row clearfix">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="card">
                     <div class="header">
-                        <h2>
-                            DAFTAR GURU
-                        </h2>
-                        <ul class="header-dropdown m-r--5">
-                            <li class="dropdown">
-                                <button type="button" class="btn btn-warning" id="btn-edit-multiple" onclick="showEditMultiple()" style="display:none; margin-right: 5px;">
-                                    <i class="fas fa-pen"></i> Edit Terpilih
+                        <div class="header-dropdown m-r--5">
+                                <button type="button" class="btn btn-warning btn-icon-split btn-sm" id="btn-edit-multiple" onclick="showEditMultiple()" style="display:none; margin-right: 5px;">
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-edit"></i>
+                                    </span>
+                                    <span class="text">Edit Terpilih</span>
                                 </button>
                                 <button type="button" class="btn btn-danger" id="btn-hapus-multiple" onclick="confirmDeleteMultiple()" style="display:none;">
                                     <i class="fas fa-trash"></i> Hapus Terpilih
@@ -185,8 +183,7 @@ include 'template/sidebar.php';
                                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
                                     <i class="fas fa-plus"></i> Tambah Guru
                                 </button>
-                            </li>
-                        </ul>
+                        </div>
                     </div>
                     <div class="body">
                         <div class="table-responsive">
@@ -234,8 +231,8 @@ include 'template/sidebar.php';
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>">
-                                                    <i class="fas fa-pen"></i>
+                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>" title="Edit">
+                                                    <i class="fas fa-edit"></i>
                                                 </button>
                                                 <a href="javascript:void(0);" onclick="confirmDelete('guru.php?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>')" class="btn btn-danger btn-circle">
                                                     <i class="fas fa-trash"></i>
@@ -314,8 +311,7 @@ include 'template/sidebar.php';
                 </div>
             </div>
         </div>
-    </div>
-</section>
+</div>
 
 <!-- Add Modal -->
 <div class="modal fade" id="addModal" tabindex="-1" role="dialog">
@@ -371,8 +367,8 @@ include 'template/sidebar.php';
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="add" class="btn btn-success waves-effect">SIMPAN</button>
-                    <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" name="add" class="btn btn-success">SIMPAN</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">TUTUP</button>
                 </div>
             </form>
         </div>
@@ -410,8 +406,8 @@ include 'template/sidebar.php';
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success waves-effect">SIMPAN PERUBAHAN</button>
-                        <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" class="btn btn-success">SIMPAN PERUBAHAN</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">TUTUP</button>
                 </div>
             </form>
         </div>
@@ -429,11 +425,11 @@ include 'template/sidebar.php';
                 <input type="hidden" id="csrf_token_import" value="<?php echo generate_csrf_token(); ?>">
                 <div class="alert alert-info">
                     Silahkan download template excel terlebih dahulu untuk memastikan format data yang benar.<br>
-                    <a href="download_template_guru.php" class="btn btn-warning waves-effect m-t-10" target="_blank">Download Template</a>
+                    <a href="download_template_guru.php" class="btn btn-warning m-t-10" target="_blank">Download Template</a>
                 </div>
                 
                 <div id="drop-zone" style="border: 2px dashed #ccc; padding: 20px; text-align: center; cursor: pointer; background-color: #f9f9f9;">
-                    <i class="material-icons" style="font-size: 48px; color: #ccc;">cloud_upload</i>
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #ccc;"></i>
                     <p style="margin-top: 10px; color: #777;">Drag & Drop file Excel disini atau klik untuk memilih file</p>
                     <input type="file" id="fileInput" name="file" style="display: none;" accept=".xlsx, .xls">
                 </div>
@@ -447,8 +443,8 @@ include 'template/sidebar.php';
                 <div id="upload-status" class="m-t-10 text-center"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary waves-effect" id="btnUpload" disabled>UPLOAD</button>
-                <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
+                <button type="button" class="btn btn-primary" id="btnUpload" disabled>UPLOAD</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">TUTUP</button>
             </div>
         </div>
     </div>
@@ -663,4 +659,3 @@ include 'template/sidebar.php';
         });
     }
 </script>
-

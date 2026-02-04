@@ -307,7 +307,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
 
 ?>
 
-<section class="content">
+<div class="container-fluid px-5">
     <style>
         /* Fix Dropdown Truncation */
         .bootstrap-select .dropdown-menu {
@@ -338,28 +338,23 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
             white-space: normal !important; /* Allow wrapping if needed */
         }
     </style>
-    <div class="container-fluid">
+    
         <div class="block-header">
-            <h2>SURAT KELUAR</h2>
+            <h2>Surat Keluar</h2>
         </div>
 
-        <div class="row clearfix">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <div class="card">
-                    <div class="header">
-                        <h2>
-                            DATA SURAT KELUAR
-                        </h2>
-                        <ul class="header-dropdown m-r--5">
-                            <li class="dropdown">
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalUndangan"><i class="fas fa-plus"></i> Surat Undangan</button>
-                                <button type="button" class="btn btn-info" data-toggle="modal" data-target="#modalPemberitahuan"><i class="fas fa-plus"></i> Surat Pemberitahuan</button>
-                                <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#modalTugas"><i class="fas fa-plus"></i> Surat Tugas</button>
-                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modalPindah"><i class="fas fa-plus"></i> Surat Pindah</button>
-                            </li>
-                        </ul>
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#modalUndangan"><i class="fas fa-plus"></i> Surat Undangan</button>
+                            <button type="button" class="btn btn-info mr-2" data-toggle="modal" data-target="#modalPemberitahuan"><i class="fas fa-plus"></i> Surat Pemberitahuan</button>
+                            <button type="button" class="btn btn-warning mr-2" data-toggle="modal" data-target="#modalTugas"><i class="fas fa-plus"></i> Surat Tugas</button>
+                            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modalPindah"><i class="fas fa-plus"></i> Surat Pindah</button>
+                        </div>
                     </div>
-                    <div class="body">
+                    <div class="card-body">
                         <!-- Filter -->
                         <form method="GET" class="row clearfix">
                             <div class="col-sm-2">
@@ -417,11 +412,11 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-3">
-                                <button type="submit" class="btn btn-info" title="Cari"><i class="fas fa-search"></i></button>
-                                <a href="surat_keluar.php" class="btn btn-secondary" title="Reset"><i class="fas fa-sync"></i></a>
-                                <a href="export_surat_keluar_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success" title="Export Excel"><i class="fas fa-file-excel"></i></a>
-                                <a href="export_surat_keluar_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning" title="Cetak PDF"><i class="fas fa-print"></i></a>
+                            <div class="col-sm-4 d-flex align-items-center flex-wrap">
+                                <button type="submit" class="btn btn-info mr-2 mb-2" title="Cari"><i class="fas fa-search"></i></button>
+                                <a href="surat_keluar.php" class="btn btn-secondary mr-2 mb-2" title="Reset"><i class="fas fa-sync"></i></a>
+                                <a href="export_surat_keluar_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success mr-2 mb-2" title="Export Excel"><i class="fas fa-file-excel"></i></a>
+                                <a href="export_surat_keluar_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning mb-2" title="Cetak PDF"><i class="fas fa-print"></i></a>
                             </div>
                         </form>
 
@@ -475,8 +470,8 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>">
-                                                    <i class="fas fa-pen"></i>
+                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>" title="Edit">
+                                                    <i class="fas fa-edit"></i>
                                                 </button>
                                                 <a href="javascript:void(0);" onclick="confirmDelete('surat_keluar.php?delete=<?php echo $row['id']; ?>')" class="btn btn-danger btn-circle">
                                                     <i class="fas fa-trash"></i>
@@ -778,8 +773,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                 </div>
             </div>
         </div>
-    </div>
-</section>
+</div>
 
 <!-- Modal Surat Undangan -->
 <div class="modal fade" id="modalUndangan" tabindex="-1" role="dialog">
