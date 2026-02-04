@@ -298,11 +298,11 @@ include 'template/sidebar.php';
                                             <td><?php echo $row['file_size']; ?></td>
                                             <td><?php echo tgl_indo(date('Y-m-d', strtotime($row['created_at']))) . ' ' . date('H:i', strtotime($row['created_at'])); ?></td>
                                             <td>
-                                                <a href="backup.php?download=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>" class="btn btn-success btn-sm">
-                                                    <i class="fas fa-download"></i> Download
+                                                <a href="backup.php?download=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>" class="btn btn-success btn-circle" title="Download">
+                                                    <i class="fas fa-download"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#restoreModal<?php echo $row['id']; ?>">
-                                                    <i class="fas fa-undo-alt"></i> Restore
+                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#restoreModal<?php echo $row['id']; ?>" title="Restore">
+                                                    <i class="fas fa-undo-alt"></i>
                                                 </button>
                                                  <a href="javascript:void(0);" onclick="confirmDelete('backup.php?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>')" class="btn btn-danger btn-circle" title="Hapus">
                                                      <i class="fas fa-trash"></i>

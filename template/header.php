@@ -152,8 +152,12 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
     <div id="wrapper">
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
-                <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-envelope-open-text"></i>
+                <div class="sidebar-brand-icon">
+                    <?php if (!empty($logo_sekolah) && file_exists('assets/images/' . $logo_sekolah)): ?>
+                        <img src="assets/images/<?php echo $logo_sekolah; ?>" alt="Logo" style="height: 50px;">
+                    <?php else: ?>
+                        <i class="fas fa-envelope-open-text"></i>
+                    <?php endif; ?>
                 </div>
                 <div class="sidebar-brand-text mx-3">SIMS</div>
             </a>
@@ -221,9 +225,6 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
                         <i class="fa fa-bars"></i>
                     </button>
                     <a class="navbar-brand d-none d-sm-inline-block" href="index.php">
-                        <?php if (!empty($logo_sekolah) && file_exists('assets/images/' . $logo_sekolah)): ?>
-                            <img src="assets/images/<?php echo $logo_sekolah; ?>" alt="Logo" style="height: 32px; margin-right: 10px;">
-                        <?php endif; ?>
                         <span class="h6 mb-0 text-white">SISTEM MANAJEMEN SURAT | <?php echo strtoupper($nama_sekolah); ?></span>
                     </a>
                     <ul class="navbar-nav ml-auto">

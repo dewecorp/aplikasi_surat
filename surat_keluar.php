@@ -455,17 +455,21 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                             <td>
                                                 <?php if (in_array($row['jenis_surat'], ['Undangan', 'Pemberitahuan'])): ?>
                                                     <div class="btn-group">
-                                                        <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                            <i class="fas fa-print"></i> Cetak <span class="caret"></span>
+                                                        <button type="button" class="btn btn-info btn-sm dropdown-toggle shadow-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-print"></i> Cetak
                                                         </button>
-                                                        <ul class="dropdown-menu">
-                                                            <li><a href="print_surat_keluar.php?id=<?php echo $row['id']; ?>&mode=portrait" target="_blank">1 Halaman 1 Surat (Portrait)</a></li>
-                                                            <li><a href="print_surat_keluar.php?id=<?php echo $row['id']; ?>&mode=landscape" target="_blank">1 Halaman 2 Surat (Landscape)</a></li>
-                                                        </ul>
+                                                        <div class="dropdown-menu shadow animated--grow-in">
+                                                            <a class="dropdown-item" href="print_surat_keluar.php?id=<?php echo $row['id']; ?>&mode=portrait" target="_blank">
+                                                                <i class="fas fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i> 1 Halaman 1 Surat (Portrait)
+                                                            </a>
+                                                            <a class="dropdown-item" href="print_surat_keluar.php?id=<?php echo $row['id']; ?>&mode=landscape" target="_blank">
+                                                                <i class="fas fa-columns fa-sm fa-fw mr-2 text-gray-400"></i> 1 Halaman 2 Surat (Landscape)
+                                                            </a>
+                                                        </div>
                                                     </div>
                                                 <?php else: ?>
-                                                    <a href="print_surat_keluar.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-primary btn-sm">
-                                                        <i class="fas fa-print"></i> Lihat/Unduh
+                                                    <a href="print_surat_keluar.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-info btn-sm shadow-sm">
+                                                        <i class="fas fa-file-download"></i> Lihat/Unduh
                                                     </a>
                                                 <?php endif; ?>
                                             </td>
