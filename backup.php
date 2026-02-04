@@ -301,13 +301,13 @@ include 'template/sidebar.php';
                                             <td><?php echo $row['file_size']; ?></td>
                                             <td><?php echo tgl_indo(date('Y-m-d', strtotime($row['created_at']))) . ' ' . date('H:i', strtotime($row['created_at'])); ?></td>
                                             <td>
-                                                <a href="backup.php?download=<?php echo $row['id']; ?>" class="btn btn-success btn-xs waves-effect">
+                                                <a href="backup.php?download=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>" class="btn btn-success btn-xs waves-effect">
                                                     <i class="material-icons">file_download</i> Download
                                                 </a>
                                                 <button type="button" class="btn btn-warning btn-xs waves-effect" data-toggle="modal" data-target="#restoreModal<?php echo $row['id']; ?>">
                                                     <i class="material-icons">restore</i> Restore
                                                 </button>
-                                                <a href="javascript:void(0);" onclick="confirmDelete('backup.php?delete=<?php echo $row['id']; ?>')" class="btn btn-danger btn-xs waves-effect">
+                                                <a href="javascript:void(0);" onclick="confirmDelete('backup.php?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>')" class="btn btn-danger btn-xs waves-effect">
                                                     <i class="material-icons">delete</i> Hapus
                                                 </a>
                                             </td>
