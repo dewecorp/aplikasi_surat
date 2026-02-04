@@ -134,7 +134,6 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
                 <ul class="nav navbar-nav navbar-right">
                     <li>
                         <a href="javascript:void(0);">
-                            <i class="material-icons">access_time</i>
                             <span id="current-time"></span>
                         </a>
                     </li>
