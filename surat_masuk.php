@@ -160,8 +160,8 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                         </h2>
                         <ul class="header-dropdown m-r--5">
                             <li class="dropdown">
-                                <button type="button" class="btn btn-primary waves-effect" data-toggle="modal" data-target="#addModal">
-                                    <i class="material-icons">add</i> Tambah Surat Masuk
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
+                                    <i class="fas fa-plus"></i> Tambah Surat Masuk
                                 </button>
                             </li>
                         </ul>
@@ -224,10 +224,10 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                 </div>
                             </div>
                             <div class="col-sm-3">
-                                <button type="submit" class="btn btn-info waves-effect" title="Cari"><i class="material-icons">search</i></button>
-                                <a href="surat_masuk.php" class="btn btn-default waves-effect" title="Reset"><i class="material-icons">refresh</i></a>
-                                <a href="export_surat_masuk_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success waves-effect" title="Export Excel"><i class="material-icons">grid_on</i></a>
-                                <a href="export_surat_masuk_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning waves-effect" title="Cetak PDF"><i class="material-icons">print</i></a>
+                                <button type="submit" class="btn btn-info" title="Cari"><i class="fas fa-search"></i></button>
+                                <a href="surat_masuk.php" class="btn btn-secondary" title="Reset"><i class="fas fa-sync"></i></a>
+                                <a href="export_surat_masuk_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success" title="Export Excel"><i class="fas fa-file-excel"></i></a>
+                                <a href="export_surat_masuk_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning" title="Cetak PDF"><i class="fas fa-print"></i></a>
                             </div>
                         </form>
 
@@ -260,19 +260,19 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                             <td><?php echo htmlspecialchars($row['pengirim']); ?></td>
                                             <td>
                                                 <?php if (!empty($row['file']) && file_exists('uploads/' . $row['file'])): ?>
-                                                    <a href="uploads/<?php echo $row['file']; ?>" target="_blank" class="btn btn-primary btn-xs waves-effect">
-                                                        <i class="material-icons">file_download</i> Lihat
+                                                    <a href="uploads/<?php echo $row['file']; ?>" target="_blank" class="btn btn-primary btn-sm">
+                                                        <i class="fas fa-download"></i> Lihat
                                                     </a>
                                                 <?php else: ?>
                                                     -
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <button type="button" class="btn btn-warning btn-circle waves-effect waves-circle waves-float" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>">
-                                                    <i class="material-icons">edit</i>
+                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>">
+                                                    <i class="fas fa-pen"></i>
                                                 </button>
-                                                <a href="javascript:void(0);" onclick="confirmDelete('surat_masuk.php?delete=<?php echo $row['id']; ?>')" class="btn btn-danger btn-circle waves-effect waves-circle waves-float">
-                                                    <i class="material-icons">delete</i>
+                                                <a href="javascript:void(0);" onclick="confirmDelete('surat_masuk.php?delete=<?php echo $row['id']; ?>')" class="btn btn-danger btn-circle">
+                                                    <i class="fas fa-trash"></i>
                                                 </a>
                                             </td>
                                         </tr>
@@ -324,8 +324,8 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="submit" name="edit" class="btn btn-success waves-effect">SIMPAN</button>
-                                                            <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
+                                                            <button type="submit" name="edit" class="btn btn-success">SIMPAN</button>
+                                                            <button type="button" class="btn btn-danger" data-dismiss="modal">TUTUP</button>
                                                         </div>
                                                     </form>
                                                 </div>

@@ -7,6 +7,12 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+// Cek Role, hanya admin yang boleh akses
+if (strtolower(trim($_SESSION['role'] ?? '')) != 'admin') {
+    echo "<script>window.location='index.php';</script>";
+    exit();
+}
+
 // Handle Add
 if (isset($_POST['add'])) {
     if (!verify_csrf_token($_POST['csrf_token'])) {
@@ -165,19 +171,19 @@ include 'template/sidebar.php';
                         </h2>
                         <ul class="header-dropdown m-r--5">
                             <li class="dropdown">
-                                <button type="button" class="btn btn-warning waves-effect" id="btn-edit-multiple" onclick="showEditMultiple()" style="display:none; margin-right: 5px;">
-                                    <i class="material-icons">edit</i> Edit Terpilih
+                                <button type="button" class="btn btn-warning" id="btn-edit-multiple" onclick="showEditMultiple()" style="display:none; margin-right: 5px;">
+                                    <i class="fas fa-pen"></i> Edit Terpilih
                                 </button>
-                                <button type="button" class="btn btn-danger waves-effect" id="btn-hapus-multiple" onclick="confirmDeleteMultiple()" style="display:none;">
-                                    <i class="material-icons">delete</i> Hapus Terpilih
+                                <button type="button" class="btn btn-danger" id="btn-hapus-multiple" onclick="confirmDeleteMultiple()" style="display:none;">
+                                    <i class="fas fa-trash"></i> Hapus Terpilih
                                 </button>
-                                <a href="export_guru_excel.php?csrf_token=<?php echo generate_csrf_token(); ?>" target="_blank" class="btn btn-success waves-effect" title="Export Excel"><i class="material-icons">grid_on</i></a>
-                                <a href="export_guru_print.php?csrf_token=<?php echo generate_csrf_token(); ?>" target="_blank" class="btn btn-warning waves-effect" title="Cetak PDF"><i class="material-icons">print</i></a>
-                                <button type="button" class="btn btn-info waves-effect" data-toggle="modal" data-target="#importModal">
-                                    <i class="material-icons">file_upload</i> Import Excel
+                                <a href="export_guru_excel.php?csrf_token=<?php echo generate_csrf_token(); ?>" target="_blank" class="btn btn-success" title="Export Excel"><i class="fas fa-file-excel"></i></a>
+                                <a href="export_guru_print.php?csrf_token=<?php echo generate_csrf_token(); ?>" target="_blank" class="btn btn-warning" title="Cetak PDF"><i class="fas fa-print"></i></a>
+                                <button type="button" class="btn btn-info" data-toggle="modal" data-target="#importModal">
+                                    <i class="fas fa-file-upload"></i> Import Excel
                                 </button>
-                                <button type="button" class="btn btn-primary waves-effect" data-toggle="modal" data-target="#addModal">
-                                    <i class="material-icons">add</i> Tambah Guru
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
+                                    <i class="fas fa-plus"></i> Tambah Guru
                                 </button>
                             </li>
                         </ul>
@@ -228,11 +234,11 @@ include 'template/sidebar.php';
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <button type="button" class="btn btn-warning btn-circle waves-effect waves-circle waves-float" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>">
-                                                    <i class="material-icons">edit</i>
+                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>">
+                                                    <i class="fas fa-pen"></i>
                                                 </button>
-                                                <a href="javascript:void(0);" onclick="confirmDelete('guru.php?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>')" class="btn btn-danger btn-circle waves-effect waves-circle waves-float">
-                                                    <i class="material-icons">delete</i>
+                                                <a href="javascript:void(0);" onclick="confirmDelete('guru.php?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>')" class="btn btn-danger btn-circle">
+                                                    <i class="fas fa-trash"></i>
                                                 </a>
                                             </td>
                                         </tr>
@@ -292,8 +298,8 @@ include 'template/sidebar.php';
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="submit" name="edit" class="btn btn-success waves-effect">SIMPAN</button>
-                                                            <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
+                                                            <button type="submit" name="edit" class="btn btn-success">SIMPAN</button>
+                                                            <button type="button" class="btn btn-danger" data-dismiss="modal">TUTUP</button>
                                                         </div>
                                                     </form>
                                                 </div>

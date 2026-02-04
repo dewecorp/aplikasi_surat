@@ -352,10 +352,10 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                         </h2>
                         <ul class="header-dropdown m-r--5">
                             <li class="dropdown">
-                                <button type="button" class="btn btn-primary waves-effect" data-toggle="modal" data-target="#modalUndangan">Surat Undangan</button>
-                                <button type="button" class="btn btn-info waves-effect" data-toggle="modal" data-target="#modalPemberitahuan">Surat Pemberitahuan</button>
-                                <button type="button" class="btn btn-warning waves-effect" data-toggle="modal" data-target="#modalTugas">Surat Tugas</button>
-                                <button type="button" class="btn btn-success waves-effect" data-toggle="modal" data-target="#modalPindah">Surat Pindah</button>
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalUndangan"><i class="fas fa-plus"></i> Surat Undangan</button>
+                                <button type="button" class="btn btn-info" data-toggle="modal" data-target="#modalPemberitahuan"><i class="fas fa-plus"></i> Surat Pemberitahuan</button>
+                                <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#modalTugas"><i class="fas fa-plus"></i> Surat Tugas</button>
+                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modalPindah"><i class="fas fa-plus"></i> Surat Pindah</button>
                             </li>
                         </ul>
                     </div>
@@ -418,10 +418,10 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                 </div>
                             </div>
                             <div class="col-sm-3">
-                                <button type="submit" class="btn btn-info waves-effect" title="Cari"><i class="material-icons">search</i></button>
-                                <a href="surat_keluar.php" class="btn btn-default waves-effect" title="Reset"><i class="material-icons">refresh</i></a>
-                                <a href="export_surat_keluar_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success waves-effect" title="Export Excel"><i class="material-icons">grid_on</i></a>
-                                <a href="export_surat_keluar_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning waves-effect" title="Cetak PDF"><i class="material-icons">print</i></a>
+                                <button type="submit" class="btn btn-info" title="Cari"><i class="fas fa-search"></i></button>
+                                <a href="surat_keluar.php" class="btn btn-secondary" title="Reset"><i class="fas fa-sync"></i></a>
+                                <a href="export_surat_keluar_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success" title="Export Excel"><i class="fas fa-file-excel"></i></a>
+                                <a href="export_surat_keluar_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning" title="Cetak PDF"><i class="fas fa-print"></i></a>
                             </div>
                         </form>
 
@@ -460,8 +460,8 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                             <td>
                                                 <?php if (in_array($row['jenis_surat'], ['Undangan', 'Pemberitahuan'])): ?>
                                                     <div class="btn-group">
-                                                        <button type="button" class="btn btn-primary btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                            <i class="material-icons">print</i> Cetak <span class="caret"></span>
+                                                        <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-print"></i> Cetak <span class="caret"></span>
                                                         </button>
                                                         <ul class="dropdown-menu">
                                                             <li><a href="print_surat_keluar.php?id=<?php echo $row['id']; ?>&mode=portrait" target="_blank">1 Halaman 1 Surat (Portrait)</a></li>
@@ -469,17 +469,17 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                         </ul>
                                                     </div>
                                                 <?php else: ?>
-                                                    <a href="print_surat_keluar.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-primary btn-xs waves-effect">
-                                                        <i class="material-icons">print</i> Lihat/Unduh
+                                                    <a href="print_surat_keluar.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-primary btn-sm">
+                                                        <i class="fas fa-print"></i> Lihat/Unduh
                                                     </a>
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <button type="button" class="btn btn-warning btn-circle waves-effect waves-circle waves-float" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>">
-                                                    <i class="material-icons">edit</i>
+                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>">
+                                                    <i class="fas fa-pen"></i>
                                                 </button>
-                                                <a href="javascript:void(0);" onclick="confirmDelete('surat_keluar.php?delete=<?php echo $row['id']; ?>')" class="btn btn-danger btn-circle waves-effect waves-circle waves-float">
-                                                    <i class="material-icons">delete</i>
+                                                <a href="javascript:void(0);" onclick="confirmDelete('surat_keluar.php?delete=<?php echo $row['id']; ?>')" class="btn btn-danger btn-circle">
+                                                    <i class="fas fa-trash"></i>
                                                 </a>
                                             </td>
                                         </tr>
@@ -619,7 +619,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                 <label>Penutup Surat</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <textarea name="penutup_surat" class="form-control no-resize" rows="4"><?php echo $row['penutup_surat']; ?></textarea>
+                                                                        <textarea name="penutup_surat" class="form-control no-resize" rows="4"><?php echo htmlspecialchars($row['penutup_surat']); ?></textarea>
                                                                     </div>
                                                                 </div>
 
@@ -627,50 +627,52 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                 <label>Lokasi Kegiatan</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <input type="text" class="form-control" name="acara_tempat" value="<?php echo $row['acara_tempat']; ?>" required>
+                                                                        <input type="text" class="form-control" name="acara_tempat" value="<?php echo htmlspecialchars($row['acara_tempat']); ?>">
                                                                     </div>
                                                                 </div>
-
                                                                 <label>Waktu Kegiatan</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <input type="text" class="form-control" name="acara_waktu" value="<?php echo $row['acara_waktu']; ?>" required>
+                                                                        <input type="text" class="form-control" name="acara_waktu" value="<?php echo htmlspecialchars($row['acara_waktu']); ?>">
                                                                     </div>
                                                                 </div>
-
-                                                                <?php
-                                                                    $is_range = (strpos($row['acara_hari_tanggal'], ' s.d ') !== false);
-                                                                    $tgl_single = $is_range ? '' : $row['acara_hari_tanggal'];
-                                                                    $parts = $is_range ? explode(' s.d ', $row['acara_hari_tanggal']) : [];
-                                                                    $tgl_start = $is_range ? $parts[0] : '';
-                                                                    $tgl_end = $is_range ? $parts[1] : '';
-                                                                ?>
-
+                                                                
                                                                 <label>Durasi Kegiatan</label>
                                                                 <div class="form-group">
-                                                                    <input name="durasi_kegiatan" type="radio" id="radio_1_<?php echo $row['id']; ?>" value="1" <?php echo !$is_range ? 'checked' : ''; ?> class="with-gap radio-col-blue durasi-radio" data-id="<?php echo $row['id']; ?>" />
+                                                                    <?php 
+                                                                    $is_single = (strpos($row['acara_hari_tanggal'], ' s.d ') === false);
+                                                                    ?>
+                                                                    <input name="durasi_kegiatan" type="radio" id="radio_1_<?php echo $row['id']; ?>" value="1" <?php echo $is_single ? 'checked' : ''; ?> class="with-gap radio-col-blue durasi-radio" data-id="<?php echo $row['id']; ?>" />
                                                                     <label for="radio_1_<?php echo $row['id']; ?>">1 Hari</label>
-                                                                    
-                                                                    <input name="durasi_kegiatan" type="radio" id="radio_2_<?php echo $row['id']; ?>" value="more" <?php echo $is_range ? 'checked' : ''; ?> class="with-gap radio-col-blue durasi-radio" data-id="<?php echo $row['id']; ?>" />
+                                                                    <input name="durasi_kegiatan" type="radio" id="radio_2_<?php echo $row['id']; ?>" value="more" <?php echo !$is_single ? 'checked' : ''; ?> class="with-gap radio-col-blue durasi-radio" data-id="<?php echo $row['id']; ?>" />
                                                                     <label for="radio_2_<?php echo $row['id']; ?>">Lebih dari 1 Hari</label>
                                                                 </div>
 
-                                                                <div id="date_single_<?php echo $row['id']; ?>" style="<?php echo $is_range ? 'display: none;' : ''; ?>">
+                                                                <div id="date_single_<?php echo $row['id']; ?>" style="<?php echo $is_single ? '' : 'display:none;'; ?>">
                                                                     <label>Tanggal Kegiatan</label>
                                                                     <div class="form-group">
                                                                         <div class="form-line">
-                                                                            <input type="date" class="form-control" name="tgl_kegiatan_single" value="<?php echo $tgl_single; ?>" <?php echo !$is_range ? 'required' : ''; ?>>
+                                                                            <input type="date" class="form-control" name="tgl_kegiatan_single" value="<?php echo $is_single ? $row['acara_hari_tanggal'] : ''; ?>">
                                                                         </div>
                                                                     </div>
                                                                 </div>
 
-                                                                <div id="date_range_<?php echo $row['id']; ?>" style="<?php echo !$is_range ? 'display: none;' : ''; ?>">
+                                                                <div id="date_range_<?php echo $row['id']; ?>" style="<?php echo !$is_single ? '' : 'display:none;'; ?>">
+                                                                    <?php
+                                                                    $start_date = '';
+                                                                    $end_date = '';
+                                                                    if (!$is_single) {
+                                                                        $dates = explode(' s.d ', $row['acara_hari_tanggal']);
+                                                                        $start_date = isset($dates[0]) ? $dates[0] : '';
+                                                                        $end_date = isset($dates[1]) ? $dates[1] : '';
+                                                                    }
+                                                                    ?>
                                                                     <div class="row clearfix">
                                                                         <div class="col-sm-6">
                                                                             <label>Mulai Tanggal</label>
                                                                             <div class="form-group">
                                                                                 <div class="form-line">
-                                                                                    <input type="date" class="form-control" name="tgl_kegiatan_start" value="<?php echo $tgl_start; ?>" <?php echo $is_range ? 'required' : ''; ?>>
+                                                                                    <input type="date" class="form-control" name="tgl_kegiatan_start" value="<?php echo $start_date; ?>">
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -678,7 +680,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                             <label>Sampai Tanggal</label>
                                                                             <div class="form-group">
                                                                                 <div class="form-line">
-                                                                                    <input type="date" class="form-control" name="tgl_kegiatan_end" value="<?php echo $tgl_end; ?>" <?php echo $is_range ? 'required' : ''; ?>>
+                                                                                    <input type="date" class="form-control" name="tgl_kegiatan_end" value="<?php echo $end_date; ?>">
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -691,16 +693,16 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                         <label>NIS / NISN</label>
                                                                         <div class="form-group">
                                                                             <div class="form-line">
-                                                                                <input type="text" class="form-control" name="nis_siswa" value="<?php echo isset($row['nis_siswa']) ? htmlspecialchars($row['nis_siswa']) : ''; ?>">
+                                                                                <input type="text" class="form-control" name="nis_siswa" value="<?php echo htmlspecialchars($row['nis_siswa']); ?>">
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-sm-6">
                                                                         <label>Jenis Kelamin</label>
                                                                         <div class="form-group">
-                                                                            <input name="jenis_kelamin_siswa" type="radio" id="radio_jk_1_<?php echo $row['id']; ?>" value="Laki-Laki" class="with-gap radio-col-blue" <?php echo (isset($row['jenis_kelamin_siswa']) && $row['jenis_kelamin_siswa'] == 'Laki-Laki') ? 'checked' : ''; ?> />
+                                                                            <input name="jenis_kelamin_siswa" type="radio" id="radio_jk_1_<?php echo $row['id']; ?>" value="Laki-Laki" class="with-gap radio-col-blue" <?php echo ($row['jenis_kelamin_siswa'] == 'Laki-Laki') ? 'checked' : ''; ?> />
                                                                             <label for="radio_jk_1_<?php echo $row['id']; ?>">Laki-Laki</label>
-                                                                            <input name="jenis_kelamin_siswa" type="radio" id="radio_jk_2_<?php echo $row['id']; ?>" value="Perempuan" class="with-gap radio-col-blue" <?php echo (isset($row['jenis_kelamin_siswa']) && $row['jenis_kelamin_siswa'] == 'Perempuan') ? 'checked' : ''; ?> />
+                                                                            <input name="jenis_kelamin_siswa" type="radio" id="radio_jk_2_<?php echo $row['id']; ?>" value="Perempuan" class="with-gap radio-col-blue" <?php echo ($row['jenis_kelamin_siswa'] == 'Perempuan') ? 'checked' : ''; ?> />
                                                                             <label for="radio_jk_2_<?php echo $row['id']; ?>">Perempuan</label>
                                                                         </div>
                                                                     </div>
@@ -710,7 +712,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                         <label>Tempat Lahir</label>
                                                                         <div class="form-group">
                                                                             <div class="form-line">
-                                                                                <input type="text" class="form-control" name="tempat_lahir_siswa" value="<?php echo isset($row['tempat_lahir_siswa']) ? htmlspecialchars($row['tempat_lahir_siswa']) : ''; ?>">
+                                                                                <input type="text" class="form-control" name="tempat_lahir_siswa" value="<?php echo htmlspecialchars($row['tempat_lahir_siswa']); ?>">
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -718,7 +720,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                         <label>Tanggal Lahir</label>
                                                                         <div class="form-group">
                                                                             <div class="form-line">
-                                                                                <input type="date" class="form-control" name="tgl_lahir_siswa" value="<?php echo isset($row['tgl_lahir_siswa']) ? $row['tgl_lahir_siswa'] : ''; ?>">
+                                                                                <input type="date" class="form-control" name="tgl_lahir_siswa" value="<?php echo $row['tgl_lahir_siswa']; ?>">
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -726,7 +728,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                 <label>Kelas</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <input type="text" class="form-control" name="kelas_siswa" value="<?php echo isset($row['kelas_siswa']) ? $row['kelas_siswa'] : ''; ?>" placeholder="Contoh: II (Dua)">
+                                                                        <input type="text" class="form-control" name="kelas_siswa" value="<?php echo htmlspecialchars($row['kelas_siswa']); ?>">
                                                                     </div>
                                                                 </div>
                                                                 
@@ -734,19 +736,19 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                 <label>Nama Orang Tua / Wali</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <input type="text" class="form-control" name="nama_wali" value="<?php echo isset($row['nama_wali']) ? htmlspecialchars($row['nama_wali']) : ''; ?>">
+                                                                        <input type="text" class="form-control" name="nama_wali" value="<?php echo htmlspecialchars($row['nama_wali']); ?>">
                                                                     </div>
                                                                 </div>
                                                                 <label>Pekerjaan</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <input type="text" class="form-control" name="pekerjaan_wali" value="<?php echo isset($row['pekerjaan_wali']) ? $row['pekerjaan_wali'] : ''; ?>">
+                                                                        <input type="text" class="form-control" name="pekerjaan_wali" value="<?php echo htmlspecialchars($row['pekerjaan_wali']); ?>">
                                                                     </div>
                                                                 </div>
                                                                 <label>Alamat</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <textarea name="alamat_wali" class="form-control no-resize" rows="2"><?php echo isset($row['alamat_wali']) ? $row['alamat_wali'] : ''; ?></textarea>
+                                                                        <textarea name="alamat_wali" class="form-control no-resize" rows="2"><?php echo htmlspecialchars($row['alamat_wali']); ?></textarea>
                                                                     </div>
                                                                 </div>
                                                                 
@@ -754,23 +756,15 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                 <label>Pindah ke Sekolah (SD/MI)</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <input type="text" class="form-control" name="tujuan_pindah" value="<?php echo isset($row['tujuan_pindah']) ? htmlspecialchars($row['tujuan_pindah']) : ''; ?>">
-                                                                    </div>
-                                                                </div>
-
-                                                            <?php else: // Default fallback for other types ?>
-                                                                <label>Keterangan</label>
-                                                                <div class="form-group">
-                                                                    <div class="form-line">
-                                                                        <textarea name="keterangan" class="form-control no-resize"><?php echo htmlspecialchars($row['keterangan']); ?></textarea>
+                                                                        <input type="text" class="form-control" name="tujuan_pindah" value="<?php echo htmlspecialchars($row['tujuan_pindah']); ?>">
                                                                     </div>
                                                                 </div>
                                                             <?php endif; ?>
 
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="submit" name="edit" class="btn btn-success waves-effect">SIMPAN</button>
-                                                            <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
+                                                            <button type="submit" name="edit" class="btn btn-primary">SIMPAN</button>
+                                                            <button type="button" class="btn btn-danger" data-dismiss="modal">TUTUP</button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -847,8 +841,8 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="add" class="btn btn-success waves-effect">SIMPAN</button>
-                    <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" name="add" class="btn btn-success"><i class="fas fa-save"></i> SIMPAN</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fas fa-times"></i> TUTUP</button>
                 </div>
             </form>
         </div>
@@ -907,8 +901,8 @@ Wassalamu'alaikum Wr. Wb.</textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="add" class="btn btn-success waves-effect">SIMPAN</button>
-                    <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" name="add" class="btn btn-success"><i class="fas fa-save"></i> SIMPAN</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fas fa-times"></i> TUTUP</button>
                 </div>
             </form>
         </div>
@@ -1009,8 +1003,8 @@ Wassalamu'alaikum Wr. Wb.</textarea>
 
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="add" class="btn btn-success waves-effect">SIMPAN</button>
-                    <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" name="add" class="btn btn-success"><i class="fas fa-save"></i> SIMPAN</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fas fa-times"></i> TUTUP</button>
                 </div>
             </form>
         </div>
@@ -1114,8 +1108,8 @@ Wassalamu'alaikum Wr. Wb.</textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="add" class="btn btn-success waves-effect">SIMPAN</button>
-                    <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">TUTUP</button>
+                    <button type="submit" name="add" class="btn btn-success"><i class="fas fa-save"></i> SIMPAN</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fas fa-times"></i> TUTUP</button>
                 </div>
             </form>
         </div>

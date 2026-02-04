@@ -29,126 +29,122 @@ $titles = [
 $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_replace('_', ' ', $page));
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title><?php echo $current_page_title; ?> | SIMS</title>
-    <!-- Favicon-->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%231e88e5%22><path d=%22M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z%22/></svg>" type="image/svg+xml">
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css">
-
-    <!-- Bootstrap Core Css -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Waves Effect Css -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/node-waves/0.7.6/waves.min.css" rel="stylesheet" />
-
-    <!-- Animation Css -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" rel="stylesheet" />
-
-    <!-- Sweetalert Css -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" rel="stylesheet" />
-
-    <!-- JQuery DataTable Css -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/css/dataTables.bootstrap.min.css" rel="stylesheet">
-
-    <!-- Bootstrap Select Css -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" rel="stylesheet" />
-
-    <!-- Custom Css -->
-    <link href="assets/css/style.css" rel="stylesheet">
-
-    <!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
-    <link href="assets/css/themes/all-themes.css" rel="stylesheet" />
-
-    <style>
-        .sidebar .user-info {
-            background: linear-gradient(45deg, #0d47a1, #1976d2) !important;
-        }
-        /* Custom Gradient Blue Theme */
-        .navbar {
-            background: linear-gradient(45deg, #0d47a1, #1976d2) !important;
-        }
-        .sidebar .menu .list li.active > :first-child i, 
-        .sidebar .menu .list li.active > :first-child span {
-            color: #0d47a1 !important;
-        }
-        .page-loader-wrapper {
-            background: #eee;
-        }
-    </style>
+    <link href="assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900" rel="stylesheet">
+    <link href="assets/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="assets/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
 </head>
 
-<body class="theme-blue">
-    <!-- Page Loader -->
-    <div class="page-loader-wrapper">
-        <div class="loader">
-            <div class="preloader">
-                <div class="spinner-layer pl-blue">
-                    <div class="circle-clipper left">
-                        <div class="circle"></div>
-                    </div>
-                    <div class="circle-clipper right">
-                        <div class="circle"></div>
-                    </div>
+<body id="page-top">
+    <div id="wrapper">
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-envelope-open-text"></i>
                 </div>
+                <div class="sidebar-brand-text mx-3">SIMS</div>
+            </a>
+            <hr class="sidebar-divider my-0">
+            <li class="nav-item <?php echo ($page == 'index') ? 'active' : ''; ?>">
+                <a class="nav-link" href="index.php">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard</span></a>
+            </li>
+            <hr class="sidebar-divider">
+            <div class="sidebar-heading">Menu</div>
+            <?php if (strtolower(trim($_SESSION['role'] ?? '')) == 'admin'): ?>
+            <li class="nav-item <?php echo ($page == 'guru') ? 'active' : ''; ?>">
+                <a class="nav-link" href="guru.php">
+                    <i class="fas fa-user"></i>
+                    <span>Data Guru</span></a>
+            </li>
+            <?php endif; ?>
+            <li class="nav-item <?php echo ($page == 'surat_masuk') ? 'active' : ''; ?>">
+                <a class="nav-link" href="surat_masuk.php">
+                    <i class="fas fa-inbox"></i>
+                    <span>Surat Masuk</span></a>
+            </li>
+            <li class="nav-item <?php echo ($page == 'surat_keluar') ? 'active' : ''; ?>">
+                <a class="nav-link" href="surat_keluar.php">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Surat Keluar</span></a>
+            </li>
+            <li class="nav-item <?php echo ($page == 'riwayat') ? 'active' : ''; ?>">
+                <a class="nav-link" href="riwayat.php">
+                    <i class="fas fa-history"></i>
+                    <span>Riwayat</span></a>
+            </li>
+            <?php if (strtolower(trim($_SESSION['role'] ?? '')) == 'admin'): ?>
+            <li class="nav-item <?php echo ($page == 'pengguna') ? 'active' : ''; ?>">
+                <a class="nav-link" href="pengguna.php">
+                    <i class="fas fa-users"></i>
+                    <span>Pengguna</span></a>
+            </li>
+            <li class="nav-item <?php echo ($page == 'pengaturan') ? 'active' : ''; ?>">
+                <a class="nav-link" href="pengaturan.php">
+                    <i class="fas fa-cogs"></i>
+                    <span>Pengaturan</span></a>
+            </li>
+            <?php endif; ?>
+            <li class="nav-item">
+                <a class="nav-link" href="backup.php">
+                    <i class="fas fa-database"></i>
+                    <span>Backup Restore</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="javascript:void(0);" onclick="confirmLogout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span></a>
+            </li>
+            <hr class="sidebar-divider d-none d-md-block">
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
-            <p>Please wait...</p>
-        </div>
-    </div>
-    <!-- #END# Page Loader -->
-    <script>
-        // Failsafe: Hide preloader after 5 seconds if it's still visible
-        // This handles cases where JS/CSS fails to load (e.g. 404 errors)
-        setTimeout(function() {
-            var loader = document.querySelector('.page-loader-wrapper');
-            if(loader) {
-                loader.style.display = 'none';
-            }
-        }, 5000);
-    </script>
-    <!-- Overlay For Sidebars -->
-    <div class="overlay"></div>
-    <!-- #END# Overlay For Sidebars -->
-    
-    <!-- Top Bar -->
-    <nav class="navbar">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <a href="javascript:void(0);" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false"></a>
-                <a href="javascript:void(0);" class="bars"></a>
-                <a class="navbar-brand" href="index.php" style="display: flex; align-items: center;">
-                    <?php if (!empty($logo_sekolah) && file_exists('assets/images/' . $logo_sekolah)): ?>
-                        <img src="assets/images/<?php echo $logo_sekolah; ?>" alt="Logo" style="height: 35px; margin-right: 10px; filter: drop-shadow(0 0 4px #fff);">
-                    <?php endif; ?>
-                    <span style="font-size: 18px;">SISTEM MANAJEMEN SURAT | <?php echo strtoupper($nama_sekolah); ?></span>
-                </a>
-            </div>
-            <div class="collapse navbar-collapse" id="navbar-collapse">
-                <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <a href="javascript:void(0);">
-                            <span id="current-time"></span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    <!-- #Top Bar -->
-    
-    <script>
-        function updateTime() {
-            var now = new Date();
-            var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
-            document.getElementById('current-time').innerText = now.toLocaleDateString('id-ID', options);
-        }
-        setInterval(updateTime, 1000);
-        window.onload = updateTime;
-    </script>
+        </ul>
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <nav class="navbar navbar-expand navbar-dark bg-gradient-primary topbar mb-4 static-top shadow">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <a class="navbar-brand d-none d-sm-inline-block" href="index.php">
+                        <?php if (!empty($logo_sekolah) && file_exists('assets/images/' . $logo_sekolah)): ?>
+                            <img src="assets/images/<?php echo $logo_sekolah; ?>" alt="Logo" style="height: 32px; margin-right: 10px;">
+                        <?php endif; ?>
+                        <span class="h6 mb-0 text-white">SISTEM MANAJEMEN SURAT | <?php echo strtoupper($nama_sekolah); ?></span>
+                    </a>
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item d-none d-sm-block">
+                            <span class="nav-link text-white"><i class="far fa-clock mr-1"></i><span id="current-time"></span></span>
+                        </li>
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                                <span class="mr-2 d-none d-lg-inline text-white small"><?php echo $_SESSION['nama'] ?? 'Pengguna'; ?></span>
+                                <i class="fas fa-user-circle fa-lg text-white"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="pengaturan.php"><i class="fas fa-cog fa-sm fa-fw mr-2 text-gray-400"></i>Pengaturan</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="javascript:void(0);" onclick="confirmLogout()"><i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>Logout</a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+                <script>
+                    function updateTime() {
+                        var now = new Date();
+                        var opt = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+                        var el = document.getElementById('current-time');
+                        if (el) el.innerText = now.toLocaleDateString('id-ID', opt);
+                    }
+                    setInterval(updateTime, 1000);
+                    updateTime();
+                </script>
