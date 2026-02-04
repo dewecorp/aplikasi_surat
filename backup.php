@@ -1,7 +1,7 @@
 <?php
 include 'config.php';
 
-session_start();
+require_once 'session_init.php';
 if (!isset($_SESSION['user_id'])) {
     if (isset($_POST['is_ajax'])) {
         header('Content-Type: application/json');

@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'session_init.php';
 include 'config.php';
 
 // Get Settings
