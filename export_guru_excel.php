@@ -6,6 +6,10 @@ if (!isset($_SESSION['user_id'])) {
     die("Unauthorized Access");
 }
 
+if (!isset($_GET['csrf_token']) || !verify_csrf_token($_GET['csrf_token'])) {
+    die("CSRF Token Verification Failed");
+}
+
 // Check for sorting or filtering if added later (currently all data)
 $query = mysqli_query($conn, "SELECT * FROM guru ORDER BY nama ASC");
 

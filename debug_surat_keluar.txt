@@ -1,21 +1,15 @@
 Array
 (
-    [id] => 6
-    [jenis_surat] => Tugas
-    [tgl_surat] => 2026-01-24
-    [perihal] => Kegiatan KKG KKMI Kedung
-    [penerima] => Array
-        (
-            [0] => Ali Yasin, S.Pd.I
-            [1] => Khoiruddin, S.Pd.
-            [2] => Nanik Purwati, S.Pd.I
-        )
-
-    [acara_tempat] => MI Salafiyah Wanusobo
-    [acara_waktu] => 08.00 - selesai
-    [durasi_kegiatan] => more
-    [tgl_kegiatan_single] => 2026-01-28
-    [tgl_kegiatan_start] => 2026-01-25
-    [tgl_kegiatan_end] => 2026-01-26
+    [csrf_token] => c2269773296dc269fd9143cb636539d3443d3174a44cbfb8b80f3efbe2285f3c
+    [id] => 8
+    [jenis_surat] => Undangan
+    [tgl_surat] => 2026-01-25
+    [perihal] => Undangan Rapat TKA
+    [penerima] => Panitia TKA
+    [acara_hari_tanggal] => 2026-01-29
+    [acara_waktu] => 20:00
+    [acara_tempat] => Kantor MI
+    [keperluan] => Rapat Panitia TKA
+    [keterangan] => Mohon hadir tepat waktu
     [edit] => 
 )

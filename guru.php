@@ -66,6 +66,9 @@ if (isset($_POST['edit'])) {
 
 // Handle Delete
 if (isset($_GET['delete'])) {
+    if (!isset($_GET['csrf_token']) || !verify_csrf_token($_GET['csrf_token'])) {
+        die("CSRF Token Verification Failed");
+    }
     $id = $_GET['delete'];
     
     // Get name for log
@@ -110,6 +113,9 @@ if (isset($_POST['hapus_multiple'])) {
 
 // Handle Multiple Edit
 if (isset($_POST['edit_multiple'])) {
+    if (!verify_csrf_token($_POST['csrf_token'])) {
+        die("CSRF Token Verification Failed");
+    }
     if (isset($_POST['id']) && is_array($_POST['id'])) {
         $count = 0;
         foreach ($_POST['id'] as $key => $id) {
@@ -165,8 +171,8 @@ include 'template/sidebar.php';
                                 <button type="button" class="btn btn-danger waves-effect" id="btn-hapus-multiple" onclick="confirmDeleteMultiple()" style="display:none;">
                                     <i class="material-icons">delete</i> Hapus Terpilih
                                 </button>
-                                <a href="export_guru_excel.php" target="_blank" class="btn btn-success waves-effect" title="Export Excel"><i class="material-icons">grid_on</i></a>
-                                <a href="export_guru_print.php" target="_blank" class="btn btn-warning waves-effect" title="Cetak PDF"><i class="material-icons">print</i></a>
+                                <a href="export_guru_excel.php?csrf_token=<?php echo generate_csrf_token(); ?>" target="_blank" class="btn btn-success waves-effect" title="Export Excel"><i class="material-icons">grid_on</i></a>
+                                <a href="export_guru_print.php?csrf_token=<?php echo generate_csrf_token(); ?>" target="_blank" class="btn btn-warning waves-effect" title="Cetak PDF"><i class="material-icons">print</i></a>
                                 <button type="button" class="btn btn-info waves-effect" data-toggle="modal" data-target="#importModal">
                                     <i class="material-icons">file_upload</i> Import Excel
                                 </button>
@@ -179,6 +185,7 @@ include 'template/sidebar.php';
                     <div class="body">
                         <div class="table-responsive">
                             <form method="POST" id="form-hapus">
+                                <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                             <table class="table table-bordered table-striped table-hover js-basic-example dataTable">
                                 <thead>
                                     <tr>
@@ -224,7 +231,7 @@ include 'template/sidebar.php';
                                                 <button type="button" class="btn btn-warning btn-circle waves-effect waves-circle waves-float" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>">
                                                     <i class="material-icons">edit</i>
                                                 </button>
-                                                <a href="javascript:void(0);" onclick="confirmDelete('guru.php?delete=<?php echo $row['id']; ?>')" class="btn btn-danger btn-circle waves-effect waves-circle waves-float">
+                                                <a href="javascript:void(0);" onclick="confirmDelete('guru.php?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>')" class="btn btn-danger btn-circle waves-effect waves-circle waves-float">
                                                     <i class="material-icons">delete</i>
                                                 </a>
                                             </td>
@@ -239,6 +246,7 @@ include 'template/sidebar.php';
                                                     </div>
                                                     <form method="POST">
                                                         <div class="modal-body">
+                                                            <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                                                             <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
                                                             <label>NUPTK</label>
                                                             <div class="form-group">
@@ -373,6 +381,7 @@ include 'template/sidebar.php';
                 <h4 class="modal-title">Edit Guru Terpilih</h4>
             </div>
             <form method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                 <div class="modal-body">
                     <input type="hidden" name="edit_multiple" value="1">
                     <div class="table-responsive">
@@ -411,6 +420,7 @@ include 'template/sidebar.php';
                 <h4 class="modal-title">Import Data Guru</h4>
             </div>
             <div class="modal-body">
+                <input type="hidden" id="csrf_token_import" value="<?php echo generate_csrf_token(); ?>">
                 <div class="alert alert-info">
                     Silahkan download template excel terlebih dahulu untuk memastikan format data yang benar.<br>
                     <a href="download_template_guru.php" class="btn btn-warning waves-effect m-t-10" target="_blank">Download Template</a>
@@ -594,7 +604,10 @@ include 'template/sidebar.php';
         $.ajax({
             url: 'get_guru_data.php',
             type: 'POST',
-            data: {ids: ids.join(',')},
+            data: {
+                ids: ids.join(','),
+                csrf_token: $('#csrf_token_import').val()
+            },
             dataType: 'json',
             success: function(response) {
                 var tbody = '';

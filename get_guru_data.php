@@ -8,6 +8,11 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 if (isset($_POST['ids'])) {
+    if (!isset($_POST['csrf_token']) || !verify_csrf_token($_POST['csrf_token'])) {
+        header('HTTP/1.0 403 Forbidden');
+        echo json_encode(['error' => 'CSRF Token Verification Failed']);
+        exit;
+    }
     $ids = $_POST['ids'];
     // Validasi IDs agar aman dari SQL Injection
     $id_array = explode(',', $ids);

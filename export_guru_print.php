@@ -6,6 +6,10 @@ if (!isset($_SESSION['user_id'])) {
     die("Unauthorized Access");
 }
 
+if (!isset($_GET['csrf_token']) || !verify_csrf_token($_GET['csrf_token'])) {
+    die("CSRF Token Verification Failed");
+}
+
 // School Info
 $q_set = mysqli_query($conn, "SELECT * FROM pengaturan LIMIT 1");
 $set = mysqli_fetch_assoc($q_set);
