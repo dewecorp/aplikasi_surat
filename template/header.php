@@ -44,22 +44,22 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css">
 
     <!-- Bootstrap Core Css -->
-    <link href="assets/plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Waves Effect Css -->
-    <link href="assets/plugins/node-waves/waves.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/node-waves/0.7.6/waves.min.css" rel="stylesheet" />
 
     <!-- Animation Css -->
-    <link href="assets/plugins/animate-css/animate.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" rel="stylesheet" />
 
     <!-- Sweetalert Css -->
-    <link href="assets/plugins/sweetalert/sweetalert.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" rel="stylesheet" />
 
     <!-- JQuery DataTable Css -->
-    <link href="assets/plugins/jquery-datatable/skin/bootstrap/css/dataTables.bootstrap.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/css/dataTables.bootstrap.min.css" rel="stylesheet">
 
     <!-- Bootstrap Select Css -->
-    <link href="assets/plugins/bootstrap-select/css/bootstrap-select.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" rel="stylesheet" />
 
     <!-- Custom Css -->
     <link href="assets/css/style.css" rel="stylesheet">
@@ -103,6 +103,16 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
         </div>
     </div>
     <!-- #END# Page Loader -->
+    <script>
+        // Failsafe: Hide preloader after 5 seconds if it's still visible
+        // This handles cases where JS/CSS fails to load (e.g. 404 errors)
+        setTimeout(function() {
+            var loader = document.querySelector('.page-loader-wrapper');
+            if(loader) {
+                loader.style.display = 'none';
+            }
+        }, 5000);
+    </script>
     <!-- Overlay For Sidebars -->
     <div class="overlay"></div>
     <!-- #END# Overlay For Sidebars -->

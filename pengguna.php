@@ -200,7 +200,6 @@ if (isset($_GET['delete'])) {
                                             </td>
                                             <td><?php echo htmlspecialchars($row['nama']); ?></td>
                                             <td><?php echo htmlspecialchars($row['username']); ?></td>
-                                            <td><?php echo htmlspecialchars($row['role']); ?></td>
                                             <td>
                                                 <?php if ($row['role'] == 'admin'): ?>
                                                     <span class="label label-success">Admin</span>

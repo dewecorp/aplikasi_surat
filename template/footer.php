@@ -1,40 +1,40 @@
     <!-- Jquery Core Js -->
-    <script src="assets/plugins/jquery/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 
     <!-- Bootstrap Core Js -->
-    <script src="assets/plugins/bootstrap/js/bootstrap.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
 
     <!-- Select Plugin Js -->
-    <script src="assets/plugins/bootstrap-select/js/bootstrap-select.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
 
     <!-- Slimscroll Plugin Js -->
-    <script src="assets/plugins/jquery-slimscroll/jquery.slimscroll.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-slimScroll/1.3.8/jquery.slimscroll.min.js"></script>
 
     <!-- Waves Effect Plugin Js -->
-    <script src="assets/plugins/node-waves/waves.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/node-waves/0.7.6/waves.min.js"></script>
 
     <!-- SweetAlert Plugin Js -->
-    <script src="assets/plugins/sweetalert/sweetalert.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
 
     <!-- Ckeditor -->
-    <script src="assets/plugins/ckeditor/ckeditor.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.7.3/ckeditor.js"></script>
 
     <!-- Jquery CountTo Plugin Js -->
-    <script src="assets/plugins/jquery-countto/jquery.countTo.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-countto/1.2.0/jquery.countTo.min.js"></script>
 
     <!-- ChartJs -->
-    <script src="assets/plugins/chartjs/Chart.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.bundle.min.js"></script>
 
     <!-- Jquery DataTable Plugin Js -->
-    <script src="assets/plugins/jquery-datatable/jquery.dataTables.js"></script>
-    <script src="assets/plugins/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js"></script>
-    <script src="assets/plugins/jquery-datatable/extensions/export/dataTables.buttons.min.js"></script>
-    <script src="assets/plugins/jquery-datatable/extensions/export/buttons.flash.min.js"></script>
-    <script src="assets/plugins/jquery-datatable/extensions/export/jszip.min.js"></script>
-    <script src="assets/plugins/jquery-datatable/extensions/export/pdfmake.min.js"></script>
-    <script src="assets/plugins/jquery-datatable/extensions/export/vfs_fonts.js"></script>
-    <script src="assets/plugins/jquery-datatable/extensions/export/buttons.html5.min.js"></script>
-    <script src="assets/plugins/jquery-datatable/extensions/export/buttons.print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/js/dataTables.bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables-buttons/1.2.4/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables-buttons/1.2.4/js/buttons.flash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.18/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.18/vfs_fonts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables-buttons/1.2.4/js/buttons.html5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables-buttons/1.2.4/js/buttons.print.min.js"></script>
 
     <!-- Custom Js -->
     <script src="assets/js/admin.js"></script>
