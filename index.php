@@ -47,13 +47,13 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama FROM activity_log a LEFT J
 }
 .timeline-item {
     position: relative;
-    padding-left: 30px; /* Space for the dot */
+    padding-left: 50px; /* Restored spacing */
     margin-bottom: 20px;
 }
 .timeline-item:before {
     content: '';
     position: absolute;
-    left: 7px;
+    left: 22px;
     top: 25px;
     bottom: -25px;
     width: 2px;
@@ -64,7 +64,7 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama FROM activity_log a LEFT J
 }
 .timeline-marker {
     position: absolute;
-    left: 0;
+    left: 15px;
     top: 5px;
     width: 16px;
     height: 16px;
@@ -82,6 +82,7 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama FROM activity_log a LEFT J
     padding: 1rem;
     position: relative;
     transition: all 0.2s ease-in-out;
+    /* margin-left removed, controlled by padding-left of parent */
 }
 .activity-card:hover {
     transform: translateY(-2px);
