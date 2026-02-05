@@ -47,15 +47,15 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama FROM activity_log a LEFT J
 }
 .timeline-item {
     position: relative;
-    padding-left: 40px;
+    padding-left: 30px; /* Space for the dot */
     margin-bottom: 20px;
 }
 .timeline-item:before {
     content: '';
     position: absolute;
-    left: 11px;
-    top: 0;
-    bottom: -20px;
+    left: 7px;
+    top: 25px;
+    bottom: -25px;
     width: 2px;
     background-color: #e3e6f0;
 }
@@ -65,25 +65,47 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama FROM activity_log a LEFT J
 .timeline-marker {
     position: absolute;
     left: 0;
-    top: 0;
-    width: 24px;
-    height: 24px;
+    top: 5px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     background-color: #4e73df;
     border: 3px solid #fff;
-    box-shadow: 0 0 0 3px #eaecf4;
+    box-shadow: 0 0 0 2px #eaecf4;
+    z-index: 1;
+}
+.activity-card {
+    border-radius: 0.5rem;
+    border-left: 0.25rem solid;
+    background-color: #fff;
+    box-shadow: 0 .125rem .25rem 0 rgba(58,59,69,.2) !important;
+    padding: 1rem;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+}
+.activity-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 .5rem 1rem 0 rgba(58,59,69,.15) !important;
+}
+.activity-icon {
+    font-size: 1.5rem; /* Larger Icon */
+    margin-right: 15px;
+    width: 40px;
     text-align: center;
-    line-height: 18px;
+}
+.activity-title {
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+.badge-auth {
+    background-color: #5a5c69;
     color: white;
-    font-size: 10px;
-}
-.timeline-content {
-    padding-bottom: 10px;
-}
-.timeline-date {
-    font-size: 0.85rem;
-    color: #858796;
-    margin-bottom: 0.5rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    margin-right: 5px;
 }
 </style>
 
@@ -91,7 +113,9 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama FROM activity_log a LEFT J
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
     </div>
+    <!-- ... (Cards Section Remains Same) ... -->
     <div class="row">
+        <!-- ... (Surat Cards Code) ... -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
@@ -153,6 +177,7 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama FROM activity_log a LEFT J
             </div>
         </div>
     </div>
+    
     <div class="row">
         <div class="col-xl-12 col-lg-12">
             <div class="card shadow mb-4">
@@ -167,6 +192,7 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama FROM activity_log a LEFT J
             </div>
         </div>
     </div>
+    
     <div class="row">
         <div class="col-xl-12 col-lg-12">
             <div class="card shadow mb-4">
@@ -177,35 +203,86 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama FROM activity_log a LEFT J
                     <div class="timeline">
                         <?php while($act = mysqli_fetch_assoc($q_activity)): 
                             $icon = 'fa-bell';
-                            $bg = 'bg-info';
+                            $border_color = 'border-left-info';
+                            $text_color = 'text-info';
+                            $type_label = 'SYSTEM';
+                            
                             switch($act['activity_type']) {
-                                case 'login': $icon = 'fa-sign-in-alt'; $bg = 'bg-primary'; break;
-                                case 'logout': $icon = 'fa-sign-out-alt'; $bg = 'bg-secondary'; break;
-                                case 'create': $icon = 'fa-plus'; $bg = 'bg-success'; break;
-                                case 'update': $icon = 'fa-edit'; $bg = 'bg-warning'; break;
-                                case 'delete': $icon = 'fa-trash'; $bg = 'bg-danger'; break;
-                                case 'backup': $icon = 'fa-database'; $bg = 'bg-info'; break;
-                                case 'delete_backup': $icon = 'fa-trash-alt'; $bg = 'bg-danger'; break;
+                                case 'login': 
+                                    $icon = 'fa-sign-in-alt'; 
+                                    $border_color = 'border-left-primary';
+                                    $text_color = 'text-primary';
+                                    $type_label = 'LOGIN';
+                                    break;
+                                case 'logout': 
+                                    $icon = 'fa-sign-out-alt'; 
+                                    $border_color = 'border-left-secondary'; 
+                                    $text_color = 'text-secondary';
+                                    $type_label = 'LOGOUT';
+                                    break;
+                                case 'create': 
+                                    $icon = 'fa-plus-circle'; 
+                                    $border_color = 'border-left-success'; 
+                                    $text_color = 'text-success';
+                                    $type_label = 'CREATE';
+                                    break;
+                                case 'update': 
+                                    $icon = 'fa-edit'; 
+                                    $border_color = 'border-left-warning'; 
+                                    $text_color = 'text-warning';
+                                    $type_label = 'UPDATE';
+                                    break;
+                                case 'delete': 
+                                    $icon = 'fa-trash'; 
+                                    $border_color = 'border-left-danger'; 
+                                    $text_color = 'text-danger';
+                                    $type_label = 'DELETE';
+                                    break;
+                                case 'backup': 
+                                    $icon = 'fa-database'; 
+                                    $border_color = 'border-left-info'; 
+                                    $text_color = 'text-info';
+                                    $type_label = 'BACKUP';
+                                    break;
+                                case 'delete_backup': 
+                                    $icon = 'fa-trash-alt'; 
+                                    $border_color = 'border-left-danger'; 
+                                    $text_color = 'text-danger';
+                                    $type_label = 'DELETE BACKUP';
+                                    break;
                             }
                         ?>
                             <div class="timeline-item">
-                                <div class="timeline-marker <?php echo $bg; ?> d-flex align-items-center justify-content-center">
-                                    <i class="fas <?php echo $icon; ?>"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <div class="timeline-date"><?php echo time_ago($act['timestamp']); ?></div>
-                                    <h6 class="font-weight-bold text-dark"><?php echo $act['nama'] ? $act['nama'] : 'System'; ?></h6>
-                                    <p class="mb-0 text-gray-800"><?php echo $act['description']; ?></p>
-                                    <small class="text-muted"><?php echo date('d M Y H:i', strtotime($act['timestamp'])); ?></small>
+                                <div class="timeline-marker <?php echo str_replace('text-', 'bg-', $text_color); ?>"></div>
+                                <div class="activity-card <?php echo $border_color; ?>">
+                                    <div class="d-flex align-items-start">
+                                        <div class="activity-icon <?php echo $text_color; ?>">
+                                            <i class="fas <?php echo $icon; ?>"></i>
+                                        </div>
+                                        <div class="w-100">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <div class="activity-title <?php echo $text_color; ?>">
+                                                    <i class="fas fa-arrow-right mr-1"></i> <?php echo $type_label; ?>
+                                                </div>
+                                                <small class="text-muted"><i class="far fa-clock"></i> <?php echo time_ago($act['timestamp']); ?></small>
+                                            </div>
+                                            <div class="mb-1">
+                                                <span class="badge badge-auth">auth</span>
+                                                <span class="font-weight-bold text-dark"><?php echo $act['nama'] ? $act['nama'] : 'System'; ?></span>
+                                                <span class="text-gray-600">(<?php echo $act['nama'] ? 'admin' : 'system'; ?>)</span>
+                                                <span class="text-gray-800 ml-1"><?php echo $act['description']; ?></span>
+                                            </div>
+                                            <small class="text-muted d-block mt-1">
+                                                <?php echo date('d/m/Y H:i:s', strtotime($act['timestamp'])); ?> • <?php echo time_ago($act['timestamp']); ?>
+                                            </small>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         <?php endwhile; ?>
                         <?php if(mysqli_num_rows($q_activity) == 0): ?>
-                            <div class="timeline-item">
-                                <div class="timeline-marker bg-secondary"></div>
-                                <div class="timeline-content">
-                                    <p class="mb-0">Belum ada aktivitas.</p>
-                                </div>
+                            <div class="text-center py-4">
+                                <p class="mb-0 text-gray-500">Belum ada aktivitas yang tercatat.</p>
                             </div>
                         <?php endif; ?>
                     </div>

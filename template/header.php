@@ -41,6 +41,16 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
     <link href="assets/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" rel="stylesheet">
     <style>
+        /* Custom Sidebar Width */
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 17rem !important; /* Diperlebar dari default 14rem */
+            }
+            .sidebar .nav-item .collapse {
+                left: 17rem !important;
+            }
+        }
+
         #wrapper {
             display: flex;
         }
