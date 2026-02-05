@@ -344,6 +344,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
             </div>
             <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                     <label>Tanggal Terima</label>
                     <div class="form-group">
                         <div class="form-line">

@@ -165,22 +165,22 @@ include 'template/sidebar.php';
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="card">
                     <div class="header">
-                        <div class="header-dropdown m-r--5">
-                                <button type="button" class="btn btn-warning btn-icon-split btn-sm" id="btn-edit-multiple" onclick="showEditMultiple()" style="display:none; margin-right: 5px;">
+                        <div class="header-dropdown m-r--5 d-flex flex-wrap">
+                                <button type="button" class="btn btn-warning btn-icon-split btn-sm mr-2 mb-2" id="btn-edit-multiple" onclick="showEditMultiple()" style="display:none;">
                                     <span class="icon text-white-50">
                                         <i class="fas fa-edit"></i>
                                     </span>
                                     <span class="text">Edit Terpilih</span>
                                 </button>
-                                <button type="button" class="btn btn-danger" id="btn-hapus-multiple" onclick="confirmDeleteMultiple()" style="display:none;">
+                                <button type="button" class="btn btn-danger mr-2 mb-2" id="btn-hapus-multiple" onclick="confirmDeleteMultiple()" style="display:none;">
                                     <i class="fas fa-trash"></i> Hapus Terpilih
                                 </button>
-                                <a href="export_guru_excel.php?csrf_token=<?php echo generate_csrf_token(); ?>" target="_blank" class="btn btn-success" title="Export Excel"><i class="fas fa-file-excel"></i></a>
-                                <a href="export_guru_print.php?csrf_token=<?php echo generate_csrf_token(); ?>" target="_blank" class="btn btn-warning" title="Cetak PDF"><i class="fas fa-print"></i></a>
-                                <button type="button" class="btn btn-info" data-toggle="modal" data-target="#importModal">
+                                <a href="export_guru_excel.php?csrf_token=<?php echo generate_csrf_token(); ?>" target="_blank" class="btn btn-success mr-2 mb-2" title="Export Excel"><i class="fas fa-file-excel"></i></a>
+                                <a href="export_guru_print.php?csrf_token=<?php echo generate_csrf_token(); ?>" target="_blank" class="btn btn-warning mr-2 mb-2" title="Cetak PDF"><i class="fas fa-print"></i></a>
+                                <button type="button" class="btn btn-info mr-2 mb-2" data-toggle="modal" data-target="#importModal">
                                     <i class="fas fa-file-upload"></i> Import Excel
                                 </button>
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
+                                <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#addModal">
                                     <i class="fas fa-plus"></i> Tambah Guru
                                 </button>
                         </div>

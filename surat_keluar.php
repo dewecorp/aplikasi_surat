@@ -347,11 +347,11 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
             <div class="col-12">
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
-                        <div class="mt-2">
-                            <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#modalUndangan"><i class="fas fa-plus"></i> Surat Undangan</button>
-                            <button type="button" class="btn btn-info mr-2" data-toggle="modal" data-target="#modalPemberitahuan"><i class="fas fa-plus"></i> Surat Pemberitahuan</button>
-                            <button type="button" class="btn btn-warning mr-2" data-toggle="modal" data-target="#modalTugas"><i class="fas fa-plus"></i> Surat Tugas</button>
-                            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modalPindah"><i class="fas fa-plus"></i> Surat Pindah</button>
+                        <div class="mt-2 d-flex flex-wrap">
+                            <button type="button" class="btn btn-primary mr-2 mb-2" data-toggle="modal" data-target="#modalUndangan"><i class="fas fa-plus"></i> Surat Undangan</button>
+                            <button type="button" class="btn btn-info mr-2 mb-2" data-toggle="modal" data-target="#modalPemberitahuan"><i class="fas fa-plus"></i> Surat Pemberitahuan</button>
+                            <button type="button" class="btn btn-warning mr-2 mb-2" data-toggle="modal" data-target="#modalTugas"><i class="fas fa-plus"></i> Surat Tugas</button>
+                            <button type="button" class="btn btn-success mb-2" data-toggle="modal" data-target="#modalPindah"><i class="fas fa-plus"></i> Surat Pindah</button>
                         </div>
                     </div>
                     <div class="card-body">
@@ -412,11 +412,11 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-4 d-flex align-items-center flex-wrap">
-                                <button type="submit" class="btn btn-info mr-2 mb-2" title="Cari"><i class="fas fa-search"></i></button>
-                                <a href="surat_keluar.php" class="btn btn-secondary mr-2 mb-2" title="Reset"><i class="fas fa-sync"></i></a>
-                                <a href="export_surat_keluar_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success mr-2 mb-2" title="Export Excel"><i class="fas fa-file-excel"></i></a>
-                                <a href="export_surat_keluar_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning mb-2" title="Cetak PDF"><i class="fas fa-print"></i></a>
+                            <div class="col-sm-3">
+                                <button type="submit" class="btn btn-info" title="Cari"><i class="fas fa-search"></i></button>
+                                <a href="surat_keluar.php" class="btn btn-secondary" title="Reset"><i class="fas fa-sync"></i></a>
+                                <a href="export_surat_keluar_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success" title="Export Excel"><i class="fas fa-file-excel"></i></a>
+                                <a href="export_surat_keluar_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning" title="Cetak PDF"><i class="fas fa-print"></i></a>
                             </div>
                         </form>
 

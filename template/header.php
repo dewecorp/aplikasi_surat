@@ -41,7 +41,7 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
     <link href="assets/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" rel="stylesheet">
     <style>
-        /* Custom Sidebar Width */
+        /* Custom Sidebar Width & Sticky Behavior for Desktop */
         @media (min-width: 768px) {
             .sidebar {
                 width: 17rem !important; /* Diperlebar dari default 14rem */
@@ -49,8 +49,27 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
             .sidebar .nav-item .collapse {
                 left: 17rem !important;
             }
+            
+            #accordionSidebar {
+                position: -webkit-sticky;
+                position: sticky;
+                top: 0;
+                height: 100vh;
+                overflow-y: auto;
+                z-index: 50;
+            }
+            
+            #accordionSidebar .sidebar-brand {
+                position: -webkit-sticky;
+                position: sticky;
+                top: 0;
+                z-index: 51;
+                background-color: inherit;
+                background-image: inherit;
+                width: 100%;
+            }
         }
-
+        
         #wrapper {
             display: flex;
         }
@@ -58,6 +77,7 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: visible !important; 
         }
         #content {
             flex: 1 0 auto;
@@ -96,21 +116,6 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
             color: #000 !important;
         }
 
-        /* STICKY SIDEBAR & NAVBAR */
-        /* Enable sticky behavior by removing overflow clipping from ancestors */
-        #content-wrapper {
-            overflow: visible !important; 
-        }
-
-        #accordionSidebar {
-            position: -webkit-sticky;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 50;
-        }
-        
         /* Minimalist scrollbar for sidebar */
         #accordionSidebar::-webkit-scrollbar {
             width: 5px;
@@ -130,17 +135,6 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
             position: sticky;
             top: 0;
             z-index: 1000;
-            width: 100%;
-        }
-
-        /* Fixed Sidebar Header */
-        #accordionSidebar .sidebar-brand {
-            position: -webkit-sticky;
-            position: sticky;
-            top: 0;
-            z-index: 51;
-            background-color: inherit; /* Fallback */
-            background-image: inherit; /* Ensure gradient matches */
             width: 100%;
         }
         /* Ensure the background covers the scrolling content */
@@ -232,17 +226,30 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
                     </button>
-                    <a class="navbar-brand d-none d-sm-inline-block" href="index.php">
-                        <span class="h6 mb-0 text-white">SISTEM MANAJEMEN SURAT | <?php echo strtoupper($nama_sekolah); ?></span>
+                    <a class="navbar-brand d-flex align-items-center" href="index.php">
+                        <span class="h6 mb-0 text-white d-none d-md-block">SISTEM MANAJEMEN SURAT | <?php echo strtoupper($nama_sekolah); ?></span>
+                        <span class="h6 mb-0 text-white d-block d-md-none">SIMS</span>
                     </a>
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item d-none d-sm-block">
                             <span class="nav-link text-white"><i class="far fa-clock mr-1"></i><span id="current-time"></span></span>
                         </li>
                         <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-white small"><?php echo $_SESSION['nama'] ?? 'Pengguna'; ?></span>
-                                <i class="fas fa-user-circle fa-lg text-white"></i>
+                                <?php 
+                                $foto_profil = isset($_SESSION['foto']) ? $_SESSION['foto'] : 'default.jpg';
+                                $foto_path = 'uploads/' . $foto_profil;
+                                $nama_user = $_SESSION['nama'] ?? 'Pengguna';
+                                
+                                if ($foto_profil != 'default.jpg' && file_exists($foto_path)) {
+                                    echo '<img class="img-profile rounded-circle" src="' . $foto_path . '" style="object-fit: cover; border: 2px solid white;">';
+                                } else {
+                                    $initials = function_exists('getInitials') ? getInitials($nama_user) : substr($nama_user, 0, 2);
+                                    $bg_color = function_exists('getAvatarColor') ? getAvatarColor($nama_user) : '#4e73df';
+                                    echo '<div class="img-profile rounded-circle d-inline-flex align-items-center justify-content-center text-white" style="background-color: ' . $bg_color . '; width: 2rem; height: 2rem; font-size: 0.8rem; font-weight: bold; border: 2px solid white;">' . $initials . '</div>';
+                                }
+                                ?>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
                                 <a class="dropdown-item" href="pengaturan.php"><i class="fas fa-cog fa-sm fa-fw mr-2 text-gray-400"></i>Pengaturan</a>
