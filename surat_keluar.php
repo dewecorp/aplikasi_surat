@@ -484,7 +484,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                         </tr>
 
                                         <!-- Edit Modal -->
-                                        <div class="modal fade" id="editModal<?php echo $row['id']; ?>" tabindex="-1" role="dialog">
+                                        <div class="modal fade" id="editModal<?php echo $row['id']; ?>" role="dialog">
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
@@ -780,7 +780,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
 </div>
 
 <!-- Modal Surat Undangan -->
-<div class="modal fade" id="modalUndangan" tabindex="-1" role="dialog">
+<div class="modal fade" id="modalUndangan" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -1010,7 +1010,7 @@ Wassalamu'alaikum Wr. Wb.</textarea>
 </div>
 
 <!-- Modal Surat Pindah -->
-<div class="modal fade" id="modalPindah" tabindex="-1" role="dialog">
+<div class="modal fade" id="modalPindah" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -1130,16 +1130,17 @@ Wassalamu'alaikum Wr. Wb.</textarea>
     // Config CKEditor to ignore version check
     CKEDITOR.config.versionCheck = false;
 
-    // Fix CKEditor in Bootstrap Modal
+    // Fix CKEditor in Bootstrap Modal (Support BS3 and BS4)
     $.fn.modal.Constructor.prototype.enforceFocus = function() {
-        modal_this = this
-        $(document).on('focusin.modal', function(e) {
-            if (modal_this.$element[0] !== e.target && !modal_this.$element.has(e.target).length &&
-                !$(e.target).closest('.cke_dialog, .cke').length) {
-                modal_this.$element.trigger('focus')
-            }
-        })
+        // Disabled to allow CKEditor dialogs to work
     };
+    
+    // For Bootstrap 4 support
+    if ($.fn.modal.Constructor.prototype._enforceFocus) {
+        $.fn.modal.Constructor.prototype._enforceFocus = function() {
+            // Disabled to allow CKEditor dialogs to work
+        };
+    }
 
     // Toggle Date Logic for Surat Tugas (Add Modal)
     $('#modalTugas input[name="durasi_kegiatan"]').on('change', function() {

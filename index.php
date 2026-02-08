@@ -47,7 +47,7 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama FROM activity_log a LEFT J
 }
 .timeline-item {
     position: relative;
-    padding-left: 50px; /* Restored spacing */
+    padding-left: 70px; /* Adjusted spacing */
     margin-bottom: 20px;
 }
 .timeline-item:before {
