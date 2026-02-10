@@ -1,6 +1,6 @@
 Array
 (
-    [csrf_token] => c2269773296dc269fd9143cb636539d3443d3174a44cbfb8b80f3efbe2285f3c
+    [csrf_token] => 255d94e8fbd505df9d239fa9c083e7d6916a3061fa53accc459f3a36e1b7927a
     [id] => 8
     [jenis_surat] => Undangan
     [tgl_surat] => 2026-01-25
@@ -9,7 +9,7 @@ Array
     [acara_hari_tanggal] => 2026-01-29
     [acara_waktu] => 20:00
     [acara_tempat] => Kantor MI
-    [keperluan] => Rapat Panitia TKA
+    [keperluan] => Rapat Panitia TKA nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
     [keterangan] => Mohon hadir tepat waktu
     [edit] => 
 )

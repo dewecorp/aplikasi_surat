@@ -140,6 +140,9 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
         }
         .meta-table td {
             vertical-align: top;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
         }
         
         .content {
@@ -148,14 +151,19 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
         }
         
         .detail-table {
-            width: 100%;
+            width: calc(100% - 35px);
             margin-left: 30px;
             margin-bottom: 10px;
+            table-layout: fixed;
         }
         .detail-table td {
             vertical-align: top;
             padding: 0;
-            line-height: 1.0;
+            line-height: 1.2;
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            white-space: normal;
         }
         
         .ttd {
@@ -174,7 +182,7 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
             width: 170px;
             opacity: 0.8;
             transform: rotate(-5deg);
-            z-index: 2;
+            z-index: 10;
         }
         .ttd img.ttd-img {
             height: 130px;
@@ -234,14 +242,14 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
         ?>
         <div class="ttd">
             <p>Kepala Madrasah,</p>
-            <?php if (!empty($setting['stempel']) && file_exists('uploads/' . $setting['stempel'])): ?>
-                <img src="uploads/<?php echo $setting['stempel']; ?>" class="stempel">
-            <?php endif; ?>
-            
             <?php if (!empty($setting['ttd']) && file_exists('uploads/' . $setting['ttd'])): ?>
                 <img src="uploads/<?php echo $setting['ttd']; ?>" class="ttd-img">
             <?php else: ?>
                 <br><br><br>
+            <?php endif; ?>
+
+            <?php if (!empty($setting['stempel']) && file_exists('uploads/' . $setting['stempel'])): ?>
+                <img src="uploads/<?php echo $setting['stempel']; ?>" class="stempel">
             <?php endif; ?>
             
             <p style="text-decoration: underline; font-weight: bold;"><?php echo $setting['kepala_madrasah']; ?></p>
@@ -429,12 +437,12 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
                             <tr>
                                 <td>Keperluan</td>
                                 <td>:</td>
-                                <td><b><?php echo $surat['keperluan'] ? $surat['keperluan'] : '-'; ?></b></td>
+                                <td><b><?php echo $surat['keperluan'] ? nl2br($surat['keperluan']) : '-'; ?></b></td>
                             </tr>
                             <tr>
                                 <td>Keterangan</td>
                                 <td>:</td>
-                                <td><?php echo $surat['keterangan'] ? $surat['keterangan'] : 'Dimohon Dengan Sangat Atas Kehadirannya.'; ?></td>
+                                <td><?php echo $surat['keterangan'] ? nl2br($surat['keterangan']) : 'Dimohon Dengan Sangat Atas Kehadirannya.'; ?></td>
                             </tr>
                         </table>
                         
@@ -513,7 +521,7 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
                             <tr>
                                 <td>Alamat</td>
                                 <td>:</td>
-                                <td><?php echo isset($surat['alamat_wali']) ? $surat['alamat_wali'] : '-'; ?></td>
+                                <td><?php echo isset($surat['alamat_wali']) ? nl2br($surat['alamat_wali']) : '-'; ?></td>
                             </tr>
                         </table>
 
