@@ -133,11 +133,11 @@ if (isset($_GET['filter_pihak']) && !empty($_GET['filter_pihak'])) {
                                         echo "<tr><td colspan='7'>Error: " . mysqli_error($conn) . "</td></tr>";
                                     } else {
                                         while ($row = mysqli_fetch_assoc($query)) :
-                                            $label_class = ($row['tipe'] == 'Masuk') ? 'label-success' : 'label-warning';
+                                            $badge_class = ($row['tipe'] == 'Keluar') ? 'badge-success' : 'badge-warning';
                                     ?>
                                         <tr>
                                             <td><?php echo $no++; ?></td>
-                                            <td><span class="label <?php echo $label_class; ?>"><?php echo $row['tipe']; ?></span></td>
+                                            <td><span class="badge <?php echo $badge_class; ?>"><?php echo $row['tipe']; ?></span></td>
                                             <td><?php echo $row['no_surat']; ?></td>
                                             <td><?php echo tgl_indo($row['tgl_surat']); ?></td>
                                             <td><?php echo $row['perihal']; ?></td>
