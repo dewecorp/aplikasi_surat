@@ -13,7 +13,7 @@ ini_set('display_errors', 1);
 
 // Handle Add
 if (isset($_POST['add'])) {
-    if (!verify_csrf_token($_POST['csrf_token'])) {
+    if (!isset($_POST['csrf_token']) || !verify_csrf_token($_POST['csrf_token'])) {
         die("CSRF Token Verification Failed");
     }
     $tgl_surat = mysqli_real_escape_string($conn, $_POST['tgl_surat']);
@@ -788,6 +788,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
             </div>
             <form method="POST">
                 <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                     <input type="hidden" name="jenis_surat" value="Undangan">
                     <label>Tanggal Surat</label>
                     <div class="form-group">
@@ -856,6 +857,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
             </div>
             <form method="POST">
                 <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                     <input type="hidden" name="jenis_surat" value="Pemberitahuan">
                     <label>Tanggal Surat</label>
                     <div class="form-group">
@@ -916,6 +918,7 @@ Wassalamu'alaikum Wr. Wb.</textarea>
             </div>
             <form method="POST">
                 <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                     <input type="hidden" name="jenis_surat" value="Tugas">
                     <label>Tanggal Surat</label>
                     <div class="form-group">
