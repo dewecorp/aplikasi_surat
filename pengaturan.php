@@ -31,8 +31,9 @@ if (isset($_POST['update'])) {
     $website = mysqli_real_escape_string($conn, $_POST['website']);
     $kepala_madrasah = mysqli_real_escape_string($conn, $_POST['kepala_madrasah']);
     $nama_aplikasi = isset($_POST['nama_aplikasi']) ? mysqli_real_escape_string($conn, $_POST['nama_aplikasi']) : '';
+    $ttd_tipe = isset($_POST['ttd_tipe']) ? mysqli_real_escape_string($conn, $_POST['ttd_tipe']) : 'image';
 
-    $query_str = "UPDATE pengaturan SET nama_yayasan='$nama_yayasan', nama_madrasah='$nama_madrasah', alamat='$alamat', email='$email', website='$website', kepala_madrasah='$kepala_madrasah', nama_aplikasi='$nama_aplikasi'";
+    $query_str = "UPDATE pengaturan SET nama_yayasan='$nama_yayasan', nama_madrasah='$nama_madrasah', alamat='$alamat', email='$email', website='$website', kepala_madrasah='$kepala_madrasah', nama_aplikasi='$nama_aplikasi', ttd_tipe='$ttd_tipe'";
 
     $allowed_ext = ['jpg', 'jpeg', 'png', 'gif'];
 
@@ -178,6 +179,17 @@ if (isset($_POST['update'])) {
                                     <?php endif; ?>
                                 </div>
                                 <div class="col-sm-4 mb-3">
+                                    <label>Tipe Tanda Tangan</label>
+                                    <div class="form-group">
+                                        <div class="demo-radio-button">
+                                            <input name="ttd_tipe" type="radio" id="radio_ttd_1" value="image" class="with-gap radio-col-blue" <?php echo (!isset($data['ttd_tipe']) || $data['ttd_tipe'] == 'image') ? 'checked' : ''; ?> />
+                                            <label for="radio_ttd_1" class="d-block">Gambar (Manual)</label>
+                                            
+                                            <input name="ttd_tipe" type="radio" id="radio_ttd_2" value="qr" class="with-gap radio-col-blue" <?php echo (isset($data['ttd_tipe']) && $data['ttd_tipe'] == 'qr') ? 'checked' : ''; ?> />
+                                            <label for="radio_ttd_2" class="d-block">QR Code (Elektronik)</label>
+                                        </div>
+                                    </div>
+
                                     <label>Upload Tanda Tangan (PNG/Transparan)</label>
                                     <input type="file" name="ttd" class="form-control">
                                     <?php if ($data['ttd']): ?>

@@ -30,7 +30,7 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Cetak Surat - <?php echo $surat['no_surat']; ?></title>
+    <title>Surat <?php echo $surat['jenis_surat']; ?> (<?php echo str_replace(['/', '\\'], '-', $surat['no_surat']); ?>)</title>
     <style>
         <?php if ($mode == 'landscape'): ?>
         @page {
@@ -244,17 +244,26 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
         <div class="ttd">
             <p><?php echo tgl_indo($surat['tgl_surat']); ?></p>
             <p>Kepala Madrasah,</p>
-            <?php if (!empty($setting['ttd']) && file_exists('uploads/' . $setting['ttd'])): ?>
+            <?php 
+            $ttd_tipe = isset($setting['ttd_tipe']) ? $setting['ttd_tipe'] : 'image';
+            if ($ttd_tipe == 'qr'): 
+                $qr_content = "Validasi Surat\nNomor: " . $surat['no_surat'] . "\nTanggal: " . tgl_indo($surat['tgl_surat']) . "\nKepala: " . $setting['kepala_madrasah'];
+                $qr_url = "https://quickchart.io/qr?text=" . urlencode($qr_content) . "&size=120";
+            ?>
+                <br>
+                <img src="<?php echo $qr_url; ?>" class="ttd-img" style="width: 100px; height: 100px; margin-top: 0; margin-bottom: 0;">
+                <br>
+            <?php elseif (!empty($setting['ttd']) && file_exists('uploads/' . $setting['ttd'])): ?>
                 <img src="uploads/<?php echo $setting['ttd']; ?>" class="ttd-img">
             <?php else: ?>
                 <br><br><br>
             <?php endif; ?>
 
-            <?php if (!empty($setting['stempel']) && file_exists('uploads/' . $setting['stempel'])): ?>
+            <?php if ($ttd_tipe != 'qr' && !empty($setting['stempel']) && file_exists('uploads/' . $setting['stempel'])): ?>
                 <img src="uploads/<?php echo $setting['stempel']; ?>" class="stempel">
             <?php endif; ?>
             
-            <p style="text-decoration: underline; font-weight: bold;"><?php echo $setting['kepala_madrasah']; ?></p>
+            <p style="font-weight: bold;"><?php echo $setting['kepala_madrasah']; ?></p>
         </div>
         <?php 
         $principal_ttd = ob_get_clean();
