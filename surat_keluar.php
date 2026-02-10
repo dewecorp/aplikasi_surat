@@ -849,7 +849,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
 </div>
 
 <!-- Modal Surat Pemberitahuan -->
-<div class="modal fade" id="modalPemberitahuan" tabindex="-1" role="dialog">
+<div class="modal fade" id="modalPemberitahuan" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -910,7 +910,7 @@ Wassalamu'alaikum Wr. Wb.</textarea>
 </div>
 
 <!-- Modal Surat Tugas -->
-<div class="modal fade" id="modalTugas" tabindex="-1" role="dialog">
+<div class="modal fade" id="modalTugas" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">

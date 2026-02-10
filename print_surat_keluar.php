@@ -151,10 +151,11 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
         }
         
         .detail-table {
-            width: calc(100% - 35px);
+            width: calc(100% - 50px);
             margin-left: 30px;
             margin-bottom: 10px;
             table-layout: fixed;
+            border-collapse: collapse;
         }
         .detail-table td {
             vertical-align: top;
@@ -241,6 +242,7 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
         ob_start();
         ?>
         <div class="ttd">
+            <p><?php echo tgl_indo($surat['tgl_surat']); ?></p>
             <p>Kepala Madrasah,</p>
             <?php if (!empty($setting['ttd']) && file_exists('uploads/' . $setting['ttd'])): ?>
                 <img src="uploads/<?php echo $setting['ttd']; ?>" class="ttd-img">
@@ -317,7 +319,7 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
                     <p>Dengan ini menugaskan Kepada :</p>
                     
                     <div style="margin-bottom: 15px; margin-left: 0;">
-                        <table class="detail-table" style="width: 100%; border-collapse: collapse; margin-left: 0;">
+                        <table class="detail-table">
                             <thead>
                                 <tr>
                                     <th style="border: 1px solid black; padding: 5px; text-align: center; width: 5%;">No</th>
