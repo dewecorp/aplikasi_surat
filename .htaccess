@@ -1,0 +1,17 @@
+RewriteEngine On
+RewriteBase /
+
+# 1. Redirect /index.php or /index to root (or directory)
+# Matches /index.php, /index, /subdir/index.php, /subdir/index
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s(.*)/index(\.php)?(\?|\s) [NC]
+RewriteRule ^(.*)index(\.php)?$ $1 [R=301,L]
+
+# 2. Redirect other .php files to extensionless
+# Matches /file.php -> /file
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+(.+)\.php(\?|\s) [NC]
+RewriteRule ^(.+)\.php$ $1 [R=301,L]
+
+# 3. Internally rewrite extensionless requests to .php
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*?)/?$ $1.php [L,QSA]
