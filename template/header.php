@@ -262,9 +262,18 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
                 <script>
                     function updateTime() {
                         var now = new Date();
-                        var opt = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+                        var opt = { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric', 
+                            hour: '2-digit', 
+                            minute: '2-digit', 
+                            second: '2-digit',
+                            timeZone: 'Asia/Jakarta'
+                        };
                         var el = document.getElementById('current-time');
-                        if (el) el.innerText = now.toLocaleDateString('id-ID', opt);
+                        if (el) el.innerText = now.toLocaleString('id-ID', opt);
                     }
                     setInterval(updateTime, 1000);
                     updateTime();

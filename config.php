@@ -12,6 +12,10 @@ if (!$conn) {
 
 // Set timezone
 date_default_timezone_set('Asia/Jakarta');
+// Ensure MySQL session uses Asia/Jakarta (WIB, UTC+07:00)
+if ($conn) {
+    @mysqli_query($conn, "SET time_zone = '+07:00'");
+}
 
 // Base URL
 $base_url = "http://localhost/sims/";
