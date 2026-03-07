@@ -18,7 +18,10 @@ if ($conn) {
 }
 
 // Base URL
-$base_url = "http://localhost/sims/";
+$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ? 'https' : 'http';
+$host_url = $_SERVER['HTTP_HOST'];
+$script_path = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+$base_url = $protocol . '://' . $host_url . ($script_path === '/' ? '/' : $script_path . '/');
 
 function getRomawi($n){
     $hasil = "";
