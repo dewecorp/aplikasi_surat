@@ -30,7 +30,7 @@ if ($current_role != 'admin' && $current_role != 'tu' && $current_role != 'tata 
         exit;
     }
     
-    echo "<script>alert('Akses Ditolak! Anda tidak memiliki izin untuk mengakses halaman ini.'); window.location='index.php';</script>";
+    echo "<script>alert('Akses Ditolak! Anda tidak memiliki izin untuk mengakses halaman ini.'); window.location=" . json_encode($base_url) . ";</script>";
     exit();
 }
 
@@ -56,6 +56,7 @@ function formatSizeUnits($bytes) {
 if (isset($_POST['backup_now'])) {
     if (!verify_csrf_token($_POST['csrf_token'])) {
         if (isset($_POST['is_ajax'])) {
+            header('Content-Type: application/json');
             echo json_encode(['status' => 'error', 'message' => 'CSRF Verification Failed']); exit;
         } else {
             die("CSRF Verification Failed");
@@ -64,6 +65,14 @@ if (isset($_POST['backup_now'])) {
 
     $tables = array();
     $result = mysqli_query($conn, "SHOW TABLES");
+    if (!$result) {
+        if (isset($_POST['is_ajax'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'error', 'message' => 'Gagal membaca daftar tabel: ' . mysqli_error($conn)]);
+            exit;
+        }
+        die("Gagal membaca daftar tabel: " . mysqli_error($conn));
+    }
     while ($row = mysqli_fetch_row($result)) {
         $tables[] = $row[0];
     }
@@ -101,9 +110,24 @@ if (isset($_POST['backup_now'])) {
     // Save file
     $file_name = 'db_backup_' . date("Y-m-d_H-i-s") . '.sql';
     if (!is_dir('backups')) {
-        mkdir('backups', 0777, true);
+        if (!mkdir('backups', 0777, true)) {
+            if (isset($_POST['is_ajax'])) {
+                header('Content-Type: application/json');
+                echo json_encode(['status' => 'error', 'message' => 'Gagal membuat folder backups.']);
+                exit;
+            }
+            die("Gagal membuat folder backups.");
+        }
     }
     $handle = fopen('backups/' . $file_name, 'w+');
+    if (!$handle) {
+        if (isset($_POST['is_ajax'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menulis file backup.']);
+            exit;
+        }
+        die("Gagal menulis file backup.");
+    }
     fwrite($handle, $return);
     fclose($handle);
 
@@ -122,7 +146,8 @@ if (isset($_POST['backup_now'])) {
     }
     
     $_SESSION['success'] = "Backup berhasil dibuat!";
-    echo "<script>window.location='backup.php';</script>";
+    header('Location: backup');
+    exit();
 }
 
 // Handle Delete
@@ -146,7 +171,8 @@ if (isset($_GET['delete'])) {
     log_activity($_SESSION['user_id'], 'delete_backup', 'Menghapus file backup (' . $row['file_name'] . ')');
 
     $_SESSION['success'] = "Backup berhasil dihapus!";
-    echo "<script>window.location='backup.php';</script>";
+    header('Location: backup');
+    exit();
 }
 
 // Handle Restore
@@ -173,7 +199,8 @@ if (isset($_POST['restore'])) {
     } else {
         $_SESSION['error'] = "File backup tidak ditemukan!";
     }
-    echo "<script>window.location='backup.php';</script>";
+    header('Location: backup');
+    exit();
 }
 
 // Handle Restore from Upload
@@ -201,7 +228,8 @@ if (isset($_POST['restore_upload'])) {
     } else {
         $_SESSION['error'] = "Terjadi kesalahan saat upload file.";
     }
-    echo "<script>window.location='backup.php';</script>";
+    header('Location: backup');
+    exit();
 }
 
 // Handle Download
@@ -309,13 +337,13 @@ include 'template/sidebar.php';
                                             <td><?php echo $row['file_size']; ?></td>
                                             <td><?php echo tgl_indo(date('Y-m-d', strtotime($row['created_at']))) . ' ' . date('H:i', strtotime($row['created_at'])); ?></td>
                                             <td>
-                                                <a href="backup.php?download=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>" class="btn btn-success btn-circle" title="Download">
+                                                <a href="backup?download=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>" class="btn btn-success btn-circle" title="Download">
                                                     <i class="fas fa-download"></i>
                                                 </a>
                                                 <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#restoreModal<?php echo $row['id']; ?>" title="Restore">
                                                     <i class="fas fa-undo-alt"></i>
                                                 </button>
-                                                 <a href="javascript:void(0);" onclick="confirmDelete('backup.php?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>')" class="btn btn-danger btn-circle" title="Hapus">
+                                                 <a href="javascript:void(0);" onclick="confirmDelete('backup?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>')" class="btn btn-danger btn-circle" title="Hapus">
                                                      <i class="fas fa-trash"></i>
                                                  </a>
                                             </td>
@@ -377,7 +405,7 @@ include 'template/sidebar.php';
             // Artificial delay so user sees the processing alert
             setTimeout(function() {
                 $.ajax({
-                    url: 'backup.php',
+                    url: 'backup',
                     type: 'POST',
                     data: formData,
                     processData: false,

@@ -20,8 +20,12 @@ if ($conn) {
 // Base URL
 $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ? 'https' : 'http';
 $host_url = $_SERVER['HTTP_HOST'];
-$script_path = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
-$base_url = $protocol . '://' . $host_url . ($script_path === '/' ? '/' : $script_path . '/');
+$app_url = getenv('APP_URL') ?: '';
+if ($app_url && filter_var($app_url, FILTER_VALIDATE_URL)) {
+    $base_url = rtrim($app_url, '/') . '/';
+} else {
+    $base_url = $protocol . '://' . $host_url . '/';
+}
 
 function getRomawi($n){
     $hasil = "";
@@ -88,6 +92,7 @@ function getAvatarColor($name) {
 
 function log_activity($user_id, $type, $description) {
     global $conn;
+    static $has_timestamp_column = null;
     $user_id = mysqli_real_escape_string($conn, $user_id);
     $type = mysqli_real_escape_string($conn, $type);
     $description = mysqli_real_escape_string($conn, $description);
@@ -95,8 +100,18 @@ function log_activity($user_id, $type, $description) {
     // Cek apakah user_id masih ada di tabel users
     $check_user = mysqli_query($conn, "SELECT id FROM users WHERE id='$user_id'");
     if (mysqli_num_rows($check_user) > 0) {
-        $query = "INSERT INTO activity_log (user_id, activity_type, description) VALUES ('$user_id', '$type', '$description')";
-        mysqli_query($conn, $query);
+        if ($has_timestamp_column === null) {
+            $check_col = @mysqli_query($conn, "SHOW COLUMNS FROM activity_log LIKE 'timestamp'");
+            $has_timestamp_column = $check_col && mysqli_num_rows($check_col) > 0;
+        }
+        if ($has_timestamp_column) {
+            $ts = mysqli_real_escape_string($conn, date('Y-m-d H:i:s'));
+            $query = "INSERT INTO activity_log (user_id, activity_type, description, timestamp) VALUES ('$user_id', '$type', '$description', '$ts')";
+            @mysqli_query($conn, $query);
+        } else {
+            $query = "INSERT INTO activity_log (user_id, activity_type, description) VALUES ('$user_id', '$type', '$description')";
+            @mysqli_query($conn, $query);
+        }
     }
 }
 

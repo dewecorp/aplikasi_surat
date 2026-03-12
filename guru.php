@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 
 // Cek Role, hanya admin yang boleh akses
 if (strtolower(trim($_SESSION['role'] ?? '')) != 'admin') {
-    echo "<script>window.location='index.php';</script>";
+    echo "<script>window.location=" . json_encode($base_url) . ";</script>";
     exit();
 }
 

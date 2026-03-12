@@ -25,13 +25,30 @@ if (isset($_POST['login'])) {
             $_SESSION['nama'] = $user['nama'];
             $_SESSION['role'] = $user['role'];
             $_SESSION['foto'] = $user['foto'];
-            $_SESSION['success'] = "Selamat Datang, " . $user['nama'];
+            unset($_SESSION['success'], $_SESSION['error']);
             
             // Log Activity
             log_activity($user['id'], 'login', 'Login ke sistem');
             
-            header("Location: index.php");
-            exit();
+            $welcome_text = "Selamat Datang, " . $user['nama'];
+            $redirect_url = $base_url;
+            session_write_close();
+            header('Content-Type: text/html; charset=utf-8');
+            echo '<!DOCTYPE html><html lang="id"><head>';
+            echo '<meta charset="utf-8">';
+            echo '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">';
+            echo '<title>Login Berhasil</title>';
+            echo '<link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">';
+            echo '<link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" rel="stylesheet">';
+            echo '<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#4e73df;font-family:Nunito,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}.sweet-alert,.sweet-alert *{font-family:inherit !important}</style>';
+            echo '</head><body>';
+            echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>';
+            echo '<script>';
+            echo 'swal({title:"Berhasil!",text:' . json_encode($welcome_text) . ',type:"success",showConfirmButton:false,timer:1200},function(){window.location.href=' . json_encode($redirect_url) . ';});';
+            echo 'setTimeout(function(){window.location.href=' . json_encode($redirect_url) . ';},1400);';
+            echo '</script>';
+            echo '</body></html>';
+            exit;
         } else {
             $error = "Password salah!";
         }

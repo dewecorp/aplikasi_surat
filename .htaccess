@@ -1,16 +1,40 @@
+DirectoryIndex index.php index.html
+
 Options -MultiViews -Indexes +FollowSymLinks
 
 RewriteEngine On
 
-# 1. Redirect /index.php atau /index ke root domain (/)
-RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s(.*)/index(\.php)?(\?|\s) [NC]
-RewriteRule ^(.*)index(\.php)?$ %1 [R=301,L]
+# Perbaiki jika URL terlanjur berisi path filesystem Windows (Laragon)
+RewriteCond %{REQUEST_METHOD} =GET [OR]
+RewriteCond %{REQUEST_METHOD} =HEAD
+RewriteCond %{THE_REQUEST} \s/+[A-Za-z]:/laragon/www/sims_ok/([A-Za-z0-9_/-]+)(?:\.php)?(?:[?\s]) [NC]
+RewriteRule ^ /%1 [R=302,L]
 
-# 2. Hapus .php dari URL (Redirect: /file.php -> /file)
-RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s([^.]+)\.php [NC]
-RewriteRule ^ %1 [R=301,L]
+# Safety net: jika URL diawali drive letter (contoh: /D:/...), kembalikan ke root web
+RewriteCond %{REQUEST_METHOD} =GET [OR]
+RewriteCond %{REQUEST_METHOD} =HEAD
+RewriteRule ^[A-Za-z]:/.*$ / [R=302,L,NC]
 
-# 3. Tangani request tanpa ekstensi secara internal (/file -> /file.php)
-RewriteCond %{REQUEST_FILENAME} !-d
+# Hilangkan .php dari URL (contoh: /guru.php -> /guru)
+RewriteCond %{REQUEST_METHOD} =GET [OR]
+RewriteCond %{REQUEST_METHOD} =HEAD
+RewriteCond %{THE_REQUEST} !\s/+[A-Za-z]:/ [NC]
+RewriteCond %{REQUEST_URI} !: [NC]
+RewriteCond %{THE_REQUEST} \s/+([A-Za-z0-9_/-]+)\.php(?:[?\s]) [NC]
+RewriteRule ^ /%1 [R=301,L]
+
+# Redirect /index atau /index.php ke root URL (/)
+RewriteCond %{REQUEST_METHOD} =GET [OR]
+RewriteCond %{REQUEST_METHOD} =HEAD
+RewriteCond %{REQUEST_URI} !: [NC]
+RewriteRule ^index(?:\.php)?$ / [R=301,L]
+
+# Jika request adalah file/folder yang memang ada, jangan di-rewrite
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Tangani request tanpa ekstensi secara internal (/file -> /file.php)
+RewriteCond %{REQUEST_URI} !: [NC]
 RewriteCond %{REQUEST_FILENAME}.php -f
-RewriteRule ^(.*?)/?$ $1.php [L]
+RewriteRule ^(.+?)/?$ $1.php [L]

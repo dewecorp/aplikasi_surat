@@ -356,7 +356,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                     </div>
                     <div class="card-body">
                         <!-- Filter -->
-                        <form method="GET" class="row clearfix">
+                        <form method="GET" class="row clearfix" id="filterSuratKeluar" data-autosubmit="1">
                             <div class="col-sm-2">
                                 <div class="form-group">
                                     <div class="form-line">
@@ -413,8 +413,6 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                 </div>
                             </div>
                             <div class="col-sm-3">
-                                <button type="submit" class="btn btn-info" title="Cari"><i class="fas fa-search"></i></button>
-                                <a href="surat_keluar.php" class="btn btn-secondary" title="Reset"><i class="fas fa-sync"></i></a>
                                 <a href="export_surat_keluar_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success" title="Export Excel"><i class="fas fa-file-excel"></i></a>
                                 <a href="export_surat_keluar_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning" title="Cetak PDF"><i class="fas fa-print"></i></a>
                             </div>
@@ -459,16 +457,16 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                             <i class="fas fa-print"></i> Cetak
                                                         </button>
                                                         <div class="dropdown-menu shadow animated--grow-in">
-                                                            <a class="dropdown-item" href="print_surat_keluar.php?id=<?php echo $row['id']; ?>&mode=portrait" target="_blank">
+                                                            <a class="dropdown-item" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>print_surat_keluar.php?id=<?php echo $row['id']; ?>&mode=portrait" target="_blank">
                                                                 <i class="fas fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i> 1 Halaman 1 Surat (Portrait)
                                                             </a>
-                                                            <a class="dropdown-item" href="print_surat_keluar.php?id=<?php echo $row['id']; ?>&mode=landscape" target="_blank">
+                                                            <a class="dropdown-item" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>print_surat_keluar.php?id=<?php echo $row['id']; ?>&mode=landscape" target="_blank">
                                                                 <i class="fas fa-columns fa-sm fa-fw mr-2 text-gray-400"></i> 1 Halaman 2 Surat (Landscape)
                                                             </a>
                                                         </div>
                                                     </div>
                                                 <?php else: ?>
-                                                    <a href="print_surat_keluar.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-info btn-sm shadow-sm">
+                                                    <a href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>print_surat_keluar.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-info btn-sm shadow-sm">
                                                         <i class="fas fa-file-download"></i> Lihat/Unduh
                                                     </a>
                                                 <?php endif; ?>
@@ -598,7 +596,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                 <label>Keterangan</label>
                                                                 <div class="form-group">
                                                                     <div class="form-line">
-                                                                        <textarea name="keterangan" class="form-control no-resize"><?php echo htmlspecialchars($row['keterangan']); ?></textarea>
+                                                                        <textarea name="keterangan" class="form-control ckeditor"><?php echo $row['keterangan']; ?></textarea>
                                                                     </div>
                                                                 </div>
 
@@ -835,7 +833,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                     <label>Keterangan</label>
                     <div class="form-group">
                         <div class="form-line">
-                            <textarea name="keterangan" class="form-control no-resize"></textarea>
+                            <textarea name="keterangan" class="form-control ckeditor"></textarea>
                         </div>
                     </div>
                 </div>
@@ -1133,6 +1131,29 @@ Wassalamu'alaikum Wr. Wb.</textarea>
     // Config CKEditor to ignore version check
     CKEDITOR.config.versionCheck = false;
 
+    function ensureCkeditorId(textarea) {
+        if (textarea.id) return textarea.id;
+        var $ta = $(textarea);
+        var modalId = $ta.closest('.modal').attr('id') || 'page';
+        var name = $ta.attr('name') || 'field';
+        var index = $ta.closest('.modal').find('textarea[name="' + name + '"]').index(textarea);
+        textarea.id = 'cke_' + modalId + '_' + name + '_' + index;
+        return textarea.id;
+    }
+
+    function initCkeditor(context) {
+        $(context).find('textarea.ckeditor').each(function () {
+            if (!$(this).is(':visible')) return;
+            var id = ensureCkeditorId(this);
+            if (CKEDITOR.instances[id]) return;
+            CKEDITOR.replace(id);
+        });
+    }
+
+    $(function () {
+        initCkeditor(document);
+    });
+
     // Fix CKEditor in Bootstrap Modal (Support BS3 and BS4)
     $.fn.modal.Constructor.prototype.enforceFocus = function() {
         // Disabled to allow CKEditor dialogs to work
@@ -1187,7 +1208,30 @@ Wassalamu'alaikum Wr. Wb.</textarea>
         // $(this).find('select.selectpicker').selectpicker('destroy'); 
         // Note: Destroy might remove the button, so just refresh is usually safer if already initialized
         $(this).find('select.selectpicker').selectpicker('refresh');
+        initCkeditor(this);
     });
+
+    (function () {
+        var form = document.getElementById('filterSuratKeluar');
+        if (!form) return;
+        var timer = null;
+        var submit = function () {
+            if (form.dataset.submitting) return;
+            form.dataset.submitting = '1';
+            form.submit();
+        };
+        form.addEventListener('change', function (e) {
+            if (!e.target || !e.target.name) return;
+            clearTimeout(timer);
+            timer = setTimeout(submit, 150);
+        });
+        form.addEventListener('keyup', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submit();
+            }
+        });
+    })();
 
     // Validasi form sebelum submit
      $('form').on('submit', function() {

@@ -67,7 +67,8 @@
                 cancelButtonText: "Batal",
                 closeOnConfirm: false
             }, function () {
-                window.location.href = "logout.php";
+                var appBase = <?php echo json_encode($base_url); ?>;
+                window.location.href = new URL("logout", appBase).toString();
             });
         }
 
@@ -104,7 +105,8 @@
                 cancelButtonText: "Batal",
                 closeOnConfirm: false
             }, function () {
-                window.location.href = url;
+                var appBase = <?php echo json_encode($base_url); ?>;
+                window.location.href = new URL(url, appBase).toString();
             });
         }
     </script>

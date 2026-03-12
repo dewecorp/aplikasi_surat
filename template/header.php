@@ -34,6 +34,7 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title><?php echo $current_page_title; ?> | SIMS</title>
+    <base href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%231e88e5%22><path d=%22M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z%22/></svg>" type="image/svg+xml">
     <link href="assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900" rel="stylesheet">
@@ -105,6 +106,9 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
         body {
             color: #000 !important;
         }
+        .sweet-alert, .sweet-alert * {
+            font-family: inherit !important;
+        }
         .text-gray-100, .text-gray-200, .text-gray-300, .text-gray-400, .text-gray-500, .text-gray-600, .text-gray-700, .text-gray-800, .text-gray-900, .text-muted {
             color: #000 !important;
         }
@@ -153,7 +157,7 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
 <body id="page-top">
     <div id="wrapper">
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>">
                 <div class="sidebar-brand-icon">
                     <?php if (!empty($logo_sekolah) && file_exists('assets/images/' . $logo_sekolah)): ?>
                         <img src="assets/images/<?php echo $logo_sekolah; ?>" alt="Logo" style="height: 50px;">
@@ -165,7 +169,7 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
             </a>
             <hr class="sidebar-divider my-0">
             <li class="nav-item <?php echo ($page == 'index') ? 'active' : ''; ?>">
-                <a class="nav-link" href="index.php">
+                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
@@ -173,40 +177,40 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
             <div class="sidebar-heading">Menu</div>
             <?php if (strtolower(trim($_SESSION['role'] ?? '')) == 'admin'): ?>
             <li class="nav-item <?php echo ($page == 'guru') ? 'active' : ''; ?>">
-                <a class="nav-link" href="guru.php">
+                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>guru">
                     <i class="fas fa-user"></i>
                     <span>Data Guru</span></a>
             </li>
             <?php endif; ?>
             <li class="nav-item <?php echo ($page == 'surat_masuk') ? 'active' : ''; ?>">
-                <a class="nav-link" href="surat_masuk.php">
+                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>surat_masuk">
                     <i class="fas fa-inbox"></i>
                     <span>Surat Masuk</span></a>
             </li>
             <li class="nav-item <?php echo ($page == 'surat_keluar') ? 'active' : ''; ?>">
-                <a class="nav-link" href="surat_keluar.php">
+                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>surat_keluar">
                     <i class="fas fa-paper-plane"></i>
                     <span>Surat Keluar</span></a>
             </li>
             <li class="nav-item <?php echo ($page == 'riwayat') ? 'active' : ''; ?>">
-                <a class="nav-link" href="riwayat.php">
+                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>riwayat">
                     <i class="fas fa-history"></i>
                     <span>Riwayat</span></a>
             </li>
             <?php if (strtolower(trim($_SESSION['role'] ?? '')) == 'admin'): ?>
             <li class="nav-item <?php echo ($page == 'pengguna') ? 'active' : ''; ?>">
-                <a class="nav-link" href="pengguna.php">
+                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>pengguna">
                     <i class="fas fa-users"></i>
                     <span>Pengguna</span></a>
             </li>
             <li class="nav-item <?php echo ($page == 'pengaturan') ? 'active' : ''; ?>">
-                <a class="nav-link" href="pengaturan.php">
+                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>pengaturan">
                     <i class="fas fa-cogs"></i>
                     <span>Pengaturan</span></a>
             </li>
             <?php endif; ?>
             <li class="nav-item">
-                <a class="nav-link" href="backup.php">
+                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>backup">
                     <i class="fas fa-database"></i>
                     <span>Backup Restore</span></a>
             </li>
@@ -226,7 +230,7 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
                     </button>
-                    <a class="navbar-brand d-flex align-items-center" href="index.php">
+                    <a class="navbar-brand d-flex align-items-center" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>">
                         <span class="h6 mb-0 text-white d-none d-md-block">SISTEM MANAJEMEN SURAT | <?php echo strtoupper($nama_sekolah); ?></span>
                         <span class="h6 mb-0 text-white d-block d-md-none">SIMS</span>
                     </a>

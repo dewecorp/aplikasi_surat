@@ -162,7 +162,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                     </div>
                     <div class="body">
                          <!-- Filter -->
-                        <form method="GET" class="row clearfix">
+                        <form method="GET" class="row clearfix" id="filterSuratMasuk" data-autosubmit="1">
                             <div class="col-sm-2">
                                 <div class="form-group">
                                     <div class="form-line">
@@ -218,8 +218,6 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                 </div>
                             </div>
                             <div class="col-sm-3">
-                                <button type="submit" class="btn btn-info" title="Cari"><i class="fas fa-search"></i></button>
-                                <a href="surat_masuk.php" class="btn btn-secondary" title="Reset"><i class="fas fa-sync"></i></a>
                                 <a href="export_surat_masuk_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success" title="Export Excel"><i class="fas fa-file-excel"></i></a>
                                 <a href="export_surat_masuk_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning" title="Cetak PDF"><i class="fas fa-print"></i></a>
                             </div>
@@ -389,4 +387,27 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
     </div>
 </div>
 
+<script>
+    (function () {
+        var form = document.getElementById('filterSuratMasuk');
+        if (!form) return;
+        var timer = null;
+        var submit = function () {
+            if (form.dataset.submitting) return;
+            form.dataset.submitting = '1';
+            form.submit();
+        };
+        form.addEventListener('change', function (e) {
+            if (!e.target || !e.target.name) return;
+            clearTimeout(timer);
+            timer = setTimeout(submit, 150);
+        });
+        form.addEventListener('keyup', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submit();
+            }
+        });
+    })();
+</script>
 <?php include 'template/footer.php'; ?>

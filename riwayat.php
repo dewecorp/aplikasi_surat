@@ -37,7 +37,7 @@ if (isset($_GET['filter_pihak']) && !empty($_GET['filter_pihak'])) {
                     </div>
                     <div class="body">
                          <!-- Filter -->
-                        <form method="GET" class="row clearfix">
+                        <form method="GET" class="row clearfix" id="filterRiwayat" data-autosubmit="1">
                             <div class="col-sm-3">
                                 <div class="form-group">
                                     <div class="form-line">
@@ -100,12 +100,34 @@ if (isset($_GET['filter_pihak']) && !empty($_GET['filter_pihak'])) {
                                 </div>
                             </div>
                             <div class="col-sm-3">
-                                <button type="submit" class="btn btn-info" title="Cari"><i class="fas fa-search"></i></button>
-                                <a href="riwayat.php" class="btn btn-secondary" title="Reset"><i class="fas fa-sync"></i></a>
                                 <a href="export_riwayat_excel.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-success" title="Export Excel"><i class="fas fa-file-excel"></i></a>
                                 <a href="export_riwayat_print.php?<?php echo http_build_query($_GET); ?>" target="_blank" class="btn btn-warning" title="Cetak PDF"><i class="fas fa-print"></i></a>
                             </div>
                         </form>
+
+                        <script>
+                            (function () {
+                                var form = document.getElementById('filterRiwayat');
+                                if (!form) return;
+                                var timer = null;
+                                var submit = function () {
+                                    if (form.dataset.submitting) return;
+                                    form.dataset.submitting = '1';
+                                    form.submit();
+                                };
+                                form.addEventListener('change', function (e) {
+                                    if (!e.target || !e.target.name) return;
+                                    clearTimeout(timer);
+                                    timer = setTimeout(submit, 150);
+                                });
+                                form.addEventListener('keyup', function (e) {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        submit();
+                                    }
+                                });
+                            })();
+                        </script>
 
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped table-hover js-basic-example dataTable">

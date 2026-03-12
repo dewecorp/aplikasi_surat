@@ -21,6 +21,14 @@ if (!$surat) {
     exit("Surat tidak ditemukan");
 }
 
+$nama_madrasah_body = ucwords(strtolower($setting['nama_madrasah'] ?? ''));
+$nama_madrasah_body = preg_replace_callback('/\bmi\b/i', function () {
+    return 'MI';
+}, $nama_madrasah_body);
+$penerima_surat = $surat['penerima'] ?? '';
+$is_penerima_siswa = preg_match('/\b(siswa|siswi|murid|ananda|peserta didik)\b/i', $penerima_surat) === 1;
+$sapaan_penerima = $is_penerima_siswa ? '' : 'Bapak / Ibu ';
+
 $mode = isset($_GET['mode']) ? $_GET['mode'] : 'portrait';
 // Only allow landscape for Undangan and Pemberitahuan
 if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pemberitahuan'])) {
@@ -148,6 +156,23 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
         .content {
             text-align: justify;
             line-height: 1.5;
+        }
+
+        .keterangan-html {
+            text-align: justify;
+        }
+        .keterangan-html p {
+            margin: 0;
+        }
+        .keterangan-html ol,
+        .keterangan-html ul {
+            margin: 0;
+            padding-left: 18px;
+            list-style-position: outside;
+        }
+        .keterangan-html li {
+            margin: 0;
+            padding: 0;
         }
         
         .detail-table {
@@ -427,7 +452,7 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
                     <?php endif; ?>
                     
                     <?php if ($surat['jenis_surat'] == 'Undangan'): ?>
-                        <p style="text-indent: 50px;">Di harap dengan hormat, atas kehadiran Bapak / Ibu <?php echo $surat['penerima']; ?> <?php echo $setting['nama_madrasah']; ?> untuk dapat menghadiri acara yang Insya Allah akan dilaksanakan pada :</p>
+                        <p style="text-indent: 50px;">Di harap dengan hormat, atas kehadiran <?php echo $sapaan_penerima; ?><?php echo $surat['penerima']; ?> untuk dapat menghadiri acara yang Insya Allah akan dilaksanakan pada :</p>
                         
                         <table class="detail-table">
                             <tr>
@@ -443,7 +468,7 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
                             <tr>
                                 <td>Tempat</td>
                                 <td>:</td>
-                                <td><?php echo $surat['acara_tempat'] ? $surat['acara_tempat'] : $setting['nama_madrasah']; ?></td>
+                                <td><?php echo $surat['acara_tempat'] ? $surat['acara_tempat'] : $nama_madrasah_body; ?></td>
                             </tr>
                             <tr>
                                 <td>Keperluan</td>
@@ -453,7 +478,18 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
                             <tr>
                                 <td>Keterangan</td>
                                 <td>:</td>
-                                <td><?php echo $surat['keterangan'] ? nl2br($surat['keterangan']) : 'Dimohon Dengan Sangat Atas Kehadirannya.'; ?></td>
+                                <td>
+                                    <div class="keterangan-html">
+                                    <?php
+                                    $keterangan_undangan = $surat['keterangan'] ? $surat['keterangan'] : 'Dimohon Dengan Sangat Atas Kehadirannya.';
+                                    if ($keterangan_undangan !== strip_tags($keterangan_undangan)) {
+                                        echo $keterangan_undangan;
+                                    } else {
+                                        echo nl2br($keterangan_undangan);
+                                    }
+                                    ?>
+                                    </div>
+                                </td>
                             </tr>
                         </table>
                         
@@ -551,7 +587,7 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
 
                     <?php if ($surat['jenis_surat'] != 'Pemberitahuan' && $surat['jenis_surat'] != 'Keterangan Pindah'): ?>
                     <div style="page-break-inside: avoid;">
-                        <p style="text-indent: 50px;">Demikian undangan kami sampaikan, atas kehadiran Bapak / Ibu <?php echo $surat['penerima']; ?> kami ucapkan terima kasih.</p>
+                        <p style="text-indent: 50px;">Demikian undangan kami sampaikan, atas kehadiran <?php echo $sapaan_penerima; ?><?php echo $surat['penerima']; ?> kami ucapkan terima kasih.</p>
                         
                         <p style="font-style: italic; font-weight: bold;">Wassalamu'alaikum Wr. Wb.</p>
                         <?php echo $principal_ttd; ?>
