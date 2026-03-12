@@ -34,7 +34,7 @@ $chart_sm_json = json_encode($chart_sm);
 $chart_sk_json = json_encode($chart_sk);
 
 // Activity Data
-$q_activity = mysqli_query($conn, "SELECT a.*, u.nama FROM activity_log a LEFT JOIN users u ON a.user_id = u.id ORDER BY a.timestamp DESC LIMIT 50");
+$q_activity = mysqli_query($conn, "SELECT a.*, u.nama, u.role FROM activity_log a LEFT JOIN users u ON a.user_id = u.id ORDER BY a.timestamp DESC LIMIT 50");
 
 ?>
 <style>
@@ -268,9 +268,22 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama FROM activity_log a LEFT J
                                                 <small class="text-muted"><i class="far fa-clock"></i> <?php echo time_ago($act['timestamp']); ?></small>
                                             </div>
                                             <div class="mb-1">
+                                                <?php
+                                                $role_raw = strtolower(trim($act['role'] ?? ''));
+                                                $role_label = 'system';
+                                                if (!empty($act['nama'])) {
+                                                    if ($role_raw === 'admin') {
+                                                        $role_label = 'admin';
+                                                    } elseif ($role_raw === 'tu' || $role_raw === 'tata usaha') {
+                                                        $role_label = 'tata usaha';
+                                                    } else {
+                                                        $role_label = $role_raw ?: 'user';
+                                                    }
+                                                }
+                                                ?>
                                                 <span class="badge badge-auth">auth</span>
                                                 <span class="font-weight-bold text-dark"><?php echo $act['nama'] ? $act['nama'] : 'System'; ?></span>
-                                                <span class="text-gray-600">(<?php echo $act['nama'] ? 'admin' : 'system'; ?>)</span>
+                                                <span class="text-gray-600">(<?php echo htmlspecialchars($role_label); ?>)</span>
                                                 <span class="text-gray-800 ml-1"><?php echo $act['description']; ?></span>
                                             </div>
                                             <small class="text-muted d-block mt-1">
