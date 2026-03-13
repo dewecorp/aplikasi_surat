@@ -11,6 +11,24 @@ if (!isset($_SESSION['user_id'])) {
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+$lampiran_column = null;
+$q_lampiran_col = @mysqli_query($conn, "SHOW COLUMNS FROM surat_keluar LIKE 'lampiran'");
+if ($q_lampiran_col && mysqli_num_rows($q_lampiran_col) > 0) {
+    $lampiran_column = 'lampiran';
+} else {
+    $q_file_col = @mysqli_query($conn, "SHOW COLUMNS FROM surat_keluar LIKE 'file'");
+    if ($q_file_col && mysqli_num_rows($q_file_col) > 0) {
+        $lampiran_column = 'file';
+    }
+}
+if ($lampiran_column === null) {
+    @mysqli_query($conn, "ALTER TABLE surat_keluar ADD COLUMN lampiran varchar(255) NULL");
+    $q_lampiran_col2 = @mysqli_query($conn, "SHOW COLUMNS FROM surat_keluar LIKE 'lampiran'");
+    if ($q_lampiran_col2 && mysqli_num_rows($q_lampiran_col2) > 0) {
+        $lampiran_column = 'lampiran';
+    }
+}
+
 // Handle Add
 if (isset($_POST['add'])) {
     if (!isset($_POST['csrf_token']) || !verify_csrf_token($_POST['csrf_token'])) {
@@ -83,6 +101,41 @@ if (isset($_POST['add'])) {
         $perihal = 'Surat Keterangan Pindah';
     }
 
+    $lampiran_pdf = null;
+    if (in_array($jenis_surat, ['Undangan', 'Pemberitahuan'], true) && isset($_FILES['lampiran_pdf']) && ($_FILES['lampiran_pdf']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+        if ($lampiran_column === null) {
+            $_SESSION['error'] = "Kolom lampiran belum tersedia di database.";
+            session_write_close();
+            header("Location: surat_keluar.php");
+            exit();
+        }
+        if (($_FILES['lampiran_pdf']['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+            $_SESSION['error'] = "Gagal upload lampiran.";
+            session_write_close();
+            header("Location: surat_keluar.php");
+            exit();
+        }
+        $ext = strtolower(pathinfo($_FILES['lampiran_pdf']['name'], PATHINFO_EXTENSION));
+        if ($ext !== 'pdf') {
+            $_SESSION['error'] = "Lampiran harus berupa PDF.";
+            session_write_close();
+            header("Location: surat_keluar.php");
+            exit();
+        }
+        $target_dir = "uploads/lampiran/";
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
+        $lampiran_pdf = time() . '_' . uniqid() . '.pdf';
+        $target_file = $target_dir . $lampiran_pdf;
+        if (!move_uploaded_file($_FILES['lampiran_pdf']['tmp_name'], $target_file)) {
+            $_SESSION['error'] = "Gagal menyimpan lampiran.";
+            session_write_close();
+            header("Location: surat_keluar.php");
+            exit();
+        }
+    }
+
     $success_count = 0;
     foreach ($penerima_list as $penerima_name) {
         $penerima = mysqli_real_escape_string($conn, $penerima_name);
@@ -110,7 +163,7 @@ if (isset($_POST['add'])) {
                     acara_hari_tanggal, acara_waktu, acara_tempat, keperluan, keterangan, 
                     pembuka_surat, isi_surat, penutup_surat,
                     nis_siswa, tempat_lahir_siswa, tgl_lahir_siswa, jenis_kelamin_siswa,
-                    kelas_siswa, nama_wali, pekerjaan_wali, alamat_wali, tujuan_pindah
+                    kelas_siswa, nama_wali, pekerjaan_wali, alamat_wali, tujuan_pindah" . ($lampiran_column ? ", $lampiran_column" : "") . "
                   ) VALUES (
                     '$tgl_surat', '$no_surat', '$jenis_surat', '$perihal', '$penerima', " . 
                   ($acara_hari_tanggal ? "'$acara_hari_tanggal'" : "NULL") . ", " . 
@@ -129,7 +182,9 @@ if (isset($_POST['add'])) {
                   ($nama_wali ? "'$nama_wali'" : "NULL") . ", " .
                   ($pekerjaan_wali ? "'$pekerjaan_wali'" : "NULL") . ", " .
                   ($alamat_wali ? "'$alamat_wali'" : "NULL") . ", " .
-                  ($tujuan_pindah ? "'$tujuan_pindah'" : "NULL") . ")";
+                  ($tujuan_pindah ? "'$tujuan_pindah'" : "NULL") .
+                  ($lampiran_column ? (", " . ($lampiran_pdf ? "'" . mysqli_real_escape_string($conn, $lampiran_pdf) . "'" : "NULL")) : "") .
+                  ")";
         
         if (mysqli_query($conn, $query)) {
             log_activity($_SESSION['user_id'], 'create', 'Membuat surat keluar no: ' . $no_surat);
@@ -213,6 +268,42 @@ if (isset($_POST['edit'])) {
     $isi_surat = !empty($_POST['isi_surat']) ? mysqli_real_escape_string($conn, $_POST['isi_surat']) : NULL;
     $penutup_surat = !empty($_POST['penutup_surat']) ? mysqli_real_escape_string($conn, $_POST['penutup_surat']) : NULL;
 
+    $lampiran_set_sql = '';
+    $lampiran_old = null;
+    if (in_array($jenis_surat_edit, ['Undangan', 'Pemberitahuan'], true) && $lampiran_column !== null && isset($_FILES['lampiran_pdf']) && ($_FILES['lampiran_pdf']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+        if (($_FILES['lampiran_pdf']['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+            $_SESSION['error'] = "Gagal upload lampiran.";
+            session_write_close();
+            header("Location: surat_keluar.php");
+            exit();
+        }
+        $ext = strtolower(pathinfo($_FILES['lampiran_pdf']['name'], PATHINFO_EXTENSION));
+        if ($ext !== 'pdf') {
+            $_SESSION['error'] = "Lampiran harus berupa PDF.";
+            session_write_close();
+            header("Location: surat_keluar.php");
+            exit();
+        }
+        $target_dir = "uploads/lampiran/";
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
+        $lampiran_new = time() . '_' . uniqid() . '.pdf';
+        $target_file = $target_dir . $lampiran_new;
+        if (!move_uploaded_file($_FILES['lampiran_pdf']['tmp_name'], $target_file)) {
+            $_SESSION['error'] = "Gagal menyimpan lampiran.";
+            session_write_close();
+            header("Location: surat_keluar.php");
+            exit();
+        }
+        $q_old = mysqli_query($conn, "SELECT $lampiran_column AS lampiran_old FROM surat_keluar WHERE id='" . mysqli_real_escape_string($conn, $id) . "' LIMIT 1");
+        if ($q_old) {
+            $d_old = mysqli_fetch_assoc($q_old);
+            $lampiran_old = $d_old['lampiran_old'] ?? null;
+        }
+        $lampiran_set_sql = ", $lampiran_column='" . mysqli_real_escape_string($conn, $lampiran_new) . "'";
+    }
+
     // Fields for Surat Pindah
     $nis_siswa = !empty($_POST['nis_siswa']) ? mysqli_real_escape_string($conn, $_POST['nis_siswa']) : NULL;
     $tempat_lahir_siswa = !empty($_POST['tempat_lahir_siswa']) ? mysqli_real_escape_string($conn, $_POST['tempat_lahir_siswa']) : NULL;
@@ -246,7 +337,8 @@ if (isset($_POST['edit'])) {
               nama_wali=" . ($nama_wali ? "'$nama_wali'" : "NULL") . ",
               pekerjaan_wali=" . ($pekerjaan_wali ? "'$pekerjaan_wali'" : "NULL") . ",
               alamat_wali=" . ($alamat_wali ? "'$alamat_wali'" : "NULL") . ",
-              tujuan_pindah=" . ($tujuan_pindah ? "'$tujuan_pindah'" : "NULL") . "
+              tujuan_pindah=" . ($tujuan_pindah ? "'$tujuan_pindah'" : "NULL") .
+              $lampiran_set_sql . "
               WHERE id='$id'";
 
     if (mysqli_query($conn, $query)) {
@@ -256,6 +348,17 @@ if (isset($_POST['edit'])) {
         log_activity($_SESSION['user_id'], 'update', 'Mengubah surat keluar no: ' . $d_log['no_surat']);
 
         $_SESSION['success'] = "Surat keluar berhasil diubah";
+
+        if ($lampiran_old && $lampiran_column) {
+            $q_left = mysqli_query($conn, "SELECT COUNT(*) AS cnt FROM surat_keluar WHERE $lampiran_column='" . mysqli_real_escape_string($conn, $lampiran_old) . "'");
+            $d_left = $q_left ? mysqli_fetch_assoc($q_left) : null;
+            if ($d_left && (int)($d_left['cnt'] ?? 0) === 0) {
+                $p = 'uploads/lampiran/' . $lampiran_old;
+                if (file_exists($p)) {
+                    @unlink($p);
+                }
+            }
+        }
     } else {
         file_put_contents('debug_edit_error.txt', mysqli_error($conn) . "\nSQL: " . $query);
         $_SESSION['error'] = "Gagal mengubah surat: " . mysqli_error($conn);
@@ -268,13 +371,27 @@ if (isset($_POST['edit'])) {
 // Handle Delete
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
-    $q_del = mysqli_query($conn, "SELECT no_surat FROM surat_keluar WHERE id='$id'");
+    $lampiran_del = null;
+    $q_del = mysqli_query($conn, "SELECT no_surat" . ($lampiran_column ? ", $lampiran_column AS lampiran" : "") . " FROM surat_keluar WHERE id='" . mysqli_real_escape_string($conn, $id) . "' LIMIT 1");
     $d_del = mysqli_fetch_assoc($q_del);
     $no_surat_del = $d_del['no_surat'];
+    if ($lampiran_column) {
+        $lampiran_del = $d_del['lampiran'] ?? null;
+    }
 
     if (mysqli_query($conn, "DELETE FROM surat_keluar WHERE id='$id'")) {
         log_activity($_SESSION['user_id'], 'delete', 'Menghapus surat keluar no: ' . $no_surat_del);
         $_SESSION['success'] = "Surat keluar berhasil dihapus";
+        if ($lampiran_del && $lampiran_column) {
+            $q_left = mysqli_query($conn, "SELECT COUNT(*) AS cnt FROM surat_keluar WHERE $lampiran_column='" . mysqli_real_escape_string($conn, $lampiran_del) . "'");
+            $d_left = $q_left ? mysqli_fetch_assoc($q_left) : null;
+            if ($d_left && (int)($d_left['cnt'] ?? 0) === 0) {
+                $p = 'uploads/lampiran/' . $lampiran_del;
+                if (file_exists($p)) {
+                    @unlink($p);
+                }
+            }
+        }
     } else {
         $_SESSION['error'] = "Gagal menghapus surat";
     }
@@ -488,7 +605,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                     <div class="modal-header">
                                                         <h4 class="modal-title">Edit <?php echo $row['jenis_surat']; ?></h4>
                                                     </div>
-                                                    <form method="POST">
+                                                    <form method="POST" enctype="multipart/form-data">
                                                         <div class="modal-body">
                                                             <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                                                             <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
@@ -599,6 +716,19 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                         <textarea name="keterangan" class="form-control ckeditor"><?php echo $row['keterangan']; ?></textarea>
                                                                     </div>
                                                                 </div>
+                                                                <label>Lampiran (PDF)</label>
+                                                                <div class="form-group">
+                                                                    <div class="form-line">
+                                                                        <input type="file" class="form-control" name="lampiran_pdf" accept="application/pdf">
+                                                                    </div>
+                                                                    <?php $lampiran_current = !empty($row['lampiran']) ? $row['lampiran'] : (!empty($row['file']) ? $row['file'] : ''); ?>
+                                                                    <?php if (!empty($lampiran_current) && file_exists('uploads/lampiran/' . $lampiran_current)): ?>
+                                                                        <small class="text-muted d-block mt-2">
+                                                                            Lampiran saat ini:
+                                                                            <a href="lampiran_preview.php?file=<?php echo rawurlencode($lampiran_current); ?>" target="_blank"><?php echo htmlspecialchars($lampiran_current); ?></a>
+                                                                        </small>
+                                                                    <?php endif; ?>
+                                                                </div>
 
                                                             <?php elseif ($row['jenis_surat'] == 'Pemberitahuan'): ?>
                                                                 <label>Pembuka Surat</label>
@@ -618,6 +748,19 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                                     <div class="form-line">
                                                                         <textarea name="penutup_surat" class="form-control no-resize" rows="4"><?php echo htmlspecialchars($row['penutup_surat']); ?></textarea>
                                                                     </div>
+                                                                </div>
+                                                                <label>Lampiran (PDF)</label>
+                                                                <div class="form-group">
+                                                                    <div class="form-line">
+                                                                        <input type="file" class="form-control" name="lampiran_pdf" accept="application/pdf">
+                                                                    </div>
+                                                                    <?php $lampiran_current = !empty($row['lampiran']) ? $row['lampiran'] : (!empty($row['file']) ? $row['file'] : ''); ?>
+                                                                    <?php if (!empty($lampiran_current) && file_exists('uploads/lampiran/' . $lampiran_current)): ?>
+                                                                        <small class="text-muted d-block mt-2">
+                                                                            Lampiran saat ini:
+                                                                            <a href="lampiran_preview.php?file=<?php echo rawurlencode($lampiran_current); ?>" target="_blank"><?php echo htmlspecialchars($lampiran_current); ?></a>
+                                                                        </small>
+                                                                    <?php endif; ?>
                                                                 </div>
 
                                                             <?php elseif ($row['jenis_surat'] == 'Tugas'): ?>
@@ -784,7 +927,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
             <div class="modal-header">
                 <h4 class="modal-title">Buat Surat Undangan</h4>
             </div>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
                     <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                     <input type="hidden" name="jenis_surat" value="Undangan">
@@ -836,6 +979,12 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                             <textarea name="keterangan" class="form-control ckeditor"></textarea>
                         </div>
                     </div>
+                    <label>Lampiran (PDF)</label>
+                    <div class="form-group">
+                        <div class="form-line">
+                            <input type="file" class="form-control" name="lampiran_pdf" accept="application/pdf">
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" name="add" class="btn btn-success"><i class="fas fa-save"></i> SIMPAN</button>
@@ -853,7 +1002,7 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
             <div class="modal-header">
                 <h4 class="modal-title">Buat Surat Pemberitahuan</h4>
             </div>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
                     <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                     <input type="hidden" name="jenis_surat" value="Pemberitahuan">
@@ -897,6 +1046,12 @@ Dengan ini kami memberitahukan bahwa:</textarea>
 Wassalamu'alaikum Wr. Wb.</textarea>
                         </div>
                     </div>
+                    <label>Lampiran (PDF)</label>
+                    <div class="form-group">
+                        <div class="form-line">
+                            <input type="file" class="form-control" name="lampiran_pdf" accept="application/pdf">
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" name="add" class="btn btn-success"><i class="fas fa-save"></i> SIMPAN</button>
@@ -914,7 +1069,7 @@ Wassalamu'alaikum Wr. Wb.</textarea>
             <div class="modal-header">
                 <h4 class="modal-title">Buat Surat Tugas</h4>
             </div>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
                     <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                     <input type="hidden" name="jenis_surat" value="Tugas">
@@ -1017,7 +1172,7 @@ Wassalamu'alaikum Wr. Wb.</textarea>
             <div class="modal-header">
                 <h4 class="modal-title">Buat Surat Keterangan Pindah</h4>
             </div>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
                     <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                     <input type="hidden" name="jenis_surat" value="Keterangan Pindah">

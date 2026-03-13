@@ -35,6 +35,7 @@ CREATE TABLE `surat_keluar` (
   `perihal` text NOT NULL,
   `penerima` varchar(100) NOT NULL,
   `file` varchar(255) DEFAULT NULL,
+  `lampiran` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

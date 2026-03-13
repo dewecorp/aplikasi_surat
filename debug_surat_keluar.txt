@@ -1,21 +1,18 @@
 Array
 (
-    [csrf_token] => e3867959cb43be253fd06b1a8bbc5291887ffcd9944967eab423b25ae44f7f6a
-    [id] => 10
-    [jenis_surat] => Undangan
-    [tgl_surat] => 2026-03-12
-    [perihal] => Undangan Buka Bersama
-    [penerima] => Siswa-Siswi MI Sultan Fattah
-    [acara_hari_tanggal] => 2026-03-13
-    [acara_waktu] => 15:00
-    [acara_tempat] => Aula Madrasah
-    [keperluan] => Buka Bersama Siswa dan guru
-    [keterangan] => <ol>
-	<li>Anak putri memakai baju muslimah dan berkerudung + membawa mukena</li>
-	<li>Anak putra memakai sarung dan baju lengan panjang + berpeci</li>
-	<li>Membawa alat tulis ( buku + pensil) cukup satu</li>
-	<li>Dimohon untuk seluruh siswa siswi hadir dalam acara tersebut</li>
-</ol>
+    [csrf_token] => ea5ed24b5dd18ee5401a688d6e7c0446c6a43a4ae88aa5c69263bdc352ffb205
+    [id] => 9
+    [jenis_surat] => Pemberitahuan
+    [tgl_surat] => 2026-02-10
+    [perihal] => Pemberitahuan Jadwal les
+    [penerima] => Wali Murid Kelas 6
+    [pembuka_surat] => Assalamu'alaikum Wr. Wb.
 
+Dengan ini kami memberitahukan bahwa:
+    [isi_surat] => <p>Jadwal les</p>
+
+    [penutup_surat] => Demikian pemberitahuan ini kami sampaikan. Atas perhatian dan kerjasamanya kami ucapkan terima kasih.
+
+Wassalamu'alaikum Wr. Wb.
     [edit] => 
 )

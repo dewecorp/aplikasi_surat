@@ -238,9 +238,19 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
             padding: 5px;
             vertical-align: top;
         }
+
+        .lampiran-page {
+            page-break-before: always;
+        }
+        .lampiran-canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
-<body onload="window.print()">
+<body>
     <div id="print-area">
         <?php
         $penerima_list = [$surat['penerima']];
@@ -676,6 +686,23 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
                 </div>
             <?php endif; ?>
             <div style="clear: both;"></div>
+            <?php
+            $lampiran_file = !empty($surat['lampiran']) ? $surat['lampiran'] : (!empty($surat['file']) ? $surat['file'] : '');
+            ?>
+            <?php if (in_array($surat['jenis_surat'], ['Undangan', 'Pemberitahuan'], true) && !empty($lampiran_file) && file_exists('uploads/lampiran/' . $lampiran_file)): ?>
+                <?php
+                $lampiran_bytes = @file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'lampiran' . DIRECTORY_SEPARATOR . $lampiran_file);
+                $lampiran_b64 = $lampiran_bytes !== false ? base64_encode($lampiran_bytes) : '';
+                ?>
+                <?php if ($lampiran_b64): ?>
+                    <div id="lampiranRoot" class="lampiran-page">
+                        <div id="lampiranPages"></div>
+                    </div>
+                    <script>
+                        window.__lampiranB64 = <?php echo json_encode($lampiran_b64); ?>;
+                    </script>
+                <?php endif; ?>
+            <?php endif; ?>
         </div>
         <?php 
             if ($mode == 'landscape') {
@@ -686,5 +713,54 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
         endforeach; 
         ?>
     </div>
+    <script>
+        (function () {
+            var printed = false;
+            var doPrint = function () {
+                if (printed) return;
+                printed = true;
+                setTimeout(function () { window.print(); }, 200);
+            };
+            var root = document.getElementById('lampiranRoot');
+            var pages = document.getElementById('lampiranPages');
+            var b64 = window.__lampiranB64 || '';
+            if (!root || !pages || !b64 || !window.pdfjsLib) {
+                doPrint();
+                return;
+            }
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            var raw = atob(b64);
+            var bytes = new Uint8Array(raw.length);
+            for (var i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+            var loadingTask = window.pdfjsLib.getDocument({ data: bytes });
+            loadingTask.promise.then(function (pdf) {
+                var renderPage = function (n) {
+                    return pdf.getPage(n).then(function (page) {
+                        var viewport = page.getViewport({ scale: 1.2 });
+                        var canvas = document.createElement('canvas');
+                        canvas.className = 'lampiran-canvas';
+                        var ctx = canvas.getContext('2d');
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+                        if (n > 1) {
+                            var pb = document.createElement('div');
+                            pb.style.pageBreakBefore = 'always';
+                            pages.appendChild(pb);
+                        }
+                        pages.appendChild(canvas);
+                        return page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                    });
+                };
+                var chain = Promise.resolve();
+                for (var p = 1; p <= pdf.numPages; p++) {
+                    (function (pageNum) {
+                        chain = chain.then(function () { return renderPage(pageNum); });
+                    })(p);
+                }
+                chain.then(doPrint).catch(doPrint);
+            }).catch(doPrint);
+            setTimeout(doPrint, 6000);
+        })();
+    </script>
 </body>
 </html>
