@@ -396,7 +396,7 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
                     </div>
 
                     <p style="text-indent: 50px; text-align: justify;">
-                        Orang tersebut diatas kami tugaskan untuk mengikuti <?php echo $surat['perihal']; ?> 
+                        Guru tersebut diatas kami tugaskan untuk mengikuti <?php echo $surat['perihal']; ?> 
                         di <?php echo $surat['acara_tempat']; ?> 
                         Pada Hari 
                         <?php 
