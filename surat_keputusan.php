@@ -1,0 +1,357 @@
+<?php
+include 'config.php';
+
+if (isset($_POST['add'])) {
+    $tentang = mysqli_real_escape_string($conn, $_POST['tentang']);
+    $menimbang = mysqli_real_escape_string($conn, $_POST['menimbang']);
+    $mengingat = mysqli_real_escape_string($conn, $_POST['mengingat']);
+    $memperhatikan = mysqli_real_escape_string($conn, $_POST['memperhatikan']);
+    $menetapkan = !empty($_POST['menetapkan']) ? json_encode($_POST['menetapkan']) : NULL;
+    $lampiran = mysqli_real_escape_string($conn, $_POST['lampiran']);
+    $tgl_surat = date('Y-m-d');
+
+    // Generate nomor surat
+    $bulan = date('m');
+    $tahun = date('Y');
+    $q_last_no = mysqli_query($conn, "SELECT no_surat FROM surat_keputusan WHERE MONTH(tgl_surat) = '$bulan' AND YEAR(tgl_surat) = '$tahun' ORDER BY id DESC LIMIT 1");
+    $last_no_row = mysqli_fetch_assoc($q_last_no);
+    $last_no = $last_no_row ? (int)substr($last_no_row['no_surat'], 0, 3) : 0;
+    $next_no = str_pad($last_no + 1, 3, '0', STR_PAD_LEFT);
+    $no_surat = $next_no . '/MI.SP/SK/' . to_romawi(date('n')) . '/' . $tahun;
+
+    $file_name = '';
+    if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
+        $file_name = time() . '_' . basename($_FILES['file']['name']);
+        move_uploaded_file($_FILES['file']['tmp_name'], 'uploads/' . $file_name);
+    }
+
+    $query = "INSERT INTO surat_keputusan (tgl_surat, no_surat, tentang, menimbang, mengingat, memperhatikan, menetapkan, lampiran, file) VALUES ('$tgl_surat', '$no_surat', '$tentang', '$menimbang', '$mengingat', '$memperhatikan', '$menetapkan', '$lampiran', '$file_name')";
+    if (mysqli_query($conn, $query)) {
+        $_SESSION['success'] = "Data berhasil ditambahkan";
+        header("Location: surat_keputusan.php");
+        exit();
+    } else {
+        $_SESSION['error'] = "Gagal menambahkan data: " . mysqli_error($conn);
+    }
+}
+
+if (isset($_POST['edit'])) {
+    $id = mysqli_real_escape_string($conn, $_POST['id']);
+    $tentang = mysqli_real_escape_string($conn, $_POST['tentang']);
+    $menimbang = mysqli_real_escape_string($conn, $_POST['menimbang']);
+    $mengingat = mysqli_real_escape_string($conn, $_POST['mengingat']);
+    $memperhatikan = mysqli_real_escape_string($conn, $_POST['memperhatikan']);
+    $menetapkan = !empty($_POST['menetapkan']) ? json_encode($_POST['menetapkan']) : NULL;
+    $lampiran = mysqli_real_escape_string($conn, $_POST['lampiran']);
+
+    $file_update = "";
+    if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
+        $file_name = time() . '_' . basename($_FILES['file']['name']);
+        if (move_uploaded_file($_FILES['file']['tmp_name'], 'uploads/' . $file_name)) {
+            $file_update = ", file='$file_name'";
+        }
+    }
+
+    $query = "UPDATE surat_keputusan SET tentang='$tentang', menimbang='$menimbang', mengingat='$mengingat', memperhatikan='$memperhatikan', menetapkan='$menetapkan', lampiran='$lampiran' $file_update WHERE id='$id'";
+    if (mysqli_query($conn, $query)) {
+        $_SESSION['success'] = "Data berhasil diperbarui";
+        header("Location: surat_keputusan.php");
+        exit();
+    } else {
+        $_SESSION['error'] = "Gagal memperbarui data: " . mysqli_error($conn);
+    }
+}
+
+if (isset($_GET['delete'])) {
+    $id = mysqli_real_escape_string($conn, $_GET['delete']);
+    $query = "DELETE FROM surat_keputusan WHERE id='$id'";
+    if (mysqli_query($conn, $query)) {
+        $_SESSION['success'] = "Data berhasil dihapus";
+        header("Location: surat_keputusan.php");
+        exit();
+    } else {
+        $_SESSION['error'] = "Gagal menghapus data: " . mysqli_error($conn);
+    }
+}
+
+// Ambil data surat keputusan
+$query = mysqli_query($conn, "SELECT * FROM surat_keputusan ORDER BY tgl_surat DESC");
+
+include 'template/header.php';
+include 'template/sidebar.php';
+?>
+
+<div class="container-fluid px-5">
+    <div class="block-header">
+        <h2>Surat Keputusan</h2>
+    </div>
+
+    <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
+                        <i class="fas fa-plus"></i> Tambah Surat Keputusan
+                    </button>
+                </div>
+                <div class="body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover js-basic-example dataTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Tanggal Surat</th>
+                                    <th>Nomor Surat</th>
+                                    <th>SK Tentang</th>
+                                    <th>File</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $no = 1;
+                                while ($row = mysqli_fetch_assoc($query)) :
+                                ?>
+                                    <tr>
+                                        <td><?php echo $no++; ?></td>
+                                        <td><?php echo tgl_indo($row['tgl_surat']); ?></td>
+                                        <td><?php echo $row['no_surat']; ?></td>
+                                        <td><?php echo $row['tentang']; ?></td>
+                                        <td>
+                                            <?php if ($row['file']) : ?>
+                                                <a href="uploads/<?php echo $row['file']; ?>" target="_blank" class="btn btn-sm btn-info">Lihat</a>
+                                            <?php else : ?>
+                                                -
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <a href="print_surat_keputusan.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-sm btn-success">Cetak</a>
+                                            <button type="button" class="btn btn-sm btn-warning edit-btn" data-id="<?php echo $row['id']; ?>">Edit</button>
+                                            <a href="javascript:void(0);" class="btn btn-sm btn-danger" onclick="confirmDelete('surat_keputusan.php?delete=<?php echo $row['id']; ?>')">Hapus</a>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Surat Keputusan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="tentang">SK Tentang</label>
+                        <textarea id="tentang" name="tentang" class="form-control ckeditor"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="menimbang">Menimbang</label>
+                        <textarea id="menimbang" name="menimbang" class="form-control ckeditor"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="mengingat">Mengingat</label>
+                        <textarea id="mengingat" name="mengingat" class="form-control ckeditor"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="memperhatikan">Memperhatikan</label>
+                        <textarea id="memperhatikan" name="memperhatikan" class="form-control ckeditor"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Menetapkan</label>
+                        <div id="menetapkan-fields">
+                            <div class="input-group mb-2">
+                                <textarea name="menetapkan[]" class="form-control" placeholder="Pertama" rows="3"></textarea>
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-danger remove-field">Hapus</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="add-menetapkan-field" class="btn btn-sm btn-info">Tambah Field</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="lampiran">Lampiran</label>
+                        <textarea id="lampiran" name="lampiran" class="form-control ckeditor"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="file">File Lampiran (PDF/Word/Excel)</label>
+                        <input type="file" id="file" name="file" class="form-control-file">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" name="add" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Surat Keputusan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="id" id="edit_id">
+                    <div class="form-group">
+                        <label for="edit_tentang">SK Tentang</label>
+                        <textarea id="edit_tentang" name="tentang" class="form-control ckeditor-edit"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_menimbang">Menimbang</label>
+                        <textarea id="edit_menimbang" name="menimbang" class="form-control ckeditor-edit"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_mengingat">Mengingat</label>
+                        <textarea id="edit_mengingat" name="mengingat" class="form-control ckeditor-edit"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_memperhatikan">Memperhatikan</label>
+                        <textarea id="edit_memperhatikan" name="memperhatikan" class="form-control ckeditor-edit"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Menetapkan</label>
+                        <div id="edit-menetapkan-fields">
+                            <!-- Fields will be populated by JS -->
+                        </div>
+                        <button type="button" id="edit-add-menetapkan-field" class="btn btn-sm btn-info">Tambah Field</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_lampiran">Lampiran</label>
+                        <textarea id="edit_lampiran" name="lampiran" class="form-control ckeditor-edit"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_file">Ganti File Lampiran (PDF/Word/Excel)</label>
+                        <input type="file" id="edit_file" name="file" class="form-control-file">
+                        <small class="text-muted">Biarkan kosong jika tidak ingin mengganti file.</small>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" name="edit" class="btn btn-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php
+include 'template/footer.php';
+?>
+<!-- Gunakan CKEditor 4 Full Build -->
+<script src="https://cdn.ckeditor.com/4.16.2/full/ckeditor.js"></script>
+<script>
+    // Konfigurasi Global CKEditor
+    CKEDITOR.config.versionCheck = false;
+    CKEDITOR.config.removePlugins = 'exportpdf';
+
+    $(document).ready(function() {
+        // Inisialisasi SEMUA editor (tambah & edit) saat halaman dimuat.
+        $('.ckeditor, .ckeditor-edit').each(function() {
+            var editorId = $(this).attr('id');
+            if (editorId && !CKEDITOR.instances[editorId]) {
+                CKEDITOR.replace(editorId);
+            }
+        });
+
+        // Add Menetapkan Field Logic
+        function createMenetapkanField(containerId, value = '', index = null) {
+            var container = document.getElementById(containerId);
+            if (!container) return;
+            if (index === null) index = container.children.length;
+            var placeholders = ['Pertama', 'Kedua', 'Ketiga', 'Keempat', 'Kelima'];
+            var placeholder = placeholders[index] || 'Berikutnya';
+            
+            var newField = document.createElement('div');
+            newField.className = 'input-group mb-2';
+            newField.innerHTML = `
+                <textarea name="menetapkan[]" class="form-control" placeholder="${placeholder}" rows="3">${value}</textarea>
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-danger remove-field">Hapus</button>
+                </div>
+            `;
+            container.appendChild(newField);
+        }
+
+        $('#add-menetapkan-field').on('click', function() { createMenetapkanField('menetapkan-fields'); });
+        $('#edit-add-menetapkan-field').on('click', function() { createMenetapkanField('edit-menetapkan-fields'); });
+        $(document).on('click', '.remove-field', function() { $(this).closest('.input-group').remove(); });
+
+        // Pastikan data CKEditor diupdate ke textarea sebelum form disubmit
+        $('form').on('submit', function() {
+            for (var instanceName in CKEDITOR.instances) {
+                if (CKEDITOR.instances.hasOwnProperty(instanceName)) {
+                    CKEDITOR.instances[instanceName].updateElement();
+                }
+            }
+        });
+
+        // Edit Button Click Logic
+        $('.edit-btn').on('click', function() {
+            var id = $(this).data('id');
+            $.ajax({
+                url: 'get_sk_data.php',
+                type: 'GET',
+                data: { id: id },
+                dataType: 'json',
+                success: function(data) {
+                    // 1. Simpan data ke elemen modal untuk diakses nanti
+                    $('#editModal').data('sk-data', data);
+                    
+                    // 2. Tampilkan modal
+                    $('#editModal').modal('show');
+                },
+                error: function() {
+                    swal("Gagal!", "Terjadi kesalahan saat mengambil data.", "error");
+                }
+            });
+        });
+
+        // Event ini berjalan SETIAP KALI modal edit selesai ditampilkan
+        $('#editModal').on('shown.bs.modal', function () {
+            // Ambil data yang disimpan sebelumnya
+            var data = $(this).data('sk-data');
+            if (!data) return;
+
+            // Isi field non-editor
+            $('#edit_id').val(data.id);
+            
+            $('#edit-menetapkan-fields').empty();
+            if (data.menetapkan) {
+                try {
+                    var menetapkan = JSON.parse(data.menetapkan);
+                    if (Array.isArray(menetapkan)) {
+                        menetapkan.forEach(function(val, idx) {
+                            createMenetapkanField('edit-menetapkan-fields', val, idx);
+                        });
+                    } else { createMenetapkanField('edit-menetapkan-fields', '', 0); }
+                } catch (e) { createMenetapkanField('edit-menetapkan-fields', '', 0); }
+            } else { createMenetapkanField('edit-menetapkan-fields', '', 0); }
+
+            // Isi data ke CKEditor
+            if (CKEDITOR.instances['edit_tentang']) CKEDITOR.instances['edit_tentang'].setData(data.tentang || '');
+            if (CKEDITOR.instances['edit_menimbang']) CKEDITOR.instances['edit_menimbang'].setData(data.menimbang || '');
+            if (CKEDITOR.instances['edit_mengingat']) CKEDITOR.instances['edit_mengingat'].setData(data.mengingat || '');
+            if (CKEDITOR.instances['edit_memperhatikan']) CKEDITOR.instances['edit_memperhatikan'].setData(data.memperhatikan || '');
+            if (CKEDITOR.instances['edit_lampiran']) CKEDITOR.instances['edit_lampiran'].setData(data.lampiran || '');
+        });
+    });
+</script>

@@ -192,6 +192,11 @@ $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_repla
                     <i class="fas fa-paper-plane"></i>
                     <span>Surat Keluar</span></a>
             </li>
+            <li class="nav-item <?php echo ($page == 'surat_keputusan') ? 'active' : ''; ?>">
+                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>surat_keputusan">
+                    <i class="fas fa-gavel"></i>
+                    <span>Surat Keputusan</span></a>
+            </li>
             <li class="nav-item <?php echo ($page == 'riwayat') ? 'active' : ''; ?>">
                 <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>riwayat">
                     <i class="fas fa-history"></i>
