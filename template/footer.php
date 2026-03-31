@@ -88,7 +88,9 @@
                 swal({
                     title: "Gagal!",
                     text: <?php echo json_encode($_SESSION['error']); ?>,
-                    type: "error"
+                    type: "error",
+                    timer: 3000,
+                    showConfirmButton: true
                 });
             <?php unset($_SESSION['error']); ?>
             <?php endif; ?>

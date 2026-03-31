@@ -1,4 +1,5 @@
 <?php
+require_once 'session_init.php';
 include 'config.php';
 
 if (isset($_POST['add'])) {
@@ -17,7 +18,7 @@ if (isset($_POST['add'])) {
     $last_no_row = mysqli_fetch_assoc($q_last_no);
     $last_no = $last_no_row ? (int)substr($last_no_row['no_surat'], 0, 3) : 0;
     $next_no = str_pad($last_no + 1, 3, '0', STR_PAD_LEFT);
-    $no_surat = $next_no . '/MI.SP/SK/' . to_romawi(date('n')) . '/' . $tahun;
+    $no_surat = $next_no . '/MI.SF/SK/' . to_romawi(date('n')) . '/' . $tahun;
 
     $file_name = '';
     if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
@@ -264,13 +265,16 @@ include 'template/footer.php';
     CKEDITOR.config.removePlugins = 'exportpdf';
 
     $(document).ready(function() {
-        // Inisialisasi SEMUA editor (tambah & edit) saat halaman dimuat.
-        $('.ckeditor, .ckeditor-edit').each(function() {
+        // Inisialisasi CKEditor untuk form tambah
+        $('.ckeditor').each(function() {
             var editorId = $(this).attr('id');
             if (editorId && !CKEDITOR.instances[editorId]) {
                 CKEDITOR.replace(editorId);
             }
         });
+
+        // Inisialisasi CKEditor untuk form edit - TUNDA sampai modal dibuka
+        // Jangan initialize dulu, akan diinitialize saat modal dibuka
 
         // Add Menetapkan Field Logic
         function createMenetapkanField(containerId, value = '', index = null) {
@@ -319,8 +323,17 @@ include 'template/footer.php';
                     // 2. Tampilkan modal
                     $('#editModal').modal('show');
                 },
-                error: function() {
+                error: function(xhr, status, error) {
                     swal("Gagal!", "Terjadi kesalahan saat mengambil data.", "error");
+                }
+            });
+        });
+
+        // Destroy CKEditor instances when modal is hidden
+        $('#editModal').on('hidden.bs.modal', function () {
+            ['edit_tentang', 'edit_menimbang', 'edit_mengingat', 'edit_memperhatikan', 'edit_lampiran'].forEach(function(editorId) {
+                if (CKEDITOR.instances[editorId]) {
+                    CKEDITOR.instances[editorId].destroy(true);
                 }
             });
         });
@@ -334,6 +347,13 @@ include 'template/footer.php';
             // Isi field non-editor
             $('#edit_id').val(data.id);
             
+            // Isi textarea fields DULU sebelum initialize CKEditor
+            $('#edit_tentang').val(data.tentang || '');
+            $('#edit_menimbang').val(data.menimbang || '');
+            $('#edit_mengingat').val(data.mengingat || '');
+            $('#edit_memperhatikan').val(data.memperhatikan || '');
+            $('#edit_lampiran').val(data.lampiran || '');
+            
             $('#edit-menetapkan-fields').empty();
             if (data.menetapkan) {
                 try {
@@ -346,12 +366,31 @@ include 'template/footer.php';
                 } catch (e) { createMenetapkanField('edit-menetapkan-fields', '', 0); }
             } else { createMenetapkanField('edit-menetapkan-fields', '', 0); }
 
-            // Isi data ke CKEditor
-            if (CKEDITOR.instances['edit_tentang']) CKEDITOR.instances['edit_tentang'].setData(data.tentang || '');
-            if (CKEDITOR.instances['edit_menimbang']) CKEDITOR.instances['edit_menimbang'].setData(data.menimbang || '');
-            if (CKEDITOR.instances['edit_mengingat']) CKEDITOR.instances['edit_mengingat'].setData(data.mengingat || '');
-            if (CKEDITOR.instances['edit_memperhatikan']) CKEDITOR.instances['edit_memperhatikan'].setData(data.memperhatikan || '');
-            if (CKEDITOR.instances['edit_lampiran']) CKEDITOR.instances['edit_lampiran'].setData(data.lampiran || '');
+            // Destroy CKEditor instances jika sudah ada, lalu buat ulang
+            
+            // Helper function to replace editor and set data
+            function replaceEditorWithDelay(editorId, data, delay) {
+                setTimeout(function() {
+                    if (CKEDITOR.instances[editorId]) {
+                        CKEDITOR.instances[editorId].destroy(true);
+                    }
+                    var editor = CKEDITOR.replace(editorId);
+                    
+                    // Set data after editor is ready
+                    editor.on('instanceReady', function() {
+                        this.setData(data);
+                    });
+                }, delay);
+            }
+            
+            // Replace each editor with slight delays to ensure proper initialization
+            replaceEditorWithDelay('edit_tentang', data.tentang || '', 0);
+            replaceEditorWithDelay('edit_menimbang', data.menimbang || '', 50);
+            replaceEditorWithDelay('edit_mengingat', data.mengingat || '', 100);
+            replaceEditorWithDelay('edit_memperhatikan', data.memperhatikan || '', 150);
+            replaceEditorWithDelay('edit_lampiran', data.lampiran || '', 200);
+            
+            console.log('Modal setup complete');
         });
     });
 </script>
