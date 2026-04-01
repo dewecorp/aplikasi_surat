@@ -34,8 +34,9 @@ $instansi = mysqli_fetch_assoc($q_instansi);
         
         /* Force lampiran to new page */
         .lampiran-section {
-            page-break-before: always;
+            page-break-before: auto;
             page-break-inside: avoid;
+            margin-top: 30px;
         }
         
         body { 
@@ -288,7 +289,6 @@ $instansi = mysqli_fetch_assoc($q_instansi);
             </div>
             
             <div style="clear: both;"></div>
-            <br><br><br>
 
             <?php 
             // Check if lampiran has content or file
