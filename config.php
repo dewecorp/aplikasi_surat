@@ -59,6 +59,10 @@ function properCaseName($name) {
     // Capitalize first letter of each word
     $name = ucwords($name);
     
+    // Fix MI (Madrasah Ibtidaiyah) to uppercase - replace all variations
+    $name = str_ireplace('mi', 'MI', $name);
+    $name = str_ireplace('Mi', 'MI', $name);
+    
     // Fix common academic titles capitalization - handle both with and without spaces
     $replacements = array(
         'S. Pd. I' => 'S.Pd.I',

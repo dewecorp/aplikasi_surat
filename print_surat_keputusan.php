@@ -37,6 +37,10 @@ $instansi = mysqli_fetch_assoc($q_instansi);
             margin: 0;
             padding: 0;
         }
+        /* Force Bookman Old Style for all content */
+        * {
+            font-family: 'Bookman Old Style', 'Times New Roman', Times, serif !important;
+        }
         .container { 
             width: 100%; 
             margin: 0 auto;
@@ -146,7 +150,7 @@ $instansi = mysqli_fetch_assoc($q_instansi);
             <p>NOMOR : <?php echo $sk['no_surat']; ?></p>
             <br>
             <h4>TENTANG</h4>
-            <div style="text-transform: uppercase; font-weight: bold;"><?php echo $sk['tentang']; ?></div>
+            <div style="text-transform: uppercase; font-weight: bold;"><?php echo html_entity_decode($sk['tentang'], ENT_QUOTES, 'UTF-8'); ?></div>
             <br>
             <h4>KEPALA <?php echo strtoupper($instansi['nama_madrasah']); ?></h4>
         </div>
@@ -156,17 +160,38 @@ $instansi = mysqli_fetch_assoc($q_instansi);
                 <tr>
                     <td class="label">Menimbang</td>
                     <td class="separator">:</td>
-                    <td class="content-cell"><?php echo $sk['menimbang']; ?></td>
+                    <td class="content-cell">
+                        <?php 
+                        $decoded = stripslashes($sk['menimbang']);
+                        $decoded = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                        $decoded = str_replace(['–', '—', '‐', '‑'], '-', $decoded);
+                        echo $decoded;
+                        ?>
+                    </td>
                 </tr>
                 <tr>
                     <td class="label">Mengingat</td>
                     <td class="separator">:</td>
-                    <td class="content-cell"><?php echo $sk['mengingat']; ?></td>
+                    <td class="content-cell">
+                        <?php 
+                        $decoded = stripslashes($sk['mengingat']);
+                        $decoded = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                        $decoded = str_replace(['–', '—', '‐', '‑'], '-', $decoded);
+                        echo $decoded;
+                        ?>
+                    </td>
                 </tr>
                 <tr>
                     <td class="label">Memperhatikan</td>
                     <td class="separator">:</td>
-                    <td class="content-cell"><?php echo $sk['memperhatikan']; ?></td>
+                    <td class="content-cell">
+                        <?php 
+                        $decoded = stripslashes($sk['memperhatikan']);
+                        $decoded = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                        $decoded = str_replace(['–', '—', '‐', '‑'], '-', $decoded);
+                        echo $decoded;
+                        ?>
+                    </td>
                 </tr>
             </table>
 
@@ -185,7 +210,12 @@ $instansi = mysqli_fetch_assoc($q_instansi);
                             if ($menetapkan && is_array($menetapkan)) {
                                 echo '<ol>';
                                 foreach ($menetapkan as $value) {
-                                    echo '<li>' . $value . '</li>';
+                                    // Handle multiple encoding layers from CKEditor
+                                    $decoded_value = stripslashes($value);
+                                    $decoded_value = html_entity_decode($decoded_value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                                    // Replace Unicode dashes with regular dash
+                                    $decoded_value = str_replace(['–', '—', '‐', '‑'], '-', $decoded_value);
+                                    echo '<li>' . $decoded_value . '</li>';
                                 }
                                 echo '</ol>';
                             }
@@ -247,7 +277,7 @@ $instansi = mysqli_fetch_assoc($q_instansi);
                         <tr>
                             <td style="width: 20%; font-weight: bold;">Lampiran</td>
                             <td style="width: 5%;">:</td>
-                            <td style="width: 75%;">Keputusan Kepala MI Sultan Fattah Sukosono</td>
+                            <td style="width: 75%;">Keputusan Kepala <?php echo properCaseName($instansi['nama_madrasah']); ?></td>
                         </tr>
                         <tr>
                             <td style="font-weight: bold;">Nomor</td>
@@ -257,11 +287,27 @@ $instansi = mysqli_fetch_assoc($q_instansi);
                         <tr>
                             <td style="font-weight: bold;">Tentang</td>
                             <td>:</td>
-                            <td><?php echo strip_tags($sk['tentang']); ?></td>
+                            <td><?php echo strip_tags(html_entity_decode($sk['tentang'], ENT_QUOTES, 'UTF-8')); ?></td>
                         </tr>
                     </table>
                     
-                    <div style="margin-bottom: 80px;"><?php echo $sk['lampiran']; ?></div>
+                    <div style="margin-bottom: 80px;">
+                        <?php 
+                        // Decode HTML entities from CKEditor - handle multiple encoding layers
+                        $lampiran_content = $sk['lampiran'];
+                        
+                        // First, handle any escaped characters
+                        $lampiran_content = stripslashes($lampiran_content);
+                        
+                        // Decode HTML entities (handles &ndash;, &#8211;, etc.)
+                        $lampiran_content = html_entity_decode($lampiran_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                        
+                        // Replace any remaining Unicode dash characters with regular dash
+                        $lampiran_content = str_replace(['–', '—', '‐', '‑'], '-', $lampiran_content);
+                        
+                        echo $lampiran_content;
+                        ?>
+                    </div>
                     
                     <!-- Signature Block at Bottom of Lampiran -->
                     <table style="width: 100%;">
