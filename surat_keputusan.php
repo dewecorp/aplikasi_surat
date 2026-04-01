@@ -23,9 +23,15 @@ if (isset($_POST['add'])) {
     }
 
     // Generate nomor surat - reset per year, not per month
+    // Latest SK gets number 001 (reverse numbering)
     $tahun = date('Y');
     
-    // Get the HIGHEST SK number from THIS YEAR only
+    // Count total SK this year and get the latest one
+    $q_count = mysqli_query($conn, "SELECT COUNT(*) as total FROM surat_keputusan WHERE YEAR(tgl_surat) = '$tahun'");
+    $count_row = mysqli_fetch_assoc($q_count);
+    $total_sk = $count_row['total'] ?? 0;
+    
+    // Get the latest SK (highest ID) to determine next number
     $q_last_no = mysqli_query($conn, "SELECT no_surat FROM surat_keputusan WHERE YEAR(tgl_surat) = '$tahun' ORDER BY id DESC LIMIT 1");
     
     if ($q_last_no && mysqli_num_rows($q_last_no) > 0) {
@@ -33,11 +39,14 @@ if (isset($_POST['add'])) {
         // Extract the number from format: 001/MI.SF/SK/III/2026
         $no_parts = explode('/', $last_no_row['no_surat']);
         $last_no = isset($no_parts[0]) ? (int)$no_parts[0] : 0;
+        
+        // New SK gets last_no + 1 (sequential forward)
+        $next_no = str_pad($last_no + 1, 3, '0', STR_PAD_LEFT);
     } else {
-        $last_no = 0;
+        // First SK of the year
+        $next_no = '001';
     }
     
-    $next_no = str_pad($last_no + 1, 3, '0', STR_PAD_LEFT);
     $no_surat = $next_no . '/MI.SF/SK/' . to_romawi(date('n')) . '/' . $tahun;
 
     $query = "INSERT INTO surat_keputusan (tgl_surat, no_surat, tentang, menimbang, mengingat, memperhatikan, menetapkan, lampiran, nama_sk, file_lampiran) VALUES ('$tgl_surat', '$no_surat', '$tentang', '$menimbang', '$mengingat', '$memperhatikan', '$menetapkan', '$lampiran', '$nama_sk', '$file_lampiran_name')";
@@ -95,8 +104,8 @@ if (isset($_GET['delete'])) {
     }
 }
 
-// Ambil data surat keputusan
-$query = mysqli_query($conn, "SELECT * FROM surat_keputusan ORDER BY tgl_surat DESC");
+// Ambil data surat keputusan - sorted by date DESC, then by ID DESC for same dates
+$query = mysqli_query($conn, "SELECT * FROM surat_keputusan ORDER BY tgl_surat DESC, id DESC");
 
 include 'template/header.php';
 include 'template/sidebar.php';
@@ -120,7 +129,7 @@ include 'template/sidebar.php';
                         <table class="table table-bordered table-striped table-hover js-basic-example dataTable">
                             <thead>
                                 <tr>
-                                    <th>No</th>
+                                    <th data-orderable="false">No</th>
                                     <th>Tanggal Surat</th>
                                     <th>Nomor Surat</th>
                                     <th>Nama SK</th>
@@ -428,4 +437,22 @@ include 'template/footer.php';
             console.log('Modal setup complete');
         });
     });
-</script>
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            // Reinitialize DataTable with NO sorting - follow PHP query order
+            if ($.fn.DataTable.isDataTable('.js-basic-example')) {
+                $('.js-basic-example').DataTable().destroy();
+            }
+            
+            $('.js-basic-example').DataTable({
+                ordering: false, // Disable ALL sorting - use PHP query order
+                columnDefs: [
+                    { orderable: false, targets: [0, 5] } // No and Aksi columns
+                ]
+            });
+        });
+    </script>
+</body>
+</html>
