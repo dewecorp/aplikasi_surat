@@ -13,6 +13,11 @@ if (!$sk) {
     die("Data tidak ditemukan");
 }
 
+// Set filename for download/print
+$tahun = date('Y', strtotime($sk['tgl_surat']));
+$nama_sk = !empty($sk['nama_sk']) ? $sk['nama_sk'] : 'SK_' . $sk['id'];
+$filename = 'SK_' . $nama_sk . '_' . $tahun;
+
 $q_instansi = mysqli_query($conn, "SELECT * FROM pengaturan LIMIT 1");
 $instansi = mysqli_fetch_assoc($q_instansi);
 ?>
@@ -20,7 +25,7 @@ $instansi = mysqli_fetch_assoc($q_instansi);
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Cetak Surat Keputusan</title>
+    <title><?php echo $filename; ?></title>
     <style>
         @page {
             size: 21.5cm 33cm; /* F4/Folio */

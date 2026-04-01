@@ -12,6 +12,9 @@ $surat_keluar = mysqli_fetch_assoc($q_surat_keluar)['total'];
 
 $total_surat = $surat_masuk + $surat_keluar;
 
+$q_sk = mysqli_query($conn, "SELECT COUNT(*) as total FROM surat_keputusan");
+$surat_keputusan = mysqli_fetch_assoc($q_sk)['total'];
+
 $q_users = mysqli_query($conn, "SELECT COUNT(*) as total FROM users");
 $users = mysqli_fetch_assoc($q_users)['total'];
 
@@ -23,15 +26,20 @@ $total_activity = mysqli_fetch_assoc($q_activity_count)['total'];
 $tahun_ini = date('Y');
 $chart_sm = [];
 $chart_sk = [];
+$chart_skt = [];
 for($i=1; $i<=12; $i++){
     $q = mysqli_query($conn, "SELECT COUNT(*) as total FROM surat_masuk WHERE MONTH(tgl_terima)='$i' AND YEAR(tgl_terima)='$tahun_ini'");
     $chart_sm[] = (int)mysqli_fetch_assoc($q)['total'];
     
     $q = mysqli_query($conn, "SELECT COUNT(*) as total FROM surat_keluar WHERE MONTH(tgl_surat)='$i' AND YEAR(tgl_surat)='$tahun_ini'");
     $chart_sk[] = (int)mysqli_fetch_assoc($q)['total'];
+    
+    $q = mysqli_query($conn, "SELECT COUNT(*) as total FROM surat_keputusan WHERE MONTH(tgl_surat)='$i' AND YEAR(tgl_surat)='$tahun_ini'");
+    $chart_skt[] = (int)mysqli_fetch_assoc($q)['total'];
 }
 $chart_sm_json = json_encode($chart_sm);
 $chart_sk_json = json_encode($chart_sk);
+$chart_skt_json = json_encode($chart_skt);
 
 // Activity Data
 $q_activity = mysqli_query($conn, "SELECT a.*, u.nama, u.role FROM activity_log a LEFT JOIN users u ON a.user_id = u.id ORDER BY a.timestamp DESC LIMIT 50");
@@ -167,11 +175,11 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama, u.role FROM activity_log 
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pengguna</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $users; ?></div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Surat Keputusan</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $surat_keputusan; ?></div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                            <i class="fas fa-file-signature fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -338,6 +346,18 @@ window.onload = function() {
                 pointBorderColor: '#fff',
                 pointHoverRadius: 5,
                 pointHoverBackgroundColor: 'rgba(28, 200, 138, 1)',
+                pointBorderWidth: 2,
+                lineTension: 0
+            }, {
+                label: "Surat Keputusan",
+                data: <?php echo $chart_skt_json; ?>,
+                borderColor: 'rgba(246, 194, 62, 1)',
+                backgroundColor: 'rgba(246, 194, 62, 0.05)',
+                pointRadius: 5,
+                pointBackgroundColor: 'rgba(246, 194, 62, 1)',
+                pointBorderColor: '#fff',
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: 'rgba(246, 194, 62, 1)',
                 pointBorderWidth: 2,
                 lineTension: 0
             }]

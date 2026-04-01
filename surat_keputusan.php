@@ -3,6 +3,7 @@ require_once 'session_init.php';
 include 'config.php';
 
 if (isset($_POST['add'])) {
+    $nama_sk = mysqli_real_escape_string($conn, $_POST['nama_sk']);
     $tentang = mysqli_real_escape_string($conn, $_POST['tentang']);
     $menimbang = mysqli_real_escape_string($conn, $_POST['menimbang']);
     $mengingat = mysqli_real_escape_string($conn, $_POST['mengingat']);
@@ -20,13 +21,7 @@ if (isset($_POST['add'])) {
     $next_no = str_pad($last_no + 1, 3, '0', STR_PAD_LEFT);
     $no_surat = $next_no . '/MI.SF/SK/' . to_romawi(date('n')) . '/' . $tahun;
 
-    $file_name = '';
-    if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
-        $file_name = time() . '_' . basename($_FILES['file']['name']);
-        move_uploaded_file($_FILES['file']['tmp_name'], 'uploads/' . $file_name);
-    }
-
-    $query = "INSERT INTO surat_keputusan (tgl_surat, no_surat, tentang, menimbang, mengingat, memperhatikan, menetapkan, lampiran, file) VALUES ('$tgl_surat', '$no_surat', '$tentang', '$menimbang', '$mengingat', '$memperhatikan', '$menetapkan', '$lampiran', '$file_name')";
+    $query = "INSERT INTO surat_keputusan (tgl_surat, no_surat, tentang, menimbang, mengingat, memperhatikan, menetapkan, lampiran, nama_sk) VALUES ('$tgl_surat', '$no_surat', '$tentang', '$menimbang', '$mengingat', '$memperhatikan', '$menetapkan', '$lampiran', '$nama_sk')";
     if (mysqli_query($conn, $query)) {
         $_SESSION['success'] = "Data berhasil ditambahkan";
         header("Location: surat_keputusan.php");
@@ -38,6 +33,7 @@ if (isset($_POST['add'])) {
 
 if (isset($_POST['edit'])) {
     $id = mysqli_real_escape_string($conn, $_POST['id']);
+    $nama_sk = mysqli_real_escape_string($conn, $_POST['nama_sk']);
     $tentang = mysqli_real_escape_string($conn, $_POST['tentang']);
     $menimbang = mysqli_real_escape_string($conn, $_POST['menimbang']);
     $mengingat = mysqli_real_escape_string($conn, $_POST['mengingat']);
@@ -45,15 +41,7 @@ if (isset($_POST['edit'])) {
     $menetapkan = !empty($_POST['menetapkan']) ? json_encode($_POST['menetapkan']) : NULL;
     $lampiran = mysqli_real_escape_string($conn, $_POST['lampiran']);
 
-    $file_update = "";
-    if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
-        $file_name = time() . '_' . basename($_FILES['file']['name']);
-        if (move_uploaded_file($_FILES['file']['tmp_name'], 'uploads/' . $file_name)) {
-            $file_update = ", file='$file_name'";
-        }
-    }
-
-    $query = "UPDATE surat_keputusan SET tentang='$tentang', menimbang='$menimbang', mengingat='$mengingat', memperhatikan='$memperhatikan', menetapkan='$menetapkan', lampiran='$lampiran' $file_update WHERE id='$id'";
+    $query = "UPDATE surat_keputusan SET tentang='$tentang', menimbang='$menimbang', mengingat='$mengingat', memperhatikan='$memperhatikan', menetapkan='$menetapkan', lampiran='$lampiran', nama_sk='$nama_sk' WHERE id='$id'";
     if (mysqli_query($conn, $query)) {
         $_SESSION['success'] = "Data berhasil diperbarui";
         header("Location: surat_keputusan.php");
@@ -103,8 +91,8 @@ include 'template/sidebar.php';
                                     <th>No</th>
                                     <th>Tanggal Surat</th>
                                     <th>Nomor Surat</th>
+                                    <th>Nama SK</th>
                                     <th>SK Tentang</th>
-                                    <th>File</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -117,14 +105,8 @@ include 'template/sidebar.php';
                                         <td><?php echo $no++; ?></td>
                                         <td><?php echo tgl_indo($row['tgl_surat']); ?></td>
                                         <td><?php echo $row['no_surat']; ?></td>
+                                        <td><?php echo $row['nama_sk'] ?? '-'; ?></td>
                                         <td><?php echo $row['tentang']; ?></td>
-                                        <td>
-                                            <?php if ($row['file']) : ?>
-                                                <a href="uploads/<?php echo $row['file']; ?>" target="_blank" class="btn btn-sm btn-info">Lihat</a>
-                                            <?php else : ?>
-                                                -
-                                            <?php endif; ?>
-                                        </td>
                                         <td>
                                             <a href="print_surat_keputusan.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-sm btn-success">Cetak</a>
                                             <button type="button" class="btn btn-sm btn-warning edit-btn" data-id="<?php echo $row['id']; ?>">Edit</button>
@@ -153,6 +135,11 @@ include 'template/sidebar.php';
             </div>
             <div class="modal-body">
                 <form action="" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="nama_sk">Nama SK (untuk filename)</label>
+                        <input type="text" id="nama_sk" name="nama_sk" class="form-control" placeholder="Contoh: Penetapan_KKTP_2025" required>
+                        <small class="text-muted">Akan menjadi: SK_Penetapan_KKTP_2025_2026.pdf</small>
+                    </div>
                     <div class="form-group">
                         <label for="tentang">SK Tentang</label>
                         <textarea id="tentang" name="tentang" class="form-control ckeditor"></textarea>
@@ -185,10 +172,6 @@ include 'template/sidebar.php';
                         <label for="lampiran">Lampiran</label>
                         <textarea id="lampiran" name="lampiran" class="form-control ckeditor"></textarea>
                     </div>
-                    <div class="form-group">
-                        <label for="file">File Lampiran (PDF/Word/Excel)</label>
-                        <input type="file" id="file" name="file" class="form-control-file">
-                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
                         <button type="submit" name="add" class="btn btn-primary">Simpan</button>
@@ -212,6 +195,10 @@ include 'template/sidebar.php';
             <div class="modal-body">
                 <form action="" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="id" id="edit_id">
+                    <div class="form-group">
+                        <label for="edit_nama_sk">Nama SK (untuk filename)</label>
+                        <input type="text" id="edit_nama_sk" name="nama_sk" class="form-control" placeholder="Contoh: Penetapan_KKTP_2025" required>
+                    </div>
                     <div class="form-group">
                         <label for="edit_tentang">SK Tentang</label>
                         <textarea id="edit_tentang" name="tentang" class="form-control ckeditor-edit"></textarea>
@@ -238,11 +225,6 @@ include 'template/sidebar.php';
                     <div class="form-group">
                         <label for="edit_lampiran">Lampiran</label>
                         <textarea id="edit_lampiran" name="lampiran" class="form-control ckeditor-edit"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_file">Ganti File Lampiran (PDF/Word/Excel)</label>
-                        <input type="file" id="edit_file" name="file" class="form-control-file">
-                        <small class="text-muted">Biarkan kosong jika tidak ingin mengganti file.</small>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -346,6 +328,7 @@ include 'template/footer.php';
 
             // Isi field non-editor
             $('#edit_id').val(data.id);
+            $('#edit_nama_sk').val(data.nama_sk || '');
             
             // Isi textarea fields DULU sebelum initialize CKEditor
             $('#edit_tentang').val(data.tentang || '');
