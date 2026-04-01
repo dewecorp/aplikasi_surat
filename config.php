@@ -51,6 +51,60 @@ function to_romawi($number) {
     return $returnValue;
 }
 
+// Function to properly format names with academic titles
+function properCaseName($name) {
+    // Convert to lowercase first
+    $name = strtolower($name);
+    
+    // Capitalize first letter of each word
+    $name = ucwords($name);
+    
+    // Fix common academic titles capitalization - handle both with and without spaces
+    $replacements = array(
+        'S. Pd. I' => 'S.Pd.I',
+        'S. Pd' => 'S.Pd',
+        'S. Ag' => 'S.Ag',
+        'S. E' => 'S.E',
+        'S. Kom' => 'S.Kom',
+        'S. T' => 'S.T',
+        'S. Sos' => 'S.Sos',
+        'S. Psi' => 'S.Psi',
+        'M. Pd' => 'M.Pd',
+        'M. Pd. I' => 'M.Pd.I',
+        'M. Ag' => 'M.Ag',
+        'M. E' => 'M.E',
+        'M. Kom' => 'M.Kom',
+        'M. T' => 'M.T',
+        'M. Si' => 'M.Si',
+        'Dr.' => 'Dr.',
+        'Prof.' => 'Prof.',
+        'Hj.' => 'Hj.',
+        'H.' => 'H.',
+        // Also fix if already without spaces but wrong case
+        'S.pd.i' => 'S.Pd.I',
+        'S.pd' => 'S.Pd',
+        'S.ag' => 'S.Ag',
+        'S.e' => 'S.E',
+        'S.kom' => 'S.Kom',
+        'S.t' => 'S.T',
+        'S.sos' => 'S.Sos',
+        'S.psi' => 'S.Psi',
+        'M.pd' => 'M.Pd',
+        'M.pd.i' => 'M.Pd.I',
+        'M.ag' => 'M.Ag',
+        'M.e' => 'M.E',
+        'M.kom' => 'M.Kom',
+        'M.t' => 'M.T',
+        'M.si' => 'M.Si',
+    );
+    
+    foreach ($replacements as $key => $value) {
+        $name = str_ireplace($key, $value, $name);
+    }
+    
+    return $name;
+}
+
 function tgl_indo($tanggal){
 	$bulan = array (
 		1 =>   'Januari',

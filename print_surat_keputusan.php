@@ -190,39 +190,111 @@ $instansi = mysqli_fetch_assoc($q_instansi);
                 </tr>
             </table>
 
-            <br><br>
+            <br><br><br><br><br>
             
-            <!-- Ditetapkan Section -->
-            <div style="text-align: right; margin-bottom: 20px;">
-                <p style="margin: 0;">Ditetapkan di : Sukosono</p>
-                <p style="margin: 0;">Pada tanggal : <?php echo tgl_indo($sk['tgl_surat']); ?></p>
-                <br>
-                <p style="margin: 0;">Kepala Madrasah,</p>
-                <?php 
-                $ttd_tipe = isset($instansi['ttd_tipe']) ? $instansi['ttd_tipe'] : 'image';
-                if ($ttd_tipe == 'qr'): 
-                    $qr_content = "Validasi Surat Keputusan\nNomor: " . $sk['no_surat'] . "\nTanggal: " . tgl_indo($sk['tgl_surat']) . "\nKepala: " . $instansi['kepala_madrasah'];
-                    $qr_url = "https://quickchart.io/qr?text=" . urlencode($qr_content) . "&size=120";
-                ?>
-                    <br>
-                    <img src="<?php echo $qr_url; ?>" style="width: 100px; height: 100px; margin: 0 auto; display: block;">
-                    <br>
-                <?php elseif (!empty($instansi['ttd']) && file_exists('uploads/' . $instansi['ttd'])): ?>
-                    <img src="uploads/<?php echo $instansi['ttd']; ?>" style="width: 120px; height: auto; margin-top: 5px; display: block; margin-left: auto; margin-right: auto;">
-                <?php else: ?>
-                    <br><br><br>
-                <?php endif; ?>
+            <!-- Ditetapkan Section - Right Side -->
+            <div style="width: 100%; margin-bottom: 30px;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="width: 50%;"></td>
+                        <td style="width: 50%; vertical-align: top; text-align: left;">
+                            <table style="width: auto;">
+                                <tr>
+                                    <td style="width: 120px;">Ditetapkan di</td>
+                                    <td style="width: 10px;">:</td>
+                                    <td>Sukosono</td>
+                                </tr>
+                                <tr>
+                                    <td>Pada tanggal</td>
+                                    <td>:</td>
+                                    <td><?php echo tgl_indo($sk['tgl_surat']); ?></td>
+                                </tr>
+                            </table>
+                            <br>
+                            <p style="margin: 0;">Kepala Madrasah,</p>
+                            
+                            <!-- Regular Signature Image -->
+                            <?php if (!empty($instansi['ttd']) && file_exists('uploads/' . $instansi['ttd'])): ?>
+                                <img src="uploads/<?php echo $instansi['ttd']; ?>" style="width: 150px; height: auto; display: block; margin-left: 0; margin-right: auto;">
+                            <?php else: ?>
+                                <br><br><br>
+                            <?php endif; ?>
 
-                <?php if ($ttd_tipe != 'qr' && !empty($instansi['stempel']) && file_exists('uploads/' . $instansi['stempel'])): ?>
-                    <img src="uploads/<?php echo $instansi['stempel']; ?>" style="width: 80px; height: 80px; position: absolute; margin-left: -40px; margin-top: -70px; opacity: 0.8;">
-                <?php endif; ?>
+                            <!-- Stampel - Larger Size, Front of Text -->
+                            <?php if (!empty($instansi['stempel']) && file_exists('uploads/' . $instansi['stempel'])): ?>
+                                <img src="uploads/<?php echo $instansi['stempel']; ?>" style="width: 150px; height: 150px; position: absolute; margin-left: -85px; margin-top: -120px; opacity: 0.8; z-index: 10;">
+                            <?php endif; ?>
 
-                <p style="margin: 0; font-weight: bold; text-decoration: underline;"><?php echo strtoupper($instansi['kepala_madrasah']); ?></p>
+                            <p style="margin: 0; font-weight: bold; text-decoration: underline;"><?php echo properCaseName($instansi['kepala_madrasah']); ?></p>
+                        </td>
+                    </tr>
+                </table>
             </div>
+            
+            <div style="clear: both;"></div>
+            <br><br><br>
 
             <?php if ($sk['lampiran']) : ?>
                 <page_break></page_break>
-                <div><?php echo $sk['lampiran']; ?></div>
+                <div style="padding-top: 20px;">
+                    <!-- Lampiran Header -->
+                    <table style="width: 100%; margin-bottom: 20px;">
+                        <tr>
+                            <td style="width: 20%; font-weight: bold;">Lampiran</td>
+                            <td style="width: 5%;">:</td>
+                            <td style="width: 75%;">Keputusan Kepala MI Sultan Fattah Sukosono</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">Nomor</td>
+                            <td>:</td>
+                            <td><?php echo $sk['no_surat']; ?></td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">Tentang</td>
+                            <td>:</td>
+                            <td><?php echo strip_tags($sk['tentang']); ?></td>
+                        </tr>
+                    </table>
+                    
+                    <div style="margin-bottom: 80px;"><?php echo $sk['lampiran']; ?></div>
+                    
+                    <!-- Signature Block at Bottom of Lampiran -->
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="width: 50%;"></td>
+                            <td style="width: 50%; vertical-align: top; text-align: left;">
+                                <table style="width: auto;">
+                                    <tr>
+                                        <td style="width: 120px;">Ditetapkan di</td>
+                                        <td style="width: 10px;">:</td>
+                                        <td>Sukosono</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pada tanggal</td>
+                                        <td>:</td>
+                                        <td><?php echo tgl_indo($sk['tgl_surat']); ?></td>
+                                    </tr>
+                                </table>
+                                <br>
+                                <p style="margin: 0;">Kepala Madrasah,</p>
+                                
+                                <!-- Regular Signature Image -->
+                                <?php if (!empty($instansi['ttd']) && file_exists('uploads/' . $instansi['ttd'])): ?>
+                                    <img src="uploads/<?php echo $instansi['ttd']; ?>" style="width: 150px; height: auto; display: block; margin-left: 0; margin-right: auto;">
+                                <?php else: ?>
+                                    <br><br><br>
+                                <?php endif; ?>
+
+                                <!-- Stampel - Larger Size, Front of Text -->
+                                <?php if (!empty($instansi['stempel']) && file_exists('uploads/' . $instansi['stempel'])): ?>
+                                    <img src="uploads/<?php echo $instansi['stempel']; ?>" style="width: 150px; height: 150px; position: absolute; margin-left: -85px; margin-top: -120px; opacity: 0.8; z-index: 10;">
+                                <?php endif; ?>
+
+                                <p style="margin: 0; font-weight: bold; text-decoration: underline;"><?php echo properCaseName($instansi['kepala_madrasah']); ?></p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
             <?php endif; ?>
         </div>
     </div>
