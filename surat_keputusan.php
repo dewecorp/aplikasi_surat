@@ -25,7 +25,7 @@ if (isset($_POST['add'])) {
     // Generate nomor surat - reset per year, not per month
     $tahun = date('Y');
     
-    // Get the last SK number from THIS YEAR only
+    // Get the HIGHEST SK number from THIS YEAR only
     $q_last_no = mysqli_query($conn, "SELECT no_surat FROM surat_keputusan WHERE YEAR(tgl_surat) = '$tahun' ORDER BY id DESC LIMIT 1");
     
     if ($q_last_no && mysqli_num_rows($q_last_no) > 0) {

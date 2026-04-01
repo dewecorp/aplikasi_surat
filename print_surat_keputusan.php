@@ -31,6 +31,13 @@ $instansi = mysqli_fetch_assoc($q_instansi);
             size: 21.5cm 33cm; /* F4/Folio */
             margin: 1.5cm; /* All sides: top, right, bottom, left */
         }
+        
+        /* Force lampiran to new page */
+        .lampiran-section {
+            page-break-before: always;
+            page-break-inside: avoid;
+        }
+        
         body { 
             font-family: 'Bookman Old Style', 'Times New Roman', Times, serif; 
             font-size: 12pt;
@@ -289,8 +296,7 @@ $instansi = mysqli_fetch_assoc($q_instansi);
             ?>
             
             <?php if ($has_lampiran) : ?>
-                <page_break></page_break>
-                <div style="padding-top: 20px;">
+                <div class="lampiran-section" style="padding-top: 20px;">
                     <!-- Lampiran Header -->
                     <table style="width: 100%; margin-bottom: 20px;">
                         <tr>
