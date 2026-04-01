@@ -34,6 +34,7 @@ $instansi = mysqli_fetch_assoc($q_instansi);
         body { 
             font-family: 'Bookman Old Style', 'Times New Roman', Times, serif; 
             font-size: 12pt;
+            line-height: 1.5;
             margin: 0;
             padding: 0;
         }
@@ -87,18 +88,29 @@ $instansi = mysqli_fetch_assoc($q_instansi);
             font-size: 12pt;
         }
         .content { margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        td { vertical-align: top; }
+        table { 
+            width: 100%; 
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        td { 
+            vertical-align: top;
+            padding: 0;
+            margin: 0;
+        }
         .label { 
-            width: 15%;
+            width: 20%;
             text-align: left;
+            font-weight: normal;
         }
         .separator { 
             width: 2%;
             text-align: left;
         }
         .content-cell {
-            width: 83%;
+            width: 78%;
+            font-size: 12pt;
+            font-family: 'Bookman Old Style', 'Times New Roman', Times, serif;
         }
         /* Style for menimbang, mengingat, memperhatikan content */
         .content-cell ol {
@@ -114,6 +126,8 @@ $instansi = mysqli_fetch_assoc($q_instansi);
         /* Style for menetapkan section */
         .menetapkan-content {
             text-align: justify;
+            font-size: 12pt;
+            font-family: 'Bookman Old Style', 'Times New Roman', Times, serif;
         }
         .menetapkan-content ol {
             margin: 0;
