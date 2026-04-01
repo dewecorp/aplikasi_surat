@@ -269,7 +269,12 @@ $instansi = mysqli_fetch_assoc($q_instansi);
             <div style="clear: both;"></div>
             <br><br><br>
 
-            <?php if ($sk['lampiran']) : ?>
+            <?php 
+            // Check if lampiran has content or file
+            $has_lampiran = !empty($sk['lampiran']) || !empty($sk['file_lampiran']);
+            ?>
+            
+            <?php if ($has_lampiran) : ?>
                 <page_break></page_break>
                 <div style="padding-top: 20px;">
                     <!-- Lampiran Header -->
@@ -291,23 +296,38 @@ $instansi = mysqli_fetch_assoc($q_instansi);
                         </tr>
                     </table>
                     
-                    <div style="margin-bottom: 80px;">
-                        <?php 
-                        // Decode HTML entities from CKEditor - handle multiple encoding layers
-                        $lampiran_content = $sk['lampiran'];
-                        
-                        // First, handle any escaped characters
-                        $lampiran_content = stripslashes($lampiran_content);
-                        
-                        // Decode HTML entities (handles &ndash;, &#8211;, etc.)
-                        $lampiran_content = html_entity_decode($lampiran_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                        
-                        // Replace any remaining Unicode dash characters with regular dash
-                        $lampiran_content = str_replace(['–', '—', '‐', '‑'], '-', $lampiran_content);
-                        
-                        echo $lampiran_content;
-                        ?>
-                    </div>
+                    <!-- Display CKEditor lampiran first (if exists) -->
+                    <?php if (!empty($sk['lampiran'])): ?>
+                        <div style="margin-bottom: 40px;">
+                            <?php 
+                            // Decode HTML entities from CKEditor - handle multiple encoding layers
+                            $lampiran_content = $sk['lampiran'];
+                            
+                            // First, handle any escaped characters
+                            $lampiran_content = stripslashes($lampiran_content);
+                            
+                            // Decode HTML entities (handles &ndash;, &#8211;, etc.)
+                            $lampiran_content = html_entity_decode($lampiran_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                            
+                            // Replace any remaining Unicode dash characters with regular dash
+                            $lampiran_content = str_replace(['–', '—', '‐', '‑'], '-', $lampiran_content);
+                            
+                            echo $lampiran_content;
+                            ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <!-- Display PDF file attachment (if exists) -->
+                    <?php if (!empty($sk['file_lampiran'])): ?>
+                        <div style="margin-bottom: 80px; text-align: center; page-break-inside: avoid;">
+                            <p style="font-style: italic; color: #666; margin-bottom: 10px;">
+                                <strong>Lampiran File PDF:</strong> <?php echo htmlspecialchars($sk['file_lampiran']); ?>
+                            </p>
+                            <embed src="uploads/<?php echo htmlspecialchars($sk['file_lampiran']); ?>" type="application/pdf" width="100%" height="600px" />
+                        </div>
+                    <?php else: ?>
+                        <div style="margin-bottom: 80px;"></div>
+                    <?php endif; ?>
                     
                     <!-- Signature Block at Bottom of Lampiran -->
                     <table style="width: 100%;">

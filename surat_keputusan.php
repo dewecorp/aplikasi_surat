@@ -12,6 +12,16 @@ if (isset($_POST['add'])) {
     $lampiran = mysqli_real_escape_string($conn, $_POST['lampiran']);
     $tgl_surat = date('Y-m-d');
 
+    // Handle file upload (optional)
+    $file_lampiran_name = '';
+    if (isset($_FILES['file_lampiran']) && $_FILES['file_lampiran']['error'] == 0) {
+        $file_ext = pathinfo($_FILES['file_lampiran']['name'], PATHINFO_EXTENSION);
+        if (strtolower($file_ext) === 'pdf') {
+            $file_lampiran_name = 'Lampiran_SK_' . $nama_sk . '_' . $tahun . '.pdf';
+            move_uploaded_file($_FILES['file_lampiran']['tmp_name'], 'uploads/' . $file_lampiran_name);
+        }
+    }
+
     // Generate nomor surat
     $bulan = date('m');
     $tahun = date('Y');
@@ -21,7 +31,7 @@ if (isset($_POST['add'])) {
     $next_no = str_pad($last_no + 1, 3, '0', STR_PAD_LEFT);
     $no_surat = $next_no . '/MI.SF/SK/' . to_romawi(date('n')) . '/' . $tahun;
 
-    $query = "INSERT INTO surat_keputusan (tgl_surat, no_surat, tentang, menimbang, mengingat, memperhatikan, menetapkan, lampiran, nama_sk) VALUES ('$tgl_surat', '$no_surat', '$tentang', '$menimbang', '$mengingat', '$memperhatikan', '$menetapkan', '$lampiran', '$nama_sk')";
+    $query = "INSERT INTO surat_keputusan (tgl_surat, no_surat, tentang, menimbang, mengingat, memperhatikan, menetapkan, lampiran, nama_sk, file_lampiran) VALUES ('$tgl_surat', '$no_surat', '$tentang', '$menimbang', '$mengingat', '$memperhatikan', '$menetapkan', '$lampiran', '$nama_sk', '$file_lampiran_name')";
     if (mysqli_query($conn, $query)) {
         $_SESSION['success'] = "Data berhasil ditambahkan";
         header("Location: surat_keputusan.php");
@@ -41,7 +51,20 @@ if (isset($_POST['edit'])) {
     $menetapkan = !empty($_POST['menetapkan']) ? json_encode($_POST['menetapkan']) : NULL;
     $lampiran = mysqli_real_escape_string($conn, $_POST['lampiran']);
 
-    $query = "UPDATE surat_keputusan SET tentang='$tentang', menimbang='$menimbang', mengingat='$mengingat', memperhatikan='$memperhatikan', menetapkan='$menetapkan', lampiran='$lampiran', nama_sk='$nama_sk' WHERE id='$id'";
+    // Handle file upload (only if new file is uploaded)
+    $file_lampiran_update = '';
+    if (isset($_FILES['file_lampiran']) && $_FILES['file_lampiran']['error'] == 0) {
+        $file_ext = pathinfo($_FILES['file_lampiran']['name'], PATHINFO_EXTENSION);
+        if (strtolower($file_ext) === 'pdf') {
+            $tahun = date('Y');
+            $file_lampiran_name = 'Lampiran_SK_' . $nama_sk . '_' . $tahun . '.pdf';
+            if (move_uploaded_file($_FILES['file_lampiran']['tmp_name'], 'uploads/' . $file_lampiran_name)) {
+                $file_lampiran_update = ", file_lampiran='$file_lampiran_name'";
+            }
+        }
+    }
+
+    $query = "UPDATE surat_keputusan SET tentang='$tentang', menimbang='$menimbang', mengingat='$mengingat', memperhatikan='$memperhatikan', menetapkan='$menetapkan', lampiran='$lampiran', nama_sk='$nama_sk' $file_lampiran_update WHERE id='$id'";
     if (mysqli_query($conn, $query)) {
         $_SESSION['success'] = "Data berhasil diperbarui";
         header("Location: surat_keputusan.php");
@@ -171,6 +194,13 @@ include 'template/sidebar.php';
                     <div class="form-group">
                         <label for="lampiran">Lampiran</label>
                         <textarea id="lampiran" name="lampiran" class="form-control ckeditor"></textarea>
+                        <small class="text-muted">Ketik konten lampiran di editor</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="file_lampiran">Upload File Lampiran (PDF) - Opsional</label>
+                        <input type="file" id="file_lampiran" name="file_lampiran" class="form-control-file" accept=".pdf">
+                        <small class="text-muted">Upload file PDF jika sudah ada file jadi (lewati jika ingin ketik di editor)</small>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -225,6 +255,12 @@ include 'template/sidebar.php';
                     <div class="form-group">
                         <label for="edit_lampiran">Lampiran</label>
                         <textarea id="edit_lampiran" name="lampiran" class="form-control ckeditor-edit"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit_file_lampiran">Upload File Lampiran (PDF) - Opsional</label>
+                        <input type="file" id="edit_file_lampiran" name="file_lampiran" class="form-control-file" accept=".pdf">
+                        <small class="text-muted" id="edit_file_current">Biarkan kosong jika tidak ingin mengganti file.</small>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -329,6 +365,13 @@ include 'template/footer.php';
             // Isi field non-editor
             $('#edit_id').val(data.id);
             $('#edit_nama_sk').val(data.nama_sk || '');
+            
+            // Show current file info if exists
+            if (data.file_lampiran) {
+                $('#edit_file_current').text('File saat ini: ' + data.file_lampiran);
+            } else {
+                $('#edit_file_current').text('Biarkan kosong jika tidak ingin mengganti file.');
+            }
             
             // Isi textarea fields DULU sebelum initialize CKEditor
             $('#edit_tentang').val(data.tentang || '');
