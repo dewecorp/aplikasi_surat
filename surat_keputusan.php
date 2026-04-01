@@ -22,12 +22,21 @@ if (isset($_POST['add'])) {
         }
     }
 
-    // Generate nomor surat
-    $bulan = date('m');
+    // Generate nomor surat - reset per year, not per month
     $tahun = date('Y');
-    $q_last_no = mysqli_query($conn, "SELECT no_surat FROM surat_keputusan WHERE MONTH(tgl_surat) = '$bulan' AND YEAR(tgl_surat) = '$tahun' ORDER BY id DESC LIMIT 1");
-    $last_no_row = mysqli_fetch_assoc($q_last_no);
-    $last_no = $last_no_row ? (int)substr($last_no_row['no_surat'], 0, 3) : 0;
+    
+    // Get the last SK number from THIS YEAR only
+    $q_last_no = mysqli_query($conn, "SELECT no_surat FROM surat_keputusan WHERE YEAR(tgl_surat) = '$tahun' ORDER BY id DESC LIMIT 1");
+    
+    if ($q_last_no && mysqli_num_rows($q_last_no) > 0) {
+        $last_no_row = mysqli_fetch_assoc($q_last_no);
+        // Extract the number from format: 001/MI.SF/SK/III/2026
+        $no_parts = explode('/', $last_no_row['no_surat']);
+        $last_no = isset($no_parts[0]) ? (int)$no_parts[0] : 0;
+    } else {
+        $last_no = 0;
+    }
+    
     $next_no = str_pad($last_no + 1, 3, '0', STR_PAD_LEFT);
     $no_surat = $next_no . '/MI.SF/SK/' . to_romawi(date('n')) . '/' . $tahun;
 
