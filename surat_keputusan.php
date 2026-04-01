@@ -104,6 +104,58 @@ if (isset($_GET['delete'])) {
     }
 }
 
+if (isset($_POST['copy'])) {
+    $copy_id = mysqli_real_escape_string($conn, $_POST['copy_id']);
+    $nama_sk = mysqli_real_escape_string($conn, $_POST['nama_sk']);
+    $tgl_surat = mysqli_real_escape_string($conn, $_POST['tgl_surat']);
+
+    // Handle file upload (optional)
+    $file_lampiran_name = '';
+    if (isset($_FILES['file_lampiran']) && $_FILES['file_lampiran']['error'] == 0) {
+        $file_ext = pathinfo($_FILES['file_lampiran']['name'], PATHINFO_EXTENSION);
+        if (strtolower($file_ext) === 'pdf') {
+            $file_lampiran_name = 'Lampiran_SK_' . $nama_sk . '_' . $tahun . '.pdf';
+            move_uploaded_file($_FILES['file_lampiran']['tmp_name'], 'uploads/' . $file_lampiran_name);
+        }
+    }
+
+    // Generate nomor surat - reset per year, not per month
+    // Latest SK gets number 001 (reverse numbering)
+    $tahun = date('Y', strtotime($tgl_surat));
+    
+    // Count total SK this year and get the latest one
+    $q_count = mysqli_query($conn, "SELECT COUNT(*) as total FROM surat_keputusan WHERE YEAR(tgl_surat) = '$tahun'");
+    $count_row = mysqli_fetch_assoc($q_count);
+    $total_sk = $count_row['total'] ?? 0;
+    
+    // Get the latest SK (highest ID) to determine next number
+    $q_last_no = mysqli_query($conn, "SELECT no_surat FROM surat_keputusan WHERE YEAR(tgl_surat) = '$tahun' ORDER BY id DESC LIMIT 1");
+    
+    if ($q_last_no && mysqli_num_rows($q_last_no) > 0) {
+        $last_no_row = mysqli_fetch_assoc($q_last_no);
+        // Extract the number from format: 001/MI.SF/SK/III/2026
+        $no_parts = explode('/', $last_no_row['no_surat']);
+        $last_no = isset($no_parts[0]) ? (int)$no_parts[0] : 0;
+        
+        // New SK gets last_no + 1 (sequential forward)
+        $next_no = str_pad($last_no + 1, 3, '0', STR_PAD_LEFT);
+    } else {
+        // First SK of the year
+        $next_no = '001';
+    }
+    
+    $no_surat = $next_no . '/MI.SF/SK/' . to_romawi(date('n', strtotime($tgl_surat))) . '/' . $tahun;
+
+    $query = "INSERT INTO surat_keputusan (tgl_surat, no_surat, tentang, menimbang, mengingat, memperhatikan, menetapkan, lampiran, nama_sk, file_lampiran) SELECT '$tgl_surat', '$no_surat', tentang, menimbang, mengingat, memperhatikan, menetapkan, lampiran, '$nama_sk', '$file_lampiran_name' FROM surat_keputusan WHERE id='$copy_id'";
+    if (mysqli_query($conn, $query)) {
+        $_SESSION['success'] = "Data berhasil dicopy";
+        header("Location: surat_keputusan.php");
+        exit();
+    } else {
+        $_SESSION['error'] = "Gagal menyalin data: " . mysqli_error($conn);
+    }
+}
+
 // Ambil data surat keputusan - sorted by date DESC, then by ID DESC for same dates
 $tahun_filter = isset($_GET['tahun']) && $_GET['tahun'] != '' ? "WHERE YEAR(tgl_surat) = '" . mysqli_real_escape_string($conn, $_GET['tahun']) . "'" : "";
 $query = mysqli_query($conn, "SELECT * FROM surat_keputusan $tahun_filter ORDER BY tgl_surat DESC, id DESC");
@@ -169,6 +221,7 @@ include 'template/sidebar.php';
                                         <td><?php echo $row['tentang']; ?></td>
                                         <td>
                                             <a href="print_surat_keputusan.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-sm btn-success">Cetak</a>
+                                            <button type="button" class="btn btn-sm btn-info copy-btn" data-id="<?php echo $row['id']; ?>"><i class="fas fa-copy"></i> Copy</button>
                                             <button type="button" class="btn btn-sm btn-warning edit-btn" data-id="<?php echo $row['id']; ?>">Edit</button>
                                             <a href="javascript:void(0);" class="btn btn-sm btn-danger" onclick="confirmDelete('surat_keputusan.php?delete=<?php echo $row['id']; ?>')">Hapus</a>
                                         </td>
@@ -249,6 +302,54 @@ include 'template/sidebar.php';
     </div>
 </div>
 
+<!-- Copy Modal -->
+<div class="modal fade" id="copyModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Copy Surat Keputusan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="copy_id" id="copy_id">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Copy SK ini dengan tahun berbeda. Semua konten akan disalin otomatis.
+                    </div>
+                    <div class="form-group">
+                        <label for="copy_nama_sk">Nama SK (untuk filename)</label>
+                        <input type="text" id="copy_nama_sk" name="nama_sk" class="form-control" placeholder="Contoh: Penetapan_KKTP_2027" required>
+                        <small class="form-text text-muted">Gunakan nama yang berbeda dari SK asli</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Tanggal Surat</label>
+                        <input type="date" name="tgl_surat" class="form-control" value="<?php echo date('Y-m-d'); ?>" required>
+                        <small class="form-text text-muted">Tanggal akan menentukan nomor surat & tahun</small>
+                    </div>
+                    <div class="form-group">
+                        <label>File Lampiran (Optional)</label>
+                        <input type="file" name="file_lampiran" class="form-control" accept=".pdf">
+                        <small class="form-text text-muted">Upload file baru atau kosongkan untuk menggunakan file yang sama</small>
+                    </div>
+                    <hr>
+                    <h6>Content yang akan di-copy:</h6>
+                    <ul>
+                        <li>SK Tentang ✓</li>
+                        <li>Menimbang ✓</li>
+                        <li>Mengingat ✓</li>
+                        <li>Memperhatikan ✓</li>
+                        <li>Menetapkan ✓</li>
+                        <li>Lampiran Text ✓</li>
+                    </ul>
+                    <button type="submit" name="copy" class="btn btn-primary mt-3"><i class="fas fa-copy"></i> Copy SK</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Edit Modal -->
 <div class="modal fade" id="editModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
@@ -320,6 +421,34 @@ include 'template/footer.php';
     CKEDITOR.config.removePlugins = 'exportpdf';
 
     $(document).ready(function() {
+        // Handle Copy button click
+        $('.copy-btn').on('click', function() {
+            var id = $(this).data('id');
+            $('#copy_id').val(id);
+            $('#copyModal').modal('show');
+        });
+
+        // Handle Edit button click
+        $('.edit-btn').on('click', function() {
+            var id = $(this).data('id');
+            $.ajax({
+                url: 'get_sk_data.php',
+                type: 'GET',
+                data: { id: id },
+                dataType: 'json',
+                success: function(data) {
+                    // 1. Simpan data ke elemen modal untuk diakses nanti
+                    $('#editModal').data('sk-data', data);
+                    
+                    // 2. Tampilkan modal
+                    $('#editModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    swal("Gagal!", "Terjadi kesalahan saat mengambil data.", "error");
+                }
+            });
+        });
+
         // Inisialisasi CKEditor untuk form tambah
         $('.ckeditor').each(function() {
             var editorId = $(this).attr('id');
@@ -361,27 +490,6 @@ include 'template/footer.php';
                     CKEDITOR.instances[instanceName].updateElement();
                 }
             }
-        });
-
-        // Edit Button Click Logic
-        $('.edit-btn').on('click', function() {
-            var id = $(this).data('id');
-            $.ajax({
-                url: 'get_sk_data.php',
-                type: 'GET',
-                data: { id: id },
-                dataType: 'json',
-                success: function(data) {
-                    // 1. Simpan data ke elemen modal untuk diakses nanti
-                    $('#editModal').data('sk-data', data);
-                    
-                    // 2. Tampilkan modal
-                    $('#editModal').modal('show');
-                },
-                error: function(xhr, status, error) {
-                    swal("Gagal!", "Terjadi kesalahan saat mengambil data.", "error");
-                }
-            });
         });
 
         // Destroy CKEditor instances when modal is hidden
