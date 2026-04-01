@@ -105,7 +105,8 @@ if (isset($_GET['delete'])) {
 }
 
 // Ambil data surat keputusan - sorted by date DESC, then by ID DESC for same dates
-$query = mysqli_query($conn, "SELECT * FROM surat_keputusan ORDER BY tgl_surat DESC, id DESC");
+$tahun_filter = isset($_GET['tahun']) && $_GET['tahun'] != '' ? "WHERE YEAR(tgl_surat) = '" . mysqli_real_escape_string($conn, $_GET['tahun']) . "'" : "";
+$query = mysqli_query($conn, "SELECT * FROM surat_keputusan $tahun_filter ORDER BY tgl_surat DESC, id DESC");
 
 include 'template/header.php';
 include 'template/sidebar.php';
@@ -120,9 +121,27 @@ include 'template/sidebar.php';
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div class="card">
                 <div class="header">
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
-                        <i class="fas fa-plus"></i> Tambah Surat Keputusan
-                    </button>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
+                                <i class="fas fa-plus"></i> Tambah Surat Keputusan
+                            </button>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <select id="filterTahun" class="form-control" style="width: 150px; display: inline-block;" onchange="filterByTahun()">
+                                <option value="">Semua Tahun</option>
+                                <?php
+                                // Get available years
+                                $q_tahun = mysqli_query($conn, "SELECT DISTINCT YEAR(tgl_surat) as tahun FROM surat_keputusan ORDER BY tahun DESC");
+                                while ($row_tahun = mysqli_fetch_assoc($q_tahun)) {
+                                    $tahun = $row_tahun['tahun'];
+                                    $selected = (isset($_GET['tahun']) && $_GET['tahun'] == $tahun) ? 'selected' : '';
+                                    echo "<option value='$tahun' $selected>$tahun</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="body">
                     <div class="table-responsive">
@@ -452,7 +471,23 @@ include 'template/footer.php';
                     { orderable: false, targets: [0, 5] } // No and Aksi columns
                 ]
             });
+            
+            // Set selected year from URL parameter
+            var urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('tahun')) {
+                $('#filterTahun').val(urlParams.get('tahun'));
+            }
         });
+        
+        function filterByTahun() {
+            var tahun = $('#filterTahun').val();
+            var currentUrl = window.location.href.split('?')[0];
+            if (tahun) {
+                window.location.href = currentUrl + '?tahun=' + tahun;
+            } else {
+                window.location.href = currentUrl;
+            }
+        }
     </script>
 </body>
 </html>
