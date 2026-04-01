@@ -239,15 +239,15 @@ $instansi = mysqli_fetch_assoc($q_instansi);
                 </tr>
             </table>
 
-            <br><br><br><br><br>
+            <br><br>
             
-            <!-- Ditetapkan Section - Right Side -->
-            <div style="width: 100%; margin-bottom: 30px;">
+            <!-- Ditetapkan Section - Right Side (No Page Break Inside) -->
+            <div style="width: 100%; margin-bottom: 30px; page-break-inside: avoid;">
                 <table style="width: 100%;">
                     <tr>
                         <td style="width: 50%;"></td>
                         <td style="width: 50%; vertical-align: top; text-align: left;">
-                            <table style="width: auto;">
+                            <table style="width: auto; page-break-inside: avoid;">
                                 <tr>
                                     <td style="width: 120px;">Ditetapkan di</td>
                                     <td style="width: 10px;">:</td>
