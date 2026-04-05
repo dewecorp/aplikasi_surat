@@ -16,25 +16,29 @@ if ($q_check_col && mysqli_num_rows($q_check_col) === 0) {
     }
 }
 
-// Automatic Sync: Ensure all existing no_surat match their tgl_surat
-$q_all = mysqli_query($conn, "SELECT id, tgl_surat, no_surat FROM surat_keputusan");
-while ($r_all = mysqli_fetch_assoc($q_all)) {
-    $id_all = $r_all['id'];
-    $tgl_all = $r_all['tgl_surat'];
-    $old_no_all = $r_all['no_surat'];
-    
-    $tahun_all = date('Y', strtotime($tgl_all));
-    $romawi_all = to_romawi(date('n', strtotime($tgl_all)));
-    
-    $no_parts_all = explode('/', $old_no_all);
-    if (count($no_parts_all) >= 4) {
-        $prefix_all = $no_parts_all[0];
-        $new_no_all = $prefix_all . '/MI.SF/SK/' . $romawi_all . '/' . $tahun_all;
+// Sync Logic: Run only if requested to avoid heavy load on every page view
+if (isset($_GET['sync_all'])) {
+    $q_all = mysqli_query($conn, "SELECT id, tgl_surat, no_surat FROM surat_keputusan");
+    while ($r_all = mysqli_fetch_assoc($q_all)) {
+        $id_all = $r_all['id'];
+        $tgl_all = $r_all['tgl_surat'];
+        $old_no_all = $r_all['no_surat'];
         
-        if ($new_no_all !== $old_no_all) {
-            mysqli_query($conn, "UPDATE surat_keputusan SET no_surat = '$new_no_all' WHERE id = '$id_all'");
+        $tahun_all = date('Y', strtotime($tgl_all));
+        $romawi_all = to_romawi(date('n', strtotime($tgl_all)));
+        
+        $no_parts_all = explode('/', $old_no_all);
+        if (count($no_parts_all) >= 4) {
+            $prefix_all = $no_parts_all[0];
+            $new_no_all = $prefix_all . '/MI.SF/SK/' . $romawi_all . '/' . $tahun_all;
+            
+            if ($new_no_all !== $old_no_all) {
+                mysqli_query($conn, "UPDATE surat_keputusan SET no_surat = '$new_no_all' WHERE id = '$id_all'");
+            }
         }
     }
+    header("Location: surat_keputusan.php?synced=true");
+    exit();
 }
 
 if (isset($_POST['add'])) {
@@ -217,7 +221,6 @@ $tahun_filter = isset($_GET['tahun']) && $_GET['tahun'] != '' ? "WHERE YEAR(tgl_
 $query = mysqli_query($conn, "SELECT * FROM surat_keputusan $tahun_filter ORDER BY created_at DESC, id DESC");
 
 include 'template/header.php';
-include 'template/sidebar.php';
 ?>
 
 <div class="container-fluid px-5">
@@ -270,7 +273,6 @@ include 'template/sidebar.php';
                                     <th>Tanggal Surat</th>
                                     <th>Nomor Surat</th>
                                     <th>Nama SK</th>
-                                    <th>SK Tentang</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -285,7 +287,6 @@ include 'template/sidebar.php';
                                         <td><?php echo tgl_indo($row['tgl_surat']); ?></td>
                                         <td><?php echo $row['no_surat']; ?></td>
                                         <td><?php echo $row['nama_sk'] ?? '-'; ?></td>
-                                        <td><?php echo $row['tentang']; ?></td>
                                         <td>
                                             <a href="print_surat_keputusan.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-sm btn-success">Cetak</a>
                                             <button type="button" class="btn btn-sm btn-info copy-btn" data-id="<?php echo $row['id']; ?>"><i class="fas fa-copy"></i> Copy</button>
@@ -485,193 +486,179 @@ include 'template/sidebar.php';
     </div>
 </div>
 
-<?php
-include 'template/footer.php';
-?>
 <!-- Gunakan CKEditor 4 Full Build -->
 <script src="https://cdn.ckeditor.com/4.16.2/full/ckeditor.js"></script>
 <script>
     // Konfigurasi Global CKEditor
-    CKEDITOR.config.versionCheck = false;
-    CKEDITOR.config.removePlugins = 'exportpdf';
+    if (typeof CKEDITOR !== 'undefined') {
+        CKEDITOR.config.versionCheck = false;
+        CKEDITOR.config.removePlugins = 'exportpdf';
+    }
 
-    $(document).ready(function() {
-        // Handle Copy button click
-        $('.copy-btn').on('click', function() {
-            var id = $(this).data('id');
-            $('#copy_id').val(id);
-            $('#copyModal').modal('show');
-        });
+    // Tunggu sampai DOM benar-benar siap
+    document.addEventListener("DOMContentLoaded", function() {
+        // Karena jQuery dimuat di footer, kita cek keberadaannya
+        var checkJQuery = setInterval(function() {
+            if (typeof jQuery !== 'undefined') {
+                clearInterval(checkJQuery);
+                initPage();
+            }
+        }, 100);
 
-        // Handle Edit button click
-        $('.edit-btn').on('click', function() {
-            var id = $(this).data('id');
-            $.ajax({
-                url: 'get_sk_data.php',
-                type: 'GET',
-                data: { id: id },
-                dataType: 'json',
-                success: function(data) {
-                    // 1. Simpan data ke elemen modal untuk diakses nanti
-                    $('#editModal').data('sk-data', data);
-                    
-                    // 2. Tampilkan modal
-                    $('#editModal').modal('show');
-                },
-                error: function(xhr, status, error) {
-                    swal("Gagal!", "Terjadi kesalahan saat mengambil data.", "error");
+        function initPage() {
+            var $ = jQuery;
+
+            // Handle Copy button click
+            $('.copy-btn').on('click', function() {
+                var id = $(this).data('id');
+                $('#copy_id').val(id);
+                $('#copyModal').modal('show');
+            });
+
+            // Handle Edit button click
+            $('.edit-btn').on('click', function() {
+                var id = $(this).data('id');
+                $.ajax({
+                    url: 'get_sk_data.php',
+                    type: 'GET',
+                    data: { id: id },
+                    dataType: 'json',
+                    success: function(data) {
+                        $('#editModal').data('sk-data', data);
+                        $('#editModal').modal('show');
+                    },
+                    error: function(xhr, status, error) {
+                        swal("Gagal!", "Terjadi kesalahan saat mengambil data.", "error");
+                    }
+                });
+            });
+
+            // Inisialisasi CKEditor untuk form tambah
+            $('.ckeditor').each(function() {
+                var editorId = $(this).attr('id');
+                if (editorId && !CKEDITOR.instances[editorId]) {
+                    CKEDITOR.replace(editorId);
                 }
             });
-        });
 
-        // Inisialisasi CKEditor untuk form tambah
-        $('.ckeditor').each(function() {
-            var editorId = $(this).attr('id');
-            if (editorId && !CKEDITOR.instances[editorId]) {
-                CKEDITOR.replace(editorId);
+            // Add Menetapkan Field Logic
+            function createMenetapkanField(containerId, value = '', index = null) {
+                var container = document.getElementById(containerId);
+                if (!container) return;
+                if (index === null) index = container.children.length;
+                var placeholders = ['Pertama', 'Kedua', 'Ketiga', 'Keempat', 'Kelima'];
+                var placeholder = placeholders[index] || 'Berikutnya';
+                
+                var newField = document.createElement('div');
+                newField.className = 'input-group mb-2';
+                newField.innerHTML = `
+                    <textarea name="menetapkan[]" class="form-control" placeholder="${placeholder}" rows="3">${value}</textarea>
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-danger remove-field">Hapus</button>
+                    </div>
+                `;
+                container.appendChild(newField);
             }
-        });
 
-        // Inisialisasi CKEditor untuk form edit - TUNDA sampai modal dibuka
-        // Jangan initialize dulu, akan diinitialize saat modal dibuka
+            $('#add-menetapkan-field').on('click', function() { createMenetapkanField('menetapkan-fields'); });
+            $('#edit-add-menetapkan-field').on('click', function() { createMenetapkanField('edit-menetapkan-fields'); });
+            $(document).on('click', '.remove-field', function() { $(this).closest('.input-group').remove(); });
 
-        // Add Menetapkan Field Logic
-        function createMenetapkanField(containerId, value = '', index = null) {
-            var container = document.getElementById(containerId);
-            if (!container) return;
-            if (index === null) index = container.children.length;
-            var placeholders = ['Pertama', 'Kedua', 'Ketiga', 'Keempat', 'Kelima'];
-            var placeholder = placeholders[index] || 'Berikutnya';
-            
-            var newField = document.createElement('div');
-            newField.className = 'input-group mb-2';
-            newField.innerHTML = `
-                <textarea name="menetapkan[]" class="form-control" placeholder="${placeholder}" rows="3">${value}</textarea>
-                <div class="input-group-append">
-                    <button type="button" class="btn btn-danger remove-field">Hapus</button>
-                </div>
-            `;
-            container.appendChild(newField);
-        }
-
-        $('#add-menetapkan-field').on('click', function() { createMenetapkanField('menetapkan-fields'); });
-        $('#edit-add-menetapkan-field').on('click', function() { createMenetapkanField('edit-menetapkan-fields'); });
-        $(document).on('click', '.remove-field', function() { $(this).closest('.input-group').remove(); });
-
-        // Pastikan data CKEditor diupdate ke textarea sebelum form disubmit
-        $('form').on('submit', function() {
-            for (var instanceName in CKEDITOR.instances) {
-                if (CKEDITOR.instances.hasOwnProperty(instanceName)) {
-                    CKEDITOR.instances[instanceName].updateElement();
-                }
-            }
-        });
-
-        // Destroy CKEditor instances when modal is hidden
-        $('#editModal').on('hidden.bs.modal', function () {
-            ['edit_tentang', 'edit_menimbang', 'edit_mengingat', 'edit_memperhatikan', 'edit_lampiran'].forEach(function(editorId) {
-                if (CKEDITOR.instances[editorId]) {
-                    CKEDITOR.instances[editorId].destroy(true);
+            $('form').on('submit', function() {
+                for (var instanceName in CKEDITOR.instances) {
+                    if (CKEDITOR.instances.hasOwnProperty(instanceName)) {
+                        CKEDITOR.instances[instanceName].updateElement();
+                    }
                 }
             });
-        });
 
-        // Event ini berjalan SETIAP KALI modal edit selesai ditampilkan
-        $('#editModal').on('shown.bs.modal', function () {
-            // Ambil data yang disimpan sebelumnya
-            var data = $(this).data('sk-data');
-            if (!data) return;
-
-            // Isi field non-editor
-            $('#edit_id').val(data.id);
-            $('#edit_tgl_surat').val(data.tgl_surat || '');
-            $('#edit_nama_sk').val(data.nama_sk || '');
-            
-            // Show current file info if exists
-            if (data.file_lampiran) {
-                $('#edit_file_current').text('File saat ini: ' + data.file_lampiran);
-            } else {
-                $('#edit_file_current').text('Biarkan kosong jika tidak ingin mengganti file.');
-            }
-            
-            // Isi textarea fields DULU sebelum initialize CKEditor
-            $('#edit_tentang').val(data.tentang || '');
-            $('#edit_menimbang').val(data.menimbang || '');
-            $('#edit_mengingat').val(data.mengingat || '');
-            $('#edit_memperhatikan').val(data.memperhatikan || '');
-            $('#edit_lampiran').val(data.lampiran || '');
-            
-            $('#edit-menetapkan-fields').empty();
-            if (data.menetapkan) {
-                try {
-                    var menetapkan = JSON.parse(data.menetapkan);
-                    if (Array.isArray(menetapkan)) {
-                        menetapkan.forEach(function(val, idx) {
-                            createMenetapkanField('edit-menetapkan-fields', val, idx);
-                        });
-                    } else { createMenetapkanField('edit-menetapkan-fields', '', 0); }
-                } catch (e) { createMenetapkanField('edit-menetapkan-fields', '', 0); }
-            } else { createMenetapkanField('edit-menetapkan-fields', '', 0); }
-
-            // Destroy CKEditor instances jika sudah ada, lalu buat ulang
-            
-            // Helper function to replace editor and set data
-            function replaceEditorWithDelay(editorId, data, delay) {
-                setTimeout(function() {
+            $('#editModal').on('hidden.bs.modal', function () {
+                ['edit_tentang', 'edit_menimbang', 'edit_mengingat', 'edit_memperhatikan', 'edit_lampiran'].forEach(function(editorId) {
                     if (CKEDITOR.instances[editorId]) {
                         CKEDITOR.instances[editorId].destroy(true);
                     }
-                    var editor = CKEDITOR.replace(editorId);
-                    
-                    // Set data after editor is ready
-                    editor.on('instanceReady', function() {
-                        this.setData(data);
-                    });
-                }, delay);
-            }
-            
-            // Replace each editor with slight delays to ensure proper initialization
-            replaceEditorWithDelay('edit_tentang', data.tentang || '', 0);
-            replaceEditorWithDelay('edit_menimbang', data.menimbang || '', 50);
-            replaceEditorWithDelay('edit_mengingat', data.mengingat || '', 100);
-            replaceEditorWithDelay('edit_memperhatikan', data.memperhatikan || '', 150);
-            replaceEditorWithDelay('edit_lampiran', data.lampiran || '', 200);
-            
-            console.log('Modal setup complete');
-        });
-    });
-    </script>
+                });
+            });
 
-    <script>
-        $(document).ready(function() {
-            // Reinitialize DataTable with NO sorting - follow PHP query order
+            $('#editModal').on('shown.bs.modal', function () {
+                var data = $(this).data('sk-data');
+                if (!data) return;
+
+                $('#edit_id').val(data.id);
+                $('#edit_tgl_surat').val(data.tgl_surat || '');
+                $('#edit_nama_sk').val(data.nama_sk || '');
+                
+                if (data.file_lampiran) {
+                    $('#edit_file_current').text('File saat ini: ' + data.file_lampiran);
+                } else {
+                    $('#edit_file_current').text('Biarkan kosong jika tidak ingin mengganti file.');
+                }
+                
+                $('#edit_tentang').val(data.tentang || '');
+                $('#edit_menimbang').val(data.menimbang || '');
+                $('#edit_mengingat').val(data.mengingat || '');
+                $('#edit_memperhatikan').val(data.memperhatikan || '');
+                $('#edit_lampiran').val(data.lampiran || '');
+                
+                $('#edit-menetapkan-fields').empty();
+                if (data.menetapkan) {
+                    try {
+                        var menetapkan = JSON.parse(data.menetapkan);
+                        if (Array.isArray(menetapkan)) {
+                            menetapkan.forEach(function(val, idx) {
+                                createMenetapkanField('edit-menetapkan-fields', val, idx);
+                            });
+                        } else { createMenetapkanField('edit-menetapkan-fields', '', 0); }
+                    } catch (e) { createMenetapkanField('edit-menetapkan-fields', '', 0); }
+                } else { createMenetapkanField('edit-menetapkan-fields', '', 0); }
+
+                function replaceEditorWithDelay(editorId, data, delay) {
+                    setTimeout(function() {
+                        if (CKEDITOR.instances[editorId]) {
+                            CKEDITOR.instances[editorId].destroy(true);
+                        }
+                        var editor = CKEDITOR.replace(editorId);
+                        editor.on('instanceReady', function() {
+                            this.setData(data);
+                        });
+                    }, delay);
+                }
+                
+                replaceEditorWithDelay('edit_tentang', data.tentang || '', 0);
+                replaceEditorWithDelay('edit_menimbang', data.menimbang || '', 50);
+                replaceEditorWithDelay('edit_mengingat', data.mengingat || '', 100);
+                replaceEditorWithDelay('edit_memperhatikan', data.memperhatikan || '', 150);
+                replaceEditorWithDelay('edit_lampiran', data.lampiran || '', 200);
+            });
+
+            // DataTable init
             if ($.fn.DataTable.isDataTable('.js-basic-example')) {
                 $('.js-basic-example').DataTable().destroy();
             }
             
             $('.js-basic-example').DataTable({
-                ordering: false, // Disable ALL sorting - use PHP query order
+                ordering: false,
                 columnDefs: [
-                    { orderable: false, targets: [0, 5] } // No and Aksi columns
+                    { orderable: false, targets: [0, 5] }
                 ]
             });
             
-            // Set selected year from URL parameter
             var urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('tahun')) {
                 $('#filterTahun').val(urlParams.get('tahun'));
             }
-        });
-        
-        function filterByTahun() {
-            var tahun = $('#filterTahun').val();
-            var currentUrl = window.location.href.split('?')[0];
-            if (tahun) {
-                window.location.href = currentUrl + '?tahun=' + tahun;
-            } else {
-                window.location.href = currentUrl;
-            }
         }
-    </script>
-</body>
-</html>
+    });
+
+    function filterByTahun() {
+        var tahun = document.getElementById('filterTahun').value;
+        var currentUrl = window.location.href.split('?')[0];
+        if (tahun) {
+            window.location.href = currentUrl + '?tahun=' + tahun;
+        } else {
+            window.location.href = currentUrl;
+        }
+    }
+</script>
+
+<?php include 'template/footer.php'; ?>
