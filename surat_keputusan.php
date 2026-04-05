@@ -16,6 +16,27 @@ if ($q_check_col && mysqli_num_rows($q_check_col) === 0) {
     }
 }
 
+// Automatic Sync: Ensure all existing no_surat match their tgl_surat
+$q_all = mysqli_query($conn, "SELECT id, tgl_surat, no_surat FROM surat_keputusan");
+while ($r_all = mysqli_fetch_assoc($q_all)) {
+    $id_all = $r_all['id'];
+    $tgl_all = $r_all['tgl_surat'];
+    $old_no_all = $r_all['no_surat'];
+    
+    $tahun_all = date('Y', strtotime($tgl_all));
+    $romawi_all = to_romawi(date('n', strtotime($tgl_all)));
+    
+    $no_parts_all = explode('/', $old_no_all);
+    if (count($no_parts_all) >= 4) {
+        $prefix_all = $no_parts_all[0];
+        $new_no_all = $prefix_all . '/MI.SF/SK/' . $romawi_all . '/' . $tahun_all;
+        
+        if ($new_no_all !== $old_no_all) {
+            mysqli_query($conn, "UPDATE surat_keputusan SET no_surat = '$new_no_all' WHERE id = '$id_all'");
+        }
+    }
+}
+
 if (isset($_POST['add'])) {
     $nama_sk = mysqli_real_escape_string($conn, $_POST['nama_sk']);
     $tentang = mysqli_real_escape_string($conn, $_POST['tentang']);
@@ -24,45 +45,38 @@ if (isset($_POST['add'])) {
     $memperhatikan = mysqli_real_escape_string($conn, $_POST['memperhatikan']);
     $menetapkan = !empty($_POST['menetapkan']) ? json_encode($_POST['menetapkan']) : NULL;
     $lampiran = mysqli_real_escape_string($conn, $_POST['lampiran']);
-    $tgl_surat = !empty($_POST['tgl_surat']) ? mysqli_real_escape_string($conn, $_POST['tgl_surat']) : date('Y-m-d');
+    
+    // Get raw date for calculations
+    $raw_tgl_surat = !empty($_POST['tgl_surat']) ? $_POST['tgl_surat'] : date('Y-m-d');
+    $tgl_surat = mysqli_real_escape_string($conn, $raw_tgl_surat);
+    
+    $tahun = date('Y', strtotime($raw_tgl_surat));
+    $bulan_num = date('n', strtotime($raw_tgl_surat));
+    $romawi = to_romawi($bulan_num);
 
     // Handle file upload (optional)
     $file_lampiran_name = '';
-    $tahun_sk = date('Y', strtotime($tgl_surat));
     if (isset($_FILES['file_lampiran']) && $_FILES['file_lampiran']['error'] == 0) {
         $file_ext = pathinfo($_FILES['file_lampiran']['name'], PATHINFO_EXTENSION);
         if (strtolower($file_ext) === 'pdf') {
-            $file_lampiran_name = 'Lampiran_SK_' . $nama_sk . '_' . $tahun_sk . '.pdf';
+            $file_lampiran_name = 'Lampiran_SK_' . $nama_sk . '_' . $tahun . '.pdf';
             move_uploaded_file($_FILES['file_lampiran']['tmp_name'], 'uploads/' . $file_lampiran_name);
         }
     }
 
-    // Generate nomor surat - reset per year, not per month
-    // Latest SK gets number 001 (reverse numbering)
-    $tahun = $tahun_sk;
-    
-    // Count total SK this year and get the latest one
-    $q_count = mysqli_query($conn, "SELECT COUNT(*) as total FROM surat_keputusan WHERE YEAR(tgl_surat) = '$tahun'");
-    $count_row = mysqli_fetch_assoc($q_count);
-    $total_sk = $count_row['total'] ?? 0;
-    
-    // Get the latest SK (highest ID) to determine next number
-    $q_last_no = mysqli_query($conn, "SELECT no_surat FROM surat_keputusan WHERE YEAR(tgl_surat) = '$tahun' ORDER BY id DESC LIMIT 1");
+    // Get the latest SK number for that specific year
+    $q_last_no = mysqli_query($conn, "SELECT no_surat FROM surat_keputusan WHERE YEAR(tgl_surat) = '$tahun' ORDER BY CAST(SUBSTRING_INDEX(no_surat, '/', 1) AS UNSIGNED) DESC LIMIT 1");
     
     if ($q_last_no && mysqli_num_rows($q_last_no) > 0) {
         $last_no_row = mysqli_fetch_assoc($q_last_no);
-        // Extract the number from format: 001/MI.SF/SK/III/2026
         $no_parts = explode('/', $last_no_row['no_surat']);
         $last_no = isset($no_parts[0]) ? (int)$no_parts[0] : 0;
-        
-        // New SK gets last_no + 1 (sequential forward)
         $next_no = str_pad($last_no + 1, 3, '0', STR_PAD_LEFT);
     } else {
-        // First SK of the year
         $next_no = '001';
     }
     
-    $no_surat = $next_no . '/MI.SF/SK/' . to_romawi(date('n', strtotime($tgl_surat))) . '/' . $tahun;
+    $no_surat = $next_no . '/MI.SF/SK/' . $romawi . '/' . $tahun;
 
     $query = "INSERT INTO surat_keputusan (tgl_surat, no_surat, tentang, menimbang, mengingat, memperhatikan, menetapkan, lampiran, nama_sk, file_lampiran) VALUES ('$tgl_surat', '$no_surat', '$tentang', '$menimbang', '$mengingat', '$memperhatikan', '$menetapkan', '$lampiran', '$nama_sk', '$file_lampiran_name')";
     if (mysqli_query($conn, $query)) {
@@ -84,22 +98,36 @@ if (isset($_POST['edit'])) {
     $memperhatikan = mysqli_real_escape_string($conn, $_POST['memperhatikan']);
     $menetapkan = !empty($_POST['menetapkan']) ? json_encode($_POST['menetapkan']) : NULL;
     $lampiran = mysqli_real_escape_string($conn, $_POST['lampiran']);
-    $tgl_surat = !empty($_POST['tgl_surat']) ? mysqli_real_escape_string($conn, $_POST['tgl_surat']) : date('Y-m-d');
+    
+    // Get raw date for calculations
+    $raw_tgl_surat = !empty($_POST['tgl_surat']) ? $_POST['tgl_surat'] : date('Y-m-d');
+    $tgl_surat = mysqli_real_escape_string($conn, $raw_tgl_surat);
+    
+    $new_tahun = date('Y', strtotime($raw_tgl_surat));
+    $new_bulan_romawi = to_romawi(date('n', strtotime($raw_tgl_surat)));
+
+    // Update no_surat agar sesuai dengan tgl_surat yang baru (Bulan Romawi & Tahun)
+    $q_current = mysqli_query($conn, "SELECT no_surat FROM surat_keputusan WHERE id='$id'");
+    $d_current = mysqli_fetch_assoc($q_current);
+    $old_no = $d_current['no_surat'];
+    $no_parts = explode('/', $old_no);
+    $prefix = $no_parts[0]; // Ambil nomor urutnya (misal: 001)
+    
+    $new_no_surat = $prefix . '/MI.SF/SK/' . $new_bulan_romawi . '/' . $new_tahun;
 
     // Handle file upload (only if new file is uploaded)
     $file_lampiran_update = '';
     if (isset($_FILES['file_lampiran']) && $_FILES['file_lampiran']['error'] == 0) {
         $file_ext = pathinfo($_FILES['file_lampiran']['name'], PATHINFO_EXTENSION);
         if (strtolower($file_ext) === 'pdf') {
-            $tahun = date('Y', strtotime($tgl_surat));
-            $file_lampiran_name = 'Lampiran_SK_' . $nama_sk . '_' . $tahun . '.pdf';
+            $file_lampiran_name = 'Lampiran_SK_' . $nama_sk . '_' . $new_tahun . '.pdf';
             if (move_uploaded_file($_FILES['file_lampiran']['tmp_name'], 'uploads/' . $file_lampiran_name)) {
                 $file_lampiran_update = ", file_lampiran='$file_lampiran_name'";
             }
         }
     }
 
-    $query = "UPDATE surat_keputusan SET tgl_surat='$tgl_surat', tentang='$tentang', menimbang='$menimbang', mengingat='$mengingat', memperhatikan='$memperhatikan', menetapkan='$menetapkan', lampiran='$lampiran', nama_sk='$nama_sk' $file_lampiran_update WHERE id='$id'";
+    $query = "UPDATE surat_keputusan SET no_surat='$new_no_surat', tgl_surat='$tgl_surat', tentang='$tentang', menimbang='$menimbang', mengingat='$mengingat', memperhatikan='$memperhatikan', menetapkan='$menetapkan', lampiran='$lampiran', nama_sk='$nama_sk' $file_lampiran_update WHERE id='$id'";
     if (mysqli_query($conn, $query)) {
         // Ambil no_surat untuk log
         $q_log = mysqli_query($conn, "SELECT no_surat FROM surat_keputusan WHERE id='$id'");
@@ -136,7 +164,13 @@ if (isset($_GET['delete'])) {
 if (isset($_POST['copy'])) {
     $copy_id = mysqli_real_escape_string($conn, $_POST['copy_id']);
     $nama_sk = mysqli_real_escape_string($conn, $_POST['nama_sk']);
-    $tgl_surat = mysqli_real_escape_string($conn, $_POST['tgl_surat']);
+    $raw_tgl_surat = !empty($_POST['tgl_surat']) ? $_POST['tgl_surat'] : date('Y-m-d');
+    $tgl_surat = mysqli_real_escape_string($conn, $raw_tgl_surat);
+
+    // Generate nomor surat - reset per year
+    $tahun = date('Y', strtotime($raw_tgl_surat));
+    $bulan_num = date('n', strtotime($raw_tgl_surat));
+    $romawi = to_romawi($bulan_num);
 
     // Handle file upload (optional)
     $file_lampiran_name = '';
@@ -147,33 +181,25 @@ if (isset($_POST['copy'])) {
             move_uploaded_file($_FILES['file_lampiran']['tmp_name'], 'uploads/' . $file_lampiran_name);
         }
     }
-
-    // Generate nomor surat - reset per year, not per month
-    // Latest SK gets number 001 (reverse numbering)
-    $tahun = date('Y', strtotime($tgl_surat));
     
     // Count total SK this year and get the latest one
     $q_count = mysqli_query($conn, "SELECT COUNT(*) as total FROM surat_keputusan WHERE YEAR(tgl_surat) = '$tahun'");
     $count_row = mysqli_fetch_assoc($q_count);
     $total_sk = $count_row['total'] ?? 0;
     
-    // Get the latest SK (highest ID) to determine next number
-    $q_last_no = mysqli_query($conn, "SELECT no_surat FROM surat_keputusan WHERE YEAR(tgl_surat) = '$tahun' ORDER BY id DESC LIMIT 1");
+    // Get the latest SK number for that specific year to determine next number
+    $q_last_no = mysqli_query($conn, "SELECT no_surat FROM surat_keputusan WHERE YEAR(tgl_surat) = '$tahun' ORDER BY CAST(SUBSTRING_INDEX(no_surat, '/', 1) AS UNSIGNED) DESC LIMIT 1");
     
     if ($q_last_no && mysqli_num_rows($q_last_no) > 0) {
         $last_no_row = mysqli_fetch_assoc($q_last_no);
-        // Extract the number from format: 001/MI.SF/SK/III/2026
         $no_parts = explode('/', $last_no_row['no_surat']);
         $last_no = isset($no_parts[0]) ? (int)$no_parts[0] : 0;
-        
-        // New SK gets last_no + 1 (sequential forward)
         $next_no = str_pad($last_no + 1, 3, '0', STR_PAD_LEFT);
     } else {
-        // First SK of the year
         $next_no = '001';
     }
     
-    $no_surat = $next_no . '/MI.SF/SK/' . to_romawi(date('n', strtotime($tgl_surat))) . '/' . $tahun;
+    $no_surat = $next_no . '/MI.SF/SK/' . $romawi . '/' . $tahun;
 
     $query = "INSERT INTO surat_keputusan (tgl_surat, no_surat, tentang, menimbang, mengingat, memperhatikan, menetapkan, lampiran, nama_sk, file_lampiran) SELECT '$tgl_surat', '$no_surat', tentang, menimbang, mengingat, memperhatikan, menetapkan, lampiran, '$nama_sk', '$file_lampiran_name' FROM surat_keputusan WHERE id='$copy_id'";
     if (mysqli_query($conn, $query)) {
@@ -198,6 +224,15 @@ include 'template/sidebar.php';
     <div class="block-header">
         <h2>Surat Keputusan</h2>
     </div>
+
+    <?php if (isset($_GET['synced'])): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            Semua nomor surat telah disinkronkan dengan tanggalnya.
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
 
     <div class="row clearfix">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -232,6 +267,7 @@ include 'template/sidebar.php';
                                 <tr>
                                     <th data-orderable="false">No</th>
                                     <th>Tanggal Pembuatan</th>
+                                    <th>Tanggal Surat</th>
                                     <th>Nomor Surat</th>
                                     <th>Nama SK</th>
                                     <th>SK Tentang</th>
@@ -246,6 +282,7 @@ include 'template/sidebar.php';
                                     <tr>
                                         <td><?php echo $no++; ?></td>
                                         <td><?php echo tgl_indo(date('Y-m-d', strtotime($row['created_at']))); ?></td>
+                                        <td><?php echo tgl_indo($row['tgl_surat']); ?></td>
                                         <td><?php echo $row['no_surat']; ?></td>
                                         <td><?php echo $row['nama_sk'] ?? '-'; ?></td>
                                         <td><?php echo $row['tentang']; ?></td>
