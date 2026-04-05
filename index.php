@@ -216,6 +216,11 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama, u.role FROM activity_log 
                             $text_color = 'text-info';
                             $type_label = 'SYSTEM';
                             
+                            $desc_lower = strtolower($act['description']);
+                            $is_surat_masuk = strpos($desc_lower, 'surat masuk') !== false;
+                            $is_surat_keluar = strpos($desc_lower, 'surat keluar') !== false;
+                            $is_surat_keputusan = strpos($desc_lower, 'surat keputusan') !== false;
+
                             switch($act['activity_type']) {
                                 case 'login': 
                                     $icon = 'fa-sign-in-alt'; 
@@ -234,18 +239,45 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama, u.role FROM activity_log 
                                     $border_color = 'border-left-success'; 
                                     $text_color = 'text-success';
                                     $type_label = 'CREATE';
+                                    if ($is_surat_masuk) {
+                                        $icon = 'fa-file-import';
+                                        $type_label = 'SURAT MASUK';
+                                    } elseif ($is_surat_keluar) {
+                                        $icon = 'fa-paper-plane';
+                                        $type_label = 'SURAT KELUAR';
+                                    } elseif ($is_surat_keputusan) {
+                                        $icon = 'fa-file-signature';
+                                        $type_label = 'SURAT KEPUTUSAN';
+                                    }
                                     break;
                                 case 'update': 
                                     $icon = 'fa-edit'; 
                                     $border_color = 'border-left-warning'; 
                                     $text_color = 'text-warning';
                                     $type_label = 'UPDATE';
+                                    if ($is_surat_masuk) {
+                                        $icon = 'fa-edit';
+                                        $type_label = 'EDIT MASUK';
+                                    } elseif ($is_surat_keluar) {
+                                        $icon = 'fa-edit';
+                                        $type_label = 'EDIT KELUAR';
+                                    } elseif ($is_surat_keputusan) {
+                                        $icon = 'fa-edit';
+                                        $type_label = 'EDIT SK';
+                                    }
                                     break;
                                 case 'delete': 
                                     $icon = 'fa-trash'; 
                                     $border_color = 'border-left-danger'; 
                                     $text_color = 'text-danger';
                                     $type_label = 'DELETE';
+                                    if ($is_surat_masuk) {
+                                        $type_label = 'HAPUS MASUK';
+                                    } elseif ($is_surat_keluar) {
+                                        $type_label = 'HAPUS KELUAR';
+                                    } elseif ($is_surat_keputusan) {
+                                        $type_label = 'HAPUS SK';
+                                    }
                                     break;
                                 case 'backup': 
                                     $icon = 'fa-database'; 

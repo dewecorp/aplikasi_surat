@@ -2,6 +2,20 @@
 require_once 'session_init.php';
 include 'config.php';
 
+// Migration: Check and add created_at column if not exists
+$q_check_col = @mysqli_query($conn, "SHOW COLUMNS FROM surat_keputusan LIKE 'created_at'");
+if ($q_check_col && mysqli_num_rows($q_check_col) === 0) {
+    @mysqli_query($conn, "ALTER TABLE surat_keputusan ADD COLUMN created_at datetime DEFAULT CURRENT_TIMESTAMP");
+    // Populate existing created_at with tgl_surat for historical data
+    @mysqli_query($conn, "UPDATE surat_keputusan SET created_at = CAST(tgl_surat AS datetime) WHERE created_at IS NULL OR created_at = '0000-00-00 00:00:00'");
+} else {
+    // If it exists but is timestamp (which often auto-updates), convert to datetime for stability
+    $col_info = mysqli_fetch_assoc($q_check_col);
+    if (stripos($col_info['Type'], 'timestamp') !== false) {
+        @mysqli_query($conn, "ALTER TABLE surat_keputusan MODIFY COLUMN created_at datetime DEFAULT CURRENT_TIMESTAMP");
+    }
+}
+
 if (isset($_POST['add'])) {
     $nama_sk = mysqli_real_escape_string($conn, $_POST['nama_sk']);
     $tentang = mysqli_real_escape_string($conn, $_POST['tentang']);
@@ -10,21 +24,22 @@ if (isset($_POST['add'])) {
     $memperhatikan = mysqli_real_escape_string($conn, $_POST['memperhatikan']);
     $menetapkan = !empty($_POST['menetapkan']) ? json_encode($_POST['menetapkan']) : NULL;
     $lampiran = mysqli_real_escape_string($conn, $_POST['lampiran']);
-    $tgl_surat = date('Y-m-d');
+    $tgl_surat = !empty($_POST['tgl_surat']) ? mysqli_real_escape_string($conn, $_POST['tgl_surat']) : date('Y-m-d');
 
     // Handle file upload (optional)
     $file_lampiran_name = '';
+    $tahun_sk = date('Y', strtotime($tgl_surat));
     if (isset($_FILES['file_lampiran']) && $_FILES['file_lampiran']['error'] == 0) {
         $file_ext = pathinfo($_FILES['file_lampiran']['name'], PATHINFO_EXTENSION);
         if (strtolower($file_ext) === 'pdf') {
-            $file_lampiran_name = 'Lampiran_SK_' . $nama_sk . '_' . $tahun . '.pdf';
+            $file_lampiran_name = 'Lampiran_SK_' . $nama_sk . '_' . $tahun_sk . '.pdf';
             move_uploaded_file($_FILES['file_lampiran']['tmp_name'], 'uploads/' . $file_lampiran_name);
         }
     }
 
     // Generate nomor surat - reset per year, not per month
     // Latest SK gets number 001 (reverse numbering)
-    $tahun = date('Y');
+    $tahun = $tahun_sk;
     
     // Count total SK this year and get the latest one
     $q_count = mysqli_query($conn, "SELECT COUNT(*) as total FROM surat_keputusan WHERE YEAR(tgl_surat) = '$tahun'");
@@ -47,10 +62,11 @@ if (isset($_POST['add'])) {
         $next_no = '001';
     }
     
-    $no_surat = $next_no . '/MI.SF/SK/' . to_romawi(date('n')) . '/' . $tahun;
+    $no_surat = $next_no . '/MI.SF/SK/' . to_romawi(date('n', strtotime($tgl_surat))) . '/' . $tahun;
 
     $query = "INSERT INTO surat_keputusan (tgl_surat, no_surat, tentang, menimbang, mengingat, memperhatikan, menetapkan, lampiran, nama_sk, file_lampiran) VALUES ('$tgl_surat', '$no_surat', '$tentang', '$menimbang', '$mengingat', '$memperhatikan', '$menetapkan', '$lampiran', '$nama_sk', '$file_lampiran_name')";
     if (mysqli_query($conn, $query)) {
+        log_activity($_SESSION['user_id'], 'create', 'Menambahkan surat keputusan no: ' . $no_surat);
         $_SESSION['success'] = "Data berhasil ditambahkan";
         header("Location: surat_keputusan.php");
         exit();
@@ -68,13 +84,14 @@ if (isset($_POST['edit'])) {
     $memperhatikan = mysqli_real_escape_string($conn, $_POST['memperhatikan']);
     $menetapkan = !empty($_POST['menetapkan']) ? json_encode($_POST['menetapkan']) : NULL;
     $lampiran = mysqli_real_escape_string($conn, $_POST['lampiran']);
+    $tgl_surat = !empty($_POST['tgl_surat']) ? mysqli_real_escape_string($conn, $_POST['tgl_surat']) : date('Y-m-d');
 
     // Handle file upload (only if new file is uploaded)
     $file_lampiran_update = '';
     if (isset($_FILES['file_lampiran']) && $_FILES['file_lampiran']['error'] == 0) {
         $file_ext = pathinfo($_FILES['file_lampiran']['name'], PATHINFO_EXTENSION);
         if (strtolower($file_ext) === 'pdf') {
-            $tahun = date('Y');
+            $tahun = date('Y', strtotime($tgl_surat));
             $file_lampiran_name = 'Lampiran_SK_' . $nama_sk . '_' . $tahun . '.pdf';
             if (move_uploaded_file($_FILES['file_lampiran']['tmp_name'], 'uploads/' . $file_lampiran_name)) {
                 $file_lampiran_update = ", file_lampiran='$file_lampiran_name'";
@@ -82,8 +99,13 @@ if (isset($_POST['edit'])) {
         }
     }
 
-    $query = "UPDATE surat_keputusan SET tentang='$tentang', menimbang='$menimbang', mengingat='$mengingat', memperhatikan='$memperhatikan', menetapkan='$menetapkan', lampiran='$lampiran', nama_sk='$nama_sk' $file_lampiran_update WHERE id='$id'";
+    $query = "UPDATE surat_keputusan SET tgl_surat='$tgl_surat', tentang='$tentang', menimbang='$menimbang', mengingat='$mengingat', memperhatikan='$memperhatikan', menetapkan='$menetapkan', lampiran='$lampiran', nama_sk='$nama_sk' $file_lampiran_update WHERE id='$id'";
     if (mysqli_query($conn, $query)) {
+        // Ambil no_surat untuk log
+        $q_log = mysqli_query($conn, "SELECT no_surat FROM surat_keputusan WHERE id='$id'");
+        $d_log = mysqli_fetch_assoc($q_log);
+        log_activity($_SESSION['user_id'], 'update', 'Mengubah surat keputusan no: ' . $d_log['no_surat']);
+
         $_SESSION['success'] = "Data berhasil diperbarui";
         header("Location: surat_keputusan.php");
         exit();
@@ -94,8 +116,15 @@ if (isset($_POST['edit'])) {
 
 if (isset($_GET['delete'])) {
     $id = mysqli_real_escape_string($conn, $_GET['delete']);
+    
+    // Ambil no_surat untuk log
+    $q_del = mysqli_query($conn, "SELECT no_surat FROM surat_keputusan WHERE id='$id'");
+    $d_del = mysqli_fetch_assoc($q_del);
+    $no_surat_del = $d_del['no_surat'];
+
     $query = "DELETE FROM surat_keputusan WHERE id='$id'";
     if (mysqli_query($conn, $query)) {
+        log_activity($_SESSION['user_id'], 'delete', 'Menghapus surat keputusan no: ' . $no_surat_del);
         $_SESSION['success'] = "Data berhasil dihapus";
         header("Location: surat_keputusan.php");
         exit();
@@ -148,6 +177,7 @@ if (isset($_POST['copy'])) {
 
     $query = "INSERT INTO surat_keputusan (tgl_surat, no_surat, tentang, menimbang, mengingat, memperhatikan, menetapkan, lampiran, nama_sk, file_lampiran) SELECT '$tgl_surat', '$no_surat', tentang, menimbang, mengingat, memperhatikan, menetapkan, lampiran, '$nama_sk', '$file_lampiran_name' FROM surat_keputusan WHERE id='$copy_id'";
     if (mysqli_query($conn, $query)) {
+        log_activity($_SESSION['user_id'], 'create', 'Menyalin surat keputusan ke no: ' . $no_surat);
         $_SESSION['success'] = "Data berhasil dicopy";
         header("Location: surat_keputusan.php");
         exit();
@@ -201,7 +231,7 @@ include 'template/sidebar.php';
                             <thead>
                                 <tr>
                                     <th data-orderable="false">No</th>
-                                    <th>Tanggal Surat</th>
+                                    <th>Tanggal Pembuatan</th>
                                     <th>Nomor Surat</th>
                                     <th>Nama SK</th>
                                     <th>SK Tentang</th>
@@ -215,7 +245,7 @@ include 'template/sidebar.php';
                                 ?>
                                     <tr>
                                         <td><?php echo $no++; ?></td>
-                                        <td><?php echo tgl_indo($row['tgl_surat']); ?></td>
+                                        <td><?php echo tgl_indo(date('Y-m-d', strtotime($row['created_at']))); ?></td>
                                         <td><?php echo $row['no_surat']; ?></td>
                                         <td><?php echo $row['nama_sk'] ?? '-'; ?></td>
                                         <td><?php echo $row['tentang']; ?></td>
@@ -248,6 +278,10 @@ include 'template/sidebar.php';
             </div>
             <div class="modal-body">
                 <form action="" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="tgl_surat">Tanggal Surat</label>
+                        <input type="date" id="tgl_surat" name="tgl_surat" class="form-control" value="<?php echo date('Y-m-d'); ?>" required>
+                    </div>
                     <div class="form-group">
                         <label for="nama_sk">Nama SK (untuk filename)</label>
                         <input type="text" id="nama_sk" name="nama_sk" class="form-control" placeholder="Contoh: Penetapan_KKTP_2025" required>
@@ -363,6 +397,10 @@ include 'template/sidebar.php';
             <div class="modal-body">
                 <form action="" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="id" id="edit_id">
+                    <div class="form-group">
+                        <label for="edit_tgl_surat">Tanggal Surat</label>
+                        <input type="date" id="edit_tgl_surat" name="tgl_surat" class="form-control" required>
+                    </div>
                     <div class="form-group">
                         <label for="edit_nama_sk">Nama SK (untuk filename)</label>
                         <input type="text" id="edit_nama_sk" name="nama_sk" class="form-control" placeholder="Contoh: Penetapan_KKTP_2025" required>
@@ -509,6 +547,7 @@ include 'template/footer.php';
 
             // Isi field non-editor
             $('#edit_id').val(data.id);
+            $('#edit_tgl_surat').val(data.tgl_surat || '');
             $('#edit_nama_sk').val(data.nama_sk || '');
             
             // Show current file info if exists
