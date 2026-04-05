@@ -186,9 +186,9 @@ if (isset($_POST['copy'])) {
     }
 }
 
-// Ambil data surat keputusan - sorted by date DESC, then by ID DESC for same dates
+// Ambil data surat keputusan - sorted by creation date DESC, then by ID DESC for same creation times
 $tahun_filter = isset($_GET['tahun']) && $_GET['tahun'] != '' ? "WHERE YEAR(tgl_surat) = '" . mysqli_real_escape_string($conn, $_GET['tahun']) . "'" : "";
-$query = mysqli_query($conn, "SELECT * FROM surat_keputusan $tahun_filter ORDER BY tgl_surat DESC, id DESC");
+$query = mysqli_query($conn, "SELECT * FROM surat_keputusan $tahun_filter ORDER BY created_at DESC, id DESC");
 
 include 'template/header.php';
 include 'template/sidebar.php';
