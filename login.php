@@ -25,6 +25,7 @@ if (isset($_POST['login'])) {
             $_SESSION['nama'] = $user['nama'];
             $_SESSION['role'] = $user['role'];
             $_SESSION['foto'] = $user['foto'];
+            $_SESSION['last_activity'] = time();
             unset($_SESSION['success'], $_SESSION['error']);
             
             // Log Activity
@@ -179,6 +180,34 @@ if (isset($_POST['login'])) {
                 });
             });
         </script>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['error'])): ?>
+        <script>
+            $(document).ready(function() {
+                swal({
+                    title: "Perhatian!",
+                    text: "<?php echo $_SESSION['error']; ?>",
+                    type: "warning",
+                    confirmButtonText: "OK"
+                });
+            });
+        </script>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['success'])): ?>
+        <script>
+            $(document).ready(function() {
+                swal({
+                    title: "Berhasil!",
+                    text: "<?php echo $_SESSION['success']; ?>",
+                    type: "success",
+                    confirmButtonText: "OK"
+                });
+            });
+        </script>
+        <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
 
 </body>
