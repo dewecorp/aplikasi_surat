@@ -157,6 +157,7 @@ include 'template/sidebar.php';
 ?>
 
 <div class="container-fluid px-5">
+        <input type="hidden" id="csrf_token_simad_sync" value="<?php echo htmlspecialchars(generate_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
         <div class="block-header">
             <h2>Data Guru</h2>
         </div>
@@ -177,6 +178,9 @@ include 'template/sidebar.php';
                                 </button>
                                 <a href="export_guru_excel.php?csrf_token=<?php echo generate_csrf_token(); ?>" target="_blank" class="btn btn-success mr-2 mb-2" title="Export Excel"><i class="fas fa-file-excel"></i></a>
                                 <a href="export_guru_print.php?csrf_token=<?php echo generate_csrf_token(); ?>" target="_blank" class="btn btn-warning mr-2 mb-2" title="Cetak PDF"><i class="fas fa-print"></i></a>
+                                <button type="button" class="btn btn-secondary mr-2 mb-2" onclick="confirmSyncSimad()">
+                                    <i class="fas fa-sync-alt"></i> Sinkron SIMAD
+                                </button>
                                 <button type="button" class="btn btn-info mr-2 mb-2" data-toggle="modal" data-target="#importModal">
                                     <i class="fas fa-file-upload"></i> Import Excel
                                 </button>
@@ -571,6 +575,24 @@ include 'template/sidebar.php';
 
 <script>
     $(function () {
+        $.ajax({
+            url: 'sync_guru_simad.php',
+            type: 'POST',
+            dataType: 'json',
+            timeout: 180000,
+            data: { csrf_token: $('#csrf_token_simad_sync').val(), automatic: '1' },
+            success: function (res) {
+                if (!res || res.status !== 'success') {
+                    return;
+                }
+                var ch = (parseInt(res.inserted, 10) || 0) + (parseInt(res.updated, 10) || 0)
+                    + (parseInt(res.removed_duplicates, 10) || 0);
+                if (ch > 0) {
+                    window.location.reload();
+                }
+            }
+        });
+
         // Check All functionality
         $('#check-all').click(function () {
             $('.check-item').prop('checked', this.checked);
@@ -635,6 +657,66 @@ include 'template/sidebar.php';
                 $('#edit_multiple_tbody').html(tbody);
                 $('#editMultipleModal').modal('show');
             }
+        });
+    }
+
+    function confirmSyncSimad() {
+        swal({
+            title: "Sinkron dari SIMAD?",
+            text: "Field yang disamakan: nama, NUPTK, jenis kelamin, tempat & tanggal lahir — mengikuti data SIMAD. Guru baru akan ditambah. Kolom status tidak diubah.",
+            type: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#3F51B5",
+            confirmButtonText: "Ya, sinkronkan",
+            cancelButtonText: "Batal",
+            closeOnConfirm: false
+        }, function () {
+            $.ajax({
+                url: 'sync_guru_simad.php',
+                type: 'POST',
+                dataType: 'json',
+                timeout: 180000,
+                data: { csrf_token: $('#csrf_token_simad_sync').val() },
+                success: function (res) {
+                    if (res.status === 'success') {
+                        swal({
+                            title: "Berhasil",
+                            text: (res.message ? res.message + ' ' : '') + (res.detail || ''),
+                            type: "success"
+                        }, function () {
+                            window.location.reload();
+                        });
+                    } else {
+                        swal("Gagal", res.message || 'Sinkron gagal.', "error");
+                    }
+                },
+                error: function (xhr, status, err) {
+                    var msg = '';
+                    if (status === 'timeout') {
+                        msg = 'Waktu habis (timeout). Sinkron ke server hub membutuhkan waktu lama — coba lagi atau jalankan lewat CLI.';
+                    } else if (xhr.status) {
+                        msg = 'HTTP ' + xhr.status + '. ';
+                    }
+                    try {
+                        var j = JSON.parse(xhr.responseText);
+                        if (j.message) {
+                            msg = j.message;
+                        }
+                    } catch (e) {
+                        var raw = (xhr.responseText || '').replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ' ');
+                        raw = raw.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+                        if (raw.length) {
+                            msg += (msg ? '' : 'Respons bukan JSON. ') + raw.substring(0, 350);
+                        } else if (!msg) {
+                            msg = 'Kesalahan jaringan atau server.';
+                        }
+                    }
+                    if (err && status !== 'timeout' && msg.indexOf(err) < 0) {
+                        msg += (msg.slice(-1) === ' ' ? '' : ' ') + '(' + err + ')';
+                    }
+                    swal("Gagal", msg, "error");
+                }
+            });
         });
     }
 

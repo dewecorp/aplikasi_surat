@@ -37,9 +37,10 @@ if (session_status() == PHP_SESSION_NONE) {
             session_start();
             $_SESSION['error'] = "Sesi Anda telah berakhir karena tidak ada aktivitas selama 2 jam.";
             
-            // If not on login.php or logout.php, redirect to login
-            $current_file = basename($_SERVER['PHP_SELF']);
-            if ($current_file !== 'login.php' && $current_file !== 'logout.php') {
+            // Tidak redirect untuk endpoint JSON (XHR) — kembalikan ke script agar bisa merespons JSON
+            $current_file = isset($_SERVER['PHP_SELF']) ? basename((string)$_SERVER['PHP_SELF']) : '';
+            $no_login_redirect = in_array($current_file, ['login.php', 'logout.php', 'sync_guru_simad.php'], true);
+            if (!$no_login_redirect) {
                 header("Location: login.php");
                 exit();
             }

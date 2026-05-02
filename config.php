@@ -19,12 +19,14 @@ if ($conn) {
 
 // Base URL
 $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ? 'https' : 'http';
-$host_url = $_SERVER['HTTP_HOST'];
+$host_url = isset($_SERVER['HTTP_HOST']) ? (string)$_SERVER['HTTP_HOST'] : '';
 $app_url = getenv('APP_URL') ?: '';
 if ($app_url && filter_var($app_url, FILTER_VALIDATE_URL)) {
     $base_url = rtrim($app_url, '/') . '/';
-} else {
+} elseif ($host_url !== '') {
     $base_url = $protocol . '://' . $host_url . '/';
+} else {
+    $base_url = $protocol . '://localhost/';
 }
 
 function getRomawi($n){
@@ -255,7 +257,6 @@ function verify_csrf_token($token) {
     }
     return false;
 }
-
 
 // Auto delete logs older than 24 hours
 mysqli_query($conn, "DELETE FROM activity_log WHERE timestamp < NOW() - INTERVAL 1 DAY");
