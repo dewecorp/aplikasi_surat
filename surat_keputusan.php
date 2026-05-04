@@ -222,8 +222,91 @@ $query = mysqli_query($conn, "SELECT * FROM surat_keputusan $tahun_filter ORDER 
 
 include 'template/header.php';
 ?>
+<style>
+    /* Toolbar + DataTables: rapi di ponsel */
+    .sk-surat-keputusan .sk-toolbar-row {
+        gap: 0.75rem;
+    }
+    .sk-surat-keputusan .sk-toolbar-filter-wrap {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    @media (max-width: 767.98px) {
+        .sk-surat-keputusan .sk-toolbar-col-btn,
+        .sk-surat-keputusan .sk-toolbar-filter-wrap {
+            width: 100%;
+            max-width: 100%;
+        }
+        .sk-surat-keputusan .sk-toolbar-row .sk-btn-add {
+            width: 100%;
+        }
+        .sk-surat-keputusan .sk-toolbar-row .sk-filter-year {
+            width: 100%;
+            max-width: none;
+        }
+        .sk-surat-keputusan .dataTables_wrapper .row:first-child > [class^="col-"] {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+        .sk-surat-keputusan .dataTables_wrapper .dataTables_length,
+        .sk-surat-keputusan .dataTables_wrapper .dataTables_filter {
+            text-align: left !important;
+            margin-bottom: 0.5rem;
+        }
+        .sk-surat-keputusan .dataTables_wrapper .dataTables_filter label {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+            margin-bottom: 0;
+        }
+        .sk-surat-keputusan .dataTables_wrapper .dataTables_filter input {
+            width: 100% !important;
+            margin-left: 0 !important;
+            margin-top: 0.25rem;
+        }
+        .sk-surat-keputusan .dataTables_wrapper .dataTables_length select {
+            margin-left: 0.35rem;
+        }
+    }
+    @media (min-width: 768px) {
+        .sk-surat-keputusan .sk-toolbar-row {
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+        }
+        .sk-surat-keputusan .sk-toolbar-filter-wrap {
+            justify-content: flex-end;
+        }
+        .sk-surat-keputusan .sk-toolbar-row .sk-filter-year {
+            width: auto;
+            min-width: 10rem;
+            max-width: 14rem;
+        }
+        /* Desktop: area konten memakai lebar sisa; kolom Aksi tidak remuk */
+        .sk-surat-keputusan .table-responsive {
+            overflow-x: auto;
+        }
+        .sk-surat-keputusan table.sk-table-sk {
+            width: 100% !important;
+            table-layout: auto;
+        }
+        .sk-surat-keputusan table.sk-table-sk th:last-child,
+        .sk-surat-keputusan table.sk-table-sk td:last-child {
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+        .sk-surat-keputusan table.sk-table-sk td:last-child .btn {
+            white-space: nowrap;
+        }
+        .sk-surat-keputusan .dataTables_wrapper {
+            width: 100%;
+        }
+    }
+</style>
 
-<div class="container-fluid px-5">
+<div class="container-fluid sk-surat-keputusan px-2 px-sm-3 px-lg-5">
     <div class="block-header">
         <h2>Surat Keputusan</h2>
     </div>
@@ -241,14 +324,14 @@ include 'template/header.php';
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div class="card">
                 <div class="header">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
+                    <div class="d-flex flex-column flex-md-row align-items-center justify-content-md-between w-100 sk-toolbar-row mx-0">
+                        <div class="mb-2 mb-md-0 text-center text-md-left sk-toolbar-col-btn">
+                            <button type="button" class="btn btn-primary sk-btn-add d-md-inline-block" data-toggle="modal" data-target="#addModal">
                                 <i class="fas fa-plus"></i> Tambah Surat Keputusan
                             </button>
                         </div>
-                        <div class="col-md-6 text-right">
-                            <select id="filterTahun" class="form-control" style="width: 150px; display: inline-block;" onchange="filterByTahun()">
+                        <div class="text-center text-md-right sk-toolbar-filter-wrap">
+                            <select id="filterTahun" class="form-control sk-filter-year d-inline-block" onchange="filterByTahun()">
                                 <option value="">Semua Tahun</option>
                                 <?php
                                 // Get available years
@@ -265,7 +348,7 @@ include 'template/header.php';
                 </div>
                 <div class="body">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped table-hover js-basic-example dataTable">
+                        <table class="table table-bordered table-striped table-hover js-basic-example dataTable sk-table-sk">
                             <thead>
                                 <tr>
                                     <th data-orderable="false">No</th>
