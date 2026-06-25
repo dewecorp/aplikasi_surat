@@ -2,6 +2,9 @@
 require_once 'session_init.php';
 include 'config.php';
 
+$allowed_surat_masuk_extensions = ['pdf', 'jpg', 'jpeg', 'png'];
+$allowed_surat_masuk_label = 'PDF, JPG, JPEG, PNG';
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -21,10 +24,16 @@ if (isset($_POST['add'])) {
     // Upload File
     $file_surat = '';
     if ($_FILES['file_surat']['name']) {
-        $allowed = array('pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx');
+        $allowed = $allowed_surat_masuk_extensions;
         $ext = strtolower(pathinfo($_FILES["file_surat"]["name"], PATHINFO_EXTENSION));
         
-        if (in_array($ext, $allowed)) {
+        if (($_FILES['file_surat']['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+            $_SESSION['error'] = "Gagal mengupload file surat.";
+            header("Location: surat_masuk.php");
+            exit();
+        }
+
+        if (in_array($ext, $allowed, true)) {
             $target_dir = "uploads/";
             // Ensure uploads directory exists
             if (!file_exists($target_dir)) {
@@ -33,9 +42,13 @@ if (isset($_POST['add'])) {
             // Use random name to prevent overwriting and predictable naming
             $file_surat = time() . '_' . uniqid() . '.' . $ext;
             $target_file = $target_dir . $file_surat;
-            move_uploaded_file($_FILES["file_surat"]["tmp_name"], $target_file);
+            if (!move_uploaded_file($_FILES["file_surat"]["tmp_name"], $target_file)) {
+                $_SESSION['error'] = "Gagal menyimpan file surat.";
+                header("Location: surat_masuk.php");
+                exit();
+            }
         } else {
-            $_SESSION['error'] = "Format file tidak diizinkan! Hanya PDF, JPG, PNG, DOC, DOCX, XLS, XLSX.";
+            $_SESSION['error'] = "Format file tidak diizinkan! Hanya $allowed_surat_masuk_label.";
             header("Location: surat_masuk.php");
             exit();
         }
@@ -66,11 +79,16 @@ if (isset($_POST['edit'])) {
     $query_str = "UPDATE surat_masuk SET tgl_terima='$tgl_terima', no_surat='$no_surat', tgl_surat='$tgl_surat', perihal='$perihal', pengirim='$pengirim'";
 
     if ($_FILES['file_surat']['name']) {
-        $allowed_types = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx'];
+        $allowed_types = $allowed_surat_masuk_extensions;
         $file_ext = strtolower(pathinfo($_FILES["file_surat"]["name"], PATHINFO_EXTENSION));
 
-        if (!in_array($file_ext, $allowed_types)) {
-            echo "<script>alert('Format file tidak valid! Hanya diperbolehkan: PDF, JPG, JPEG, PNG, DOC, DOCX, XLS, XLSX'); window.history.back();</script>";
+        if (($_FILES['file_surat']['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+            echo "<script>alert('Gagal mengupload file surat.'); window.history.back();</script>";
+            exit;
+        }
+
+        if (!in_array($file_ext, $allowed_types, true)) {
+            echo "<script>alert('Format file tidak valid! Hanya diperbolehkan: $allowed_surat_masuk_label'); window.history.back();</script>";
             exit;
         }
 
@@ -252,8 +270,8 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                             <td><?php echo htmlspecialchars($row['pengirim']); ?></td>
                                             <td>
                                                 <?php if (!empty($row['file']) && file_exists('uploads/' . $row['file'])): ?>
-                                                    <a href="uploads/<?php echo $row['file']; ?>" target="_blank" class="btn btn-primary btn-sm">
-                                                        <i class="fas fa-download"></i> Lihat
+                                                    <a href="surat_masuk_preview.php?id=<?php echo (int)$row['id']; ?>" target="_blank" class="btn btn-primary btn-sm">
+                                                        <i class="fas fa-eye"></i> Lihat
                                                     </a>
                                                 <?php else: ?>
                                                     -
@@ -312,7 +330,8 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                                             </div>
                                                             <div class="form-group">
                                                                 <label>File Surat (Biarkan kosong jika tidak diubah)</label>
-                                                                <input type="file" name="file_surat" class="form-control">
+                                                                <input type="file" name="file_surat" class="form-control" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png">
+                                                                <small class="form-text text-muted">File yang boleh diupload: <?php echo $allowed_surat_masuk_label; ?>.</small>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
@@ -375,7 +394,8 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                     </div>
                     <div class="form-group">
                         <label>File Surat</label>
-                        <input type="file" name="file_surat" class="form-control">
+                        <input type="file" name="file_surat" class="form-control" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png">
+                        <small class="form-text text-muted">File yang boleh diupload: <?php echo $allowed_surat_masuk_label; ?>.</small>
                     </div>
                 </div>
                 <div class="modal-footer">
