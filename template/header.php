@@ -421,7 +421,7 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
                                 ?>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="pengaturan.php"><i class="fas fa-cog fa-sm fa-fw mr-2 text-gray-400"></i>Pengaturan</a>
+                                <a class="dropdown-item" href="javascript:void(0);" onclick="doUpdateSystem()"><i class="fas fa-download fa-sm fa-fw mr-2 text-gray-400"></i>Update Sistem</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="javascript:void(0);" onclick="confirmLogout()"><i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>Logout</a>
                             </div>
@@ -446,4 +446,44 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
                     }
                     setInterval(updateTime, 1000);
                     updateTime();
+                </script>
+                <script>
+                function doUpdateSystem() {
+                    swal({
+                        title: "Update Sistem",
+                        text: "Sistem akan mengunduh dan memperbarui file dari GitHub. Folder uploads, config.php, dan session_init.php tidak akan terpengaruh. Lanjutkan?",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        confirmButtonText: "Ya, Update!",
+                        cancelButtonText: "Batal",
+                        closeOnConfirm: false,
+                        showLoaderOnConfirm: true
+                    }, function (isConfirm) {
+                        if (isConfirm) {
+                            var timer = setTimeout(function () {
+                                swal("Error", "Gagal update. Periksa koneksi internet.", "error");
+                            }, 60000);
+
+                            fetch("update_system.php", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" }
+                            })
+                            .then(function (res) { return res.json(); })
+                            .then(function (data) {
+                                clearTimeout(timer);
+                                if (data.success) {
+                                    swal("Berhasil!", data.message, "success");
+                                } else {
+                                    swal("Gagal", data.message, "error");
+                                }
+                            })
+                            .catch(function (err) {
+                                clearTimeout(timer);
+                                swal("Error", "Gagal update: " + err.message, "error");
+                            });
+                        }
+                    });
+                }
+                </script>
                 </script>
