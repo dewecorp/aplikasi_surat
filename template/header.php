@@ -481,7 +481,18 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
                             .then(function (data) {
                                 clearTimeout(timer);
                                 if (data.success) {
-                                    swal("Berhasil!", data.message, "success");
+                                    swal({
+                                        title: "Berhasil!",
+                                        text: data.message,
+                                        type: "success",
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    }, function () {
+                                        window.location.reload();
+                                    });
+                                    setTimeout(function () {
+                                        window.location.reload();
+                                    }, 1700);
                                 } else {
                                     swal("Gagal", data.message, "error");
                                 }
