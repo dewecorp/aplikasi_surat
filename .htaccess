@@ -15,20 +15,6 @@ RewriteCond %{REQUEST_METHOD} =GET [OR]
 RewriteCond %{REQUEST_METHOD} =HEAD
 RewriteRule ^[A-Za-z]:/.*$ ./ [R=302,L,NC]
 
-# Hilangkan .php dari URL (contoh: /guru.php -> /guru)
-RewriteCond %{REQUEST_METHOD} =GET [OR]
-RewriteCond %{REQUEST_METHOD} =HEAD
-RewriteCond %{THE_REQUEST} !\s/+[A-Za-z]:/ [NC]
-RewriteCond %{REQUEST_URI} !: [NC]
-RewriteCond %{THE_REQUEST} \s/+([A-Za-z0-9_/-]+)\.php(?:[?\s]) [NC]
-RewriteRule ^ %1 [R=301,L]
-
-# Redirect /index atau /index.php ke root URL (/)
-RewriteCond %{REQUEST_METHOD} =GET [OR]
-RewriteCond %{REQUEST_METHOD} =HEAD
-RewriteCond %{REQUEST_URI} !: [NC]
-RewriteRule ^index(?:\.php)?$ ./ [R=301,L]
-
 # Jika request adalah file/folder yang memang ada, jangan di-rewrite
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d

@@ -1,8 +1,15 @@
 <?php
+$request_host = isset($_SERVER['HTTP_HOST']) ? strtolower((string)$_SERVER['HTTP_HOST']) : '';
+$is_local = $request_host === ''
+    || strpos($request_host, 'localhost') !== false
+    || strpos($request_host, '127.0.0.1') !== false
+    || strpos($request_host, '.test') !== false
+    || strpos($request_host, '.local') !== false;
+
 $host = getenv('DB_HOST') ?: 'localhost';
-$user = getenv('DB_USER') ?: 'root';
-$pass = getenv('DB_PASS') ?: '';
-$db   = getenv('DB_NAME') ?: 'sims';
+$user = getenv('DB_USER') ?: ($is_local ? 'root' : 'kvzveyrg_sims');
+$pass = getenv('DB_PASS') ?: ($is_local ? '' : 'sultanfattah25');
+$db   = getenv('DB_NAME') ?: ($is_local ? 'sims' : 'kvzveyrg_sims');
 
 $conn = mysqli_connect($host, $user, $pass, $db);
 

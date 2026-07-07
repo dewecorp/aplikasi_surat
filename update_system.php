@@ -57,12 +57,6 @@ if (!class_exists('ZipArchive')) {
 $github_repo = 'https://github.com/dewecorp/aplikasi_surat/archive/refs/heads/main.zip';
 $temp_dir = __DIR__ . '/temp_update';
 $zip_file = $temp_dir . '/update.zip';
-$current_db_config = [
-    'host' => isset($host) ? (string)$host : 'localhost',
-    'user' => isset($user) ? (string)$user : 'root',
-    'pass' => isset($pass) ? (string)$pass : '',
-    'db' => isset($db) ? (string)$db : 'sims',
-];
 
 try {
     // Bersihkan folder temp lama
@@ -161,15 +155,14 @@ try {
     $source_dir = $extracted_folders[0];
 
     // Salin file ke root aplikasi, kecuali data lokal yang wajib tetap aman.
-    // config.php tetap ditimpa agar perubahan konfigurasi ikut update, tetapi kredensial DB dipulihkan setelah copy.
+    // config.php sengaja tidak dilindungi agar perubahan konfigurasi ikut terpasang.
     $protected_items = ['uploads', 'temp_update', 'config_local.php', 'session_init.php', 'update_log.txt'];
     $success_count = 0;
     $skip_count = 0;
 
     copyDirectory($source_dir, __DIR__, $protected_items, $success_count, $skip_count);
-    preserveDatabaseConfig(__DIR__ . '/config.php', $current_db_config);
     log_update('Copy selesai. ' . $success_count . ' file diupdate, ' . $skip_count . ' dilewati.');
-    log_update('Kredensial database hosting dipertahankan di config.php.');
+    log_update('config.php ikut ditimpa dari paket update.');
 
     // Bersihkan temp
     deleteDirectory($temp_dir);
@@ -230,34 +223,4 @@ function deleteDirectory($dir) {
         is_dir($path) ? deleteDirectory($path) : @unlink($path);
     }
     @rmdir($dir);
-}
-
-function preserveDatabaseConfig($config_file, array $db_config) {
-    if (!is_file($config_file) || !is_readable($config_file) || !is_writable($config_file)) {
-        throw new Exception('Gagal mempertahankan konfigurasi database. config.php tidak dapat dibaca/ditulis.');
-    }
-
-    $content = file_get_contents($config_file);
-    if ($content === false) {
-        throw new Exception('Gagal membaca config.php setelah update.');
-    }
-
-    $replacements = [
-        'host' => '$host = getenv(\'DB_HOST\') ?: ' . var_export($db_config['host'], true) . ';',
-        'user' => '$user = getenv(\'DB_USER\') ?: ' . var_export($db_config['user'], true) . ';',
-        'pass' => '$pass = getenv(\'DB_PASS\') ?: ' . var_export($db_config['pass'], true) . ';',
-        'db' => '$db   = getenv(\'DB_NAME\') ?: ' . var_export($db_config['db'], true) . ';',
-    ];
-
-    foreach ($replacements as $name => $line) {
-        $pattern = '/^\$' . preg_quote($name, '/') . '\s*=.*?;\s*$/m';
-        $content = preg_replace($pattern, $line, $content, 1, $count);
-        if ($count !== 1) {
-            throw new Exception('Format config.php tidak dikenali pada variabel database: $' . $name);
-        }
-    }
-
-    if (file_put_contents($config_file, $content, LOCK_EX) === false) {
-        throw new Exception('Gagal menulis ulang kredensial database ke config.php.');
-    }
 }

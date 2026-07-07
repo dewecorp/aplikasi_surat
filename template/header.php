@@ -36,7 +36,6 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title><?php echo $current_page_title; ?> | SIMS</title>
-    <base href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%231e88e5%22><path d=%22M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z%22/></svg>" type="image/svg+xml">
     <link href="assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900" rel="stylesheet">
@@ -316,7 +315,7 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
 <body id="page-top">
     <div id="wrapper">
         <div class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar" role="navigation">
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $sims_drawer_nav_onclick; ?>>
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php"<?php echo $sims_drawer_nav_onclick; ?>>
                 <div class="sidebar-brand-icon">
                     <?php if (!empty($logo_sekolah) && file_exists('assets/images/' . $logo_sekolah)): ?>
                         <img src="assets/images/<?php echo $logo_sekolah; ?>" alt="Logo" style="height: 50px;">
@@ -328,7 +327,7 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
             </a>
             <hr class="sidebar-divider my-0">
             <div class="nav-item <?php echo ($page == 'index') ? 'active' : ''; ?>">
-                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="index.php"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </div>
@@ -336,45 +335,45 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
             <div class="sidebar-heading">Menu</div>
             <?php if (strtolower(trim($_SESSION['role'] ?? '')) == 'admin'): ?>
             <div class="nav-item <?php echo ($page == 'guru') ? 'active' : ''; ?>">
-                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>guru"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="guru.php"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-user"></i>
                     <span>Data Guru</span></a>
             </div>
             <?php endif; ?>
             <div class="nav-item <?php echo ($page == 'surat_masuk') ? 'active' : ''; ?>">
-                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>surat_masuk"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="surat_masuk.php"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-inbox"></i>
                     <span>Surat Masuk</span></a>
             </div>
             <div class="nav-item <?php echo ($page == 'surat_keluar') ? 'active' : ''; ?>">
-                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>surat_keluar"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="surat_keluar.php"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-paper-plane"></i>
                     <span>Surat Keluar</span></a>
             </div>
             <div class="nav-item <?php echo ($page == 'surat_keputusan') ? 'active' : ''; ?>">
-                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>surat_keputusan"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="surat_keputusan.php"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-gavel"></i>
                     <span>Surat Keputusan</span></a>
             </div>
             <div class="nav-item <?php echo ($page == 'riwayat') ? 'active' : ''; ?>">
-                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>riwayat"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="riwayat.php"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-history"></i>
                     <span>Riwayat</span></a>
             </div>
             <?php if (strtolower(trim($_SESSION['role'] ?? '')) == 'admin'): ?>
             <div class="nav-item <?php echo ($page == 'pengguna') ? 'active' : ''; ?>">
-                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>pengguna"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="pengguna.php"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-users"></i>
                     <span>Pengguna</span></a>
             </div>
             <div class="nav-item <?php echo ($page == 'pengaturan') ? 'active' : ''; ?>">
-                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>pengaturan"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="pengaturan.php"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-cogs"></i>
                     <span>Pengaturan</span></a>
             </div>
             <?php endif; ?>
             <div class="nav-item">
-                <a class="nav-link" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>backup"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="backup.php"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-database"></i>
                     <span>Backup Restore</span></a>
             </div>
@@ -395,7 +394,7 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
                     <button id="sidebarToggleTop" type="button" class="btn btn-link d-md-none rounded-circle mr-3 text-white p-2" aria-label="Buka menu">
                         <i class="fas fa-bars fa-lg"></i>
                     </button>
-                    <a class="navbar-brand d-flex align-items-center" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>">
+                    <a class="navbar-brand d-flex align-items-center" href="index.php">
                         <span class="h6 mb-0 text-white d-none d-md-block">SISTEM MANAJEMEN SURAT | <?php echo strtoupper($nama_sekolah); ?></span>
                         <span class="h6 mb-0 text-white d-block d-md-none">SIMS</span>
                     </a>
@@ -451,7 +450,7 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
                 function doUpdateSystem() {
                     swal({
                         title: "Update Sistem",
-                        text: "Sistem akan mengunduh dan memperbarui file dari GitHub. config.php ikut diperbarui, tetapi koneksi database hosting tetap dipertahankan. Folder uploads dan session_init.php tidak akan terpengaruh. Lanjutkan?",
+                        text: "Sistem akan mengunduh dan memperbarui file dari GitHub. config.php ikut ditimpa dari paket update. Folder uploads dan session_init.php tidak akan terpengaruh. Lanjutkan?",
                         type: "warning",
                         showCancelButton: true,
                         confirmButtonColor: "#3085d6",
@@ -481,18 +480,7 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
                             .then(function (data) {
                                 clearTimeout(timer);
                                 if (data.success) {
-                                    swal({
-                                        title: "Berhasil!",
-                                        text: data.message,
-                                        type: "success",
-                                        timer: 1500,
-                                        showConfirmButton: false
-                                    }, function () {
-                                        window.location.reload();
-                                    });
-                                    setTimeout(function () {
-                                        window.location.reload();
-                                    }, 1700);
+                                    swal("Berhasil!", data.message, "success");
                                 } else {
                                     swal("Gagal", data.message, "error");
                                 }
