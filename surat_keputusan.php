@@ -370,11 +370,13 @@ include 'template/header.php';
                                         <td><?php echo tgl_indo($row['tgl_surat']); ?></td>
                                         <td><?php echo $row['no_surat']; ?></td>
                                         <td><?php echo $row['nama_sk'] ?? '-'; ?></td>
-                                        <td>
-                                            <a href="print_surat_keputusan.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-sm btn-success">Cetak</a>
-                                            <button type="button" class="btn btn-sm btn-info copy-btn" data-id="<?php echo $row['id']; ?>"><i class="fas fa-copy"></i> Copy</button>
-                                            <button type="button" class="btn btn-sm btn-warning edit-btn" data-id="<?php echo $row['id']; ?>">Edit</button>
-                                            <a href="javascript:void(0);" class="btn btn-sm btn-danger" onclick="confirmDelete('surat_keputusan.php?delete=<?php echo $row['id']; ?>')">Hapus</a>
+                                        <td style="white-space: nowrap;">
+                                            <div class="btn-group">
+                                                <a href="print_surat_keputusan.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-sm btn-success">Cetak</a>
+                                                <button type="button" class="btn btn-sm btn-info copy-btn" data-id="<?php echo $row['id']; ?>"><i class="fas fa-copy"></i> Copy</button>
+                                                <button type="button" class="btn btn-sm btn-warning edit-btn" data-id="<?php echo $row['id']; ?>">Edit</button>
+                                                <a href="javascript:void(0);" class="btn btn-sm btn-danger" onclick="confirmDelete('surat_keputusan.php?delete=<?php echo $row['id']; ?>')">Hapus</a>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endwhile; ?>

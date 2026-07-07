@@ -234,13 +234,15 @@ include 'template/sidebar.php';
                                                     <span class="badge badge-secondary"><?php echo htmlspecialchars($row['status']); ?></span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td>
-                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>" title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <a href="javascript:void(0);" onclick="confirmDelete('guru.php?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>')" class="btn btn-danger btn-circle">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
+                                            <td style="white-space: nowrap;">
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>" title="Edit">
+                                                        <i class="fas fa-edit"></i> Edit
+                                                    </button>
+                                                    <a href="javascript:void(0);" onclick="confirmDelete('guru.php?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>')" class="btn btn-danger btn-sm">
+                                                        <i class="fas fa-trash"></i> Hapus
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
 
