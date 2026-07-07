@@ -26,7 +26,7 @@ $nama_madrasah_body = preg_replace_callback('/\bmi\b/i', function () {
     return 'MI';
 }, $nama_madrasah_body);
 $penerima_surat = $surat['penerima'] ?? '';
-$is_penerima_siswa = preg_match('/\b(siswa|siswi|murid|ananda|peserta didik)\b/i', $penerima_surat) === 1;
+$is_penerima_siswa = preg_match('/(?<!wali\s)\b(siswa|siswi|murid|ananda|peserta didik)\b/i', $penerima_surat) === 1;
 $sapaan_penerima = $is_penerima_siswa ? '' : 'Bapak / Ibu ';
 
 $mode = isset($_GET['mode']) ? $_GET['mode'] : 'portrait';
@@ -507,7 +507,7 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
                         <?php if (!empty($surat['pembuka_surat'])): ?>
                             <p style="text-indent: 50px;"><?php echo nl2br($surat['pembuka_surat']); ?></p>
                         <?php else: ?>
-                            <p style="text-indent: 50px;">Memberitahukan bahwa:</p>
+                            <p style="text-indent: 50px;">Dengan hormat, memberitahukan kepada <?php echo $sapaan_penerima; ?><?php echo $surat['penerima']; ?> bahwa:</p>
                         <?php endif; ?>
 
                         <div style="margin-left: 50px;">
@@ -523,6 +523,8 @@ if ($mode == 'landscape' && !in_array($surat['jenis_surat'], ['Undangan', 'Pembe
                         <div style="page-break-inside: avoid;">
                             <?php if (!empty($surat['penutup_surat'])): ?>
                                 <p style="text-indent: 50px;"><?php echo nl2br($surat['penutup_surat']); ?></p>
+                            <?php else: ?>
+                                <p style="text-indent: 50px;">Demikian pemberitahuan ini kami sampaikan, atas perhatian <?php echo $sapaan_penerima; ?><?php echo $surat['penerima']; ?> kami ucapkan terima kasih.</p>
                             <?php endif; ?>
                             <?php echo $principal_ttd; ?>
                         </div>
