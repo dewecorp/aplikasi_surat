@@ -293,6 +293,12 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama, u.role FROM activity_log 
                                         $type_label = 'EDIT SK';
                                     }
                                     break;
+                                case 'simad_sync':
+                                    $icon = 'fa-sync-alt';
+                                    $border_color = 'border-left-warning';
+                                    $text_color = 'text-warning';
+                                    $type_label = 'SINKRON SIMAD';
+                                    break;
                                 case 'update_system':
                                     $icon = 'fa-cloud-download-alt';
                                     $border_color = 'border-left-primary';

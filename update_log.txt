@@ -1,0 +1,10 @@
+[2026-07-07 09:34:06] Mulai update sistem oleh user ID: 1
+[2026-07-07 09:34:06] Mengunduh via cURL: https://github.com/dewecorp/aplikasi_surat/archive/refs/heads/main.zip
+[2026-07-07 09:34:08] cURL sukses, ukuran: 6208929 bytes
+[2026-07-07 09:34:09] Extract zip selesai.
+[2026-07-07 09:34:17] Copy selesai. 825 file diupdate, 3 dilewati.
+[2026-07-07 17:30:23] Mulai update sistem oleh user ID: 1
+[2026-07-07 17:30:23] Mengunduh via cURL: https://github.com/dewecorp/aplikasi_surat/archive/refs/heads/main.zip
+[2026-07-07 17:30:24] cURL sukses, ukuran: 6208929 bytes
+[2026-07-07 17:30:25] Extract zip selesai.
+[2026-07-07 17:30:33] Copy selesai. 825 file diupdate, 3 dilewati.

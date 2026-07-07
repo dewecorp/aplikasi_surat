@@ -4,6 +4,7 @@
  * Hanya bisa diakses oleh admin (cek session)
  */
 require_once 'session_init.php';
+require_once 'config.php';
 
 // Matikan output error agar tidak mengganggu JSON
 error_reporting(0);

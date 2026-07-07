@@ -1222,7 +1222,7 @@ function simad_execute_cron_path($conn, $SIMAD_SCRIPT_DIR, $simad_is_cli)
     if ($uid > 0) {
         log_activity(
             $uid,
-            'update',
+            'simad_sync',
             'Cron sinkron guru SIMAD: ' . (int)$result['inserted'] . ' baru, ' . (int)$result['updated'] . ' diperbarui, '
                 . (int)($result['removed_duplicates'] ?? 0) . ' duplikat dihapus'
         );
@@ -1357,7 +1357,7 @@ if ($post_auto) {
     $iu = (int)$_SESSION['user_id'];
     log_activity(
         $iu,
-        'update',
+        'simad_sync',
         'Sinkron otomatis guru SIMAD: ' . (int)$result['inserted'] . ' baru, ' . (int)$result['updated'] . ' diperbarui, '
             . (int)($result['removed_duplicates'] ?? 0) . ' duplikat dihapus, ' . (int)$result['skipped'] . ' dilewati/gagal'
     );
@@ -1414,7 +1414,7 @@ $removed_dup = (int)($result['removed_duplicates'] ?? 0);
 
 log_activity(
     (int)$_SESSION['user_id'],
-    'update',
+    'simad_sync',
     'Sinkron manual guru SIMAD: ' . $inserted . ' baru, ' . $updated . ' diperbarui, ' . $removed_dup . ' duplikat dihapus, '
         . $skipped . ' dilewati/gagal'
 );
