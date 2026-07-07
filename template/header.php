@@ -451,7 +451,7 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
                 function doUpdateSystem() {
                     swal({
                         title: "Update Sistem",
-                        text: "Sistem akan mengunduh dan memperbarui file dari GitHub. Folder uploads, config.php, dan session_init.php tidak akan terpengaruh. Lanjutkan?",
+                        text: "Sistem akan mengunduh dan memperbarui file dari GitHub. config.php ikut diperbarui, tetapi koneksi database hosting tetap dipertahankan. Folder uploads dan session_init.php tidak akan terpengaruh. Lanjutkan?",
                         type: "warning",
                         showCancelButton: true,
                         confirmButtonColor: "#3085d6",
