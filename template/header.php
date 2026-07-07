@@ -469,7 +469,15 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" }
                             })
-                            .then(function (res) { return res.json(); })
+                            .then(function (res) {
+                                return res.text().then(function (text) {
+                                    try {
+                                        return JSON.parse(text);
+                                    } catch (e) {
+                                        throw new Error("Respons server bukan JSON. Mungkin halaman error hosting atau mod_security memblokir request. Lihat update_log.txt");
+                                    }
+                                });
+                            })
                             .then(function (data) {
                                 clearTimeout(timer);
                                 if (data.success) {
