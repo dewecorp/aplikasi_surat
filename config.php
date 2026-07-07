@@ -24,7 +24,10 @@ $app_url = getenv('APP_URL') ?: '';
 if ($app_url && filter_var($app_url, FILTER_VALIDATE_URL)) {
     $base_url = rtrim($app_url, '/') . '/';
 } elseif ($host_url !== '') {
-    $base_url = $protocol . '://' . $host_url . '/';
+    $script_dir = isset($_SERVER['SCRIPT_NAME']) ? str_replace('\\', '/', dirname((string)$_SERVER['SCRIPT_NAME'])) : '';
+    $script_dir = trim($script_dir, '/');
+    $base_path = ($script_dir !== '' && $script_dir !== '.') ? '/' . $script_dir : '';
+    $base_url = $protocol . '://' . $host_url . $base_path . '/';
 } else {
     $base_url = $protocol . '://localhost/';
 }
