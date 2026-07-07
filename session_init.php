@@ -1,5 +1,11 @@
 <?php
 if (session_status() == PHP_SESSION_NONE) {
+    // Idle timeout aplikasi: user baru dipaksa login ulang setelah tidak aktif > 2 jam.
+    $timeout_duration = 2 * 60 * 60;
+
+    // Samakan umur session PHP di server agar tidak terhapus lebih cepat dari aturan idle aplikasi.
+    @ini_set('session.gc_maxlifetime', (string)$timeout_duration);
+
     // Deteksi HTTPS yang lebih aman (cegah false positive pada beberapa konfigurasi server)
     $secure = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) === 'on';
 
@@ -22,9 +28,6 @@ if (session_status() == PHP_SESSION_NONE) {
     // Set nama session unik untuk mencegah konflik
     session_name('SIMS_OK_APP_SESSION');
     session_start();
-
-    // Session Timeout Logic: 2 hours (7200 seconds)
-    $timeout_duration = 7200; 
 
     if (isset($_SESSION['user_id'])) {
         if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > $timeout_duration)) {
