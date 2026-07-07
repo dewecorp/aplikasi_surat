@@ -27,6 +27,16 @@ $titles = [
 $current_page_title = isset($titles[$page]) ? $titles[$page] : ucwords(str_replace('_', ' ', $page));
 /** Penutupan drawer (onclick); penutupan juga dijaga lewat delegasi jQuery di footer. */
 $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__simsCloseDrawerNav();"';
+$sims_protocol = ((isset($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) === 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower((string)$_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https')) ? 'https' : 'http';
+$sims_host = isset($_SERVER['HTTP_HOST']) ? (string)$_SERVER['HTTP_HOST'] : 'localhost';
+$sims_script_dir = isset($_SERVER['SCRIPT_NAME']) ? str_replace('\\', '/', dirname((string)$_SERVER['SCRIPT_NAME'])) : '';
+$sims_script_dir = trim(rawurldecode($sims_script_dir), '/');
+if ($sims_script_dir !== '' && (preg_match('/^[A-Za-z]:/', $sims_script_dir) || strpos($sims_script_dir, ':') !== false || stripos($sims_script_dir, 'laragon/www') !== false)) {
+    $sims_script_dir = '';
+}
+$sims_app_path = ($sims_script_dir !== '' && $sims_script_dir !== '.') ? '/' . $sims_script_dir : '';
+$sims_app_raw_url = $sims_protocol . '://' . $sims_host . $sims_app_path . '/';
+$sims_app_url = htmlspecialchars($sims_app_raw_url, ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -315,7 +325,7 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
 <body id="page-top">
     <div id="wrapper">
         <div class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar" role="navigation">
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php"<?php echo $sims_drawer_nav_onclick; ?>>
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="<?php echo $sims_app_url; ?>"<?php echo $sims_drawer_nav_onclick; ?>>
                 <div class="sidebar-brand-icon">
                     <?php if (!empty($logo_sekolah) && file_exists('assets/images/' . $logo_sekolah)): ?>
                         <img src="assets/images/<?php echo $logo_sekolah; ?>" alt="Logo" style="height: 50px;">
@@ -327,7 +337,7 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
             </a>
             <hr class="sidebar-divider my-0">
             <div class="nav-item <?php echo ($page == 'index') ? 'active' : ''; ?>">
-                <a class="nav-link" href="index.php"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="<?php echo $sims_app_url; ?>"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </div>
@@ -335,45 +345,45 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
             <div class="sidebar-heading">Menu</div>
             <?php if (strtolower(trim($_SESSION['role'] ?? '')) == 'admin'): ?>
             <div class="nav-item <?php echo ($page == 'guru') ? 'active' : ''; ?>">
-                <a class="nav-link" href="guru.php"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="<?php echo $sims_app_url; ?>guru"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-user"></i>
                     <span>Data Guru</span></a>
             </div>
             <?php endif; ?>
             <div class="nav-item <?php echo ($page == 'surat_masuk') ? 'active' : ''; ?>">
-                <a class="nav-link" href="surat_masuk.php"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="<?php echo $sims_app_url; ?>surat_masuk"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-inbox"></i>
                     <span>Surat Masuk</span></a>
             </div>
             <div class="nav-item <?php echo ($page == 'surat_keluar') ? 'active' : ''; ?>">
-                <a class="nav-link" href="surat_keluar.php"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="<?php echo $sims_app_url; ?>surat_keluar"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-paper-plane"></i>
                     <span>Surat Keluar</span></a>
             </div>
             <div class="nav-item <?php echo ($page == 'surat_keputusan') ? 'active' : ''; ?>">
-                <a class="nav-link" href="surat_keputusan.php"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="<?php echo $sims_app_url; ?>surat_keputusan"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-gavel"></i>
                     <span>Surat Keputusan</span></a>
             </div>
             <div class="nav-item <?php echo ($page == 'riwayat') ? 'active' : ''; ?>">
-                <a class="nav-link" href="riwayat.php"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="<?php echo $sims_app_url; ?>riwayat"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-history"></i>
                     <span>Riwayat</span></a>
             </div>
             <?php if (strtolower(trim($_SESSION['role'] ?? '')) == 'admin'): ?>
             <div class="nav-item <?php echo ($page == 'pengguna') ? 'active' : ''; ?>">
-                <a class="nav-link" href="pengguna.php"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="<?php echo $sims_app_url; ?>pengguna"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-users"></i>
                     <span>Pengguna</span></a>
             </div>
             <div class="nav-item <?php echo ($page == 'pengaturan') ? 'active' : ''; ?>">
-                <a class="nav-link" href="pengaturan.php"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="<?php echo $sims_app_url; ?>pengaturan"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-cogs"></i>
                     <span>Pengaturan</span></a>
             </div>
             <?php endif; ?>
             <div class="nav-item">
-                <a class="nav-link" href="backup.php"<?php echo $sims_drawer_nav_onclick; ?>>
+                <a class="nav-link" href="<?php echo $sims_app_url; ?>backup"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-database"></i>
                     <span>Backup Restore</span></a>
             </div>
@@ -394,7 +404,7 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
                     <button id="sidebarToggleTop" type="button" class="btn btn-link d-md-none rounded-circle mr-3 text-white p-2" aria-label="Buka menu">
                         <i class="fas fa-bars fa-lg"></i>
                     </button>
-                    <a class="navbar-brand d-flex align-items-center" href="index.php">
+                    <a class="navbar-brand d-flex align-items-center" href="<?php echo $sims_app_url; ?>">
                         <span class="h6 mb-0 text-white d-none d-md-block">SISTEM MANAJEMEN SURAT | <?php echo strtoupper($nama_sekolah); ?></span>
                         <span class="h6 mb-0 text-white d-block d-md-none">SIMS</span>
                     </a>
@@ -480,7 +490,20 @@ $sims_drawer_nav_onclick = ' onclick="window.__simsCloseDrawerNav&&window.__sims
                             .then(function (data) {
                                 clearTimeout(timer);
                                 if (data.success) {
-                                    swal("Berhasil!", data.message, "success");
+                                    var updateReloaded = false;
+                                    var reloadAfterUpdate = function () {
+                                        if (updateReloaded) return;
+                                        updateReloaded = true;
+                                        window.location.reload();
+                                    };
+                                    swal({
+                                        title: "Berhasil!",
+                                        text: data.message + " Halaman akan dimuat ulang.",
+                                        type: "success",
+                                        timer: 1800,
+                                        showConfirmButton: false
+                                    }, reloadAfterUpdate);
+                                    setTimeout(reloadAfterUpdate, 2200);
                                 } else {
                                     swal("Gagal", data.message, "error");
                                 }

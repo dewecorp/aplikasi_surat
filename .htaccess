@@ -8,19 +8,41 @@ RewriteEngine On
 RewriteCond %{REQUEST_METHOD} =GET [OR]
 RewriteCond %{REQUEST_METHOD} =HEAD
 RewriteCond %{THE_REQUEST} \s/+[A-Za-z]:/laragon/www/sims_ok/([A-Za-z0-9_/-]+)(?:\.php)?(?:[?\s]) [NC]
-RewriteRule ^ %1 [R=302,L]
+RewriteRule ^ /%1 [R=302,L]
 
 # Safety net: jika URL diawali drive letter (contoh: /D:/...), kembalikan ke root web
 RewriteCond %{REQUEST_METHOD} =GET [OR]
 RewriteCond %{REQUEST_METHOD} =HEAD
-RewriteRule ^[A-Za-z]:/.*$ ./ [R=302,L,NC]
+RewriteRule ^[A-Za-z]:/.*$ / [R=302,L,NC]
+
+# Sembunyikan index.php dan ekstensi .php untuk request halaman biasa.
+# Hanya GET/HEAD yang di-redirect; POST tetap langsung diproses agar form/AJAX tidak rusak.
+# Query string bawaan Apache tetap dipertahankan, misalnya guru.php?id=1 -> guru?id=1.
+RewriteCond %{REQUEST_METHOD} =GET [OR]
+RewriteCond %{REQUEST_METHOD} =HEAD
+RewriteCond %{THE_REQUEST} \s/+(.*/)?index(?:\.php)?(?:[?\s]) [NC]
+RewriteRule ^index(?:\.php)?$ ./ [R=302,L]
+
+RewriteCond %{REQUEST_METHOD} =GET [OR]
+RewriteCond %{REQUEST_METHOD} =HEAD
+RewriteCond %{THE_REQUEST} \s/+.+?\.php(?:[?\s]) [NC]
+RewriteCond %{REQUEST_URI} ^(.+?)\.php$ [NC]
+RewriteCond %{REQUEST_URI} !: [NC]
+RewriteRule ^ %1 [R=302,L]
+
+# Route halaman aplikasi secara eksplisit sebelum pengecekan folder fisik.
+# Ini mencegah /guru atau /surat_masuk dibaca sebagai folder hosting dan berakhir Forbidden.
+RewriteRule ^(index|guru|surat_masuk|surat_keluar|surat_keputusan|riwayat|pengguna|pengaturan|backup|login|logout|update_system|sync_guru_simad)$ $1.php [L,QSA]
+RewriteRule ^(export_guru_excel|export_guru_print|download_template_guru|export_pengguna_excel|export_pengguna_print|export_riwayat_excel|export_riwayat_print|print_surat_keluar|print_surat_keputusan|export_surat_keluar_excel|export_surat_keluar_print|export_surat_masuk_excel|export_surat_masuk_print|surat_masuk_preview|lampiran_preview|view_lampiran)$ $1.php [L,QSA]
+
+# Tangani request tanpa ekstensi secara internal (/file -> /file.php).
+# Diletakkan sebelum pengecualian folder agar /guru tetap masuk ke guru.php
+# meski di hosting ada folder bernama guru atau surat_masuk.
+RewriteCond %{REQUEST_URI} !: [NC]
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.+?)/?$ $1.php [L]
 
 # Jika request adalah file/folder yang memang ada, jangan di-rewrite
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
-
-# Tangani request tanpa ekstensi secara internal (/file -> /file.php)
-RewriteCond %{REQUEST_URI} !: [NC]
-RewriteCond %{REQUEST_FILENAME}.php -f
-RewriteRule ^(.+?)/?$ $1.php [L]
