@@ -544,7 +544,6 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                         <th>Nomor Surat</th>
                                         <th>Perihal</th>
                                         <th>Penerima</th>
-                                        <th>File</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -568,33 +567,27 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                             <td><?php echo htmlspecialchars($row['perihal']); ?></td>
                                             <td><?php echo htmlspecialchars($row['penerima']); ?></td>
                                             <td>
-                                                <?php if (in_array($row['jenis_surat'], ['Undangan', 'Pemberitahuan'])): ?>
-                                                    <div class="btn-group">
-                                                        <button type="button" class="btn btn-info btn-sm dropdown-toggle shadow-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <div class="btn-group">
+                                                    <?php if (in_array($row['jenis_surat'], ['Undangan', 'Pemberitahuan'])): ?>
+                                                        <button type="button" class="btn btn-sm btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             <i class="fas fa-print"></i> Cetak
                                                         </button>
-                                                        <div class="dropdown-menu shadow animated--grow-in">
-                                                            <a class="dropdown-item" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>print_surat_keluar.php?id=<?php echo $row['id']; ?>&mode=portrait" target="_blank">
-                                                                <i class="fas fa-file-alt fa-sm fa-fw mr-2 text-gray-400"></i> 1 Halaman 1 Surat (Portrait)
-                                                            </a>
-                                                            <a class="dropdown-item" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>print_surat_keluar.php?id=<?php echo $row['id']; ?>&mode=landscape" target="_blank">
-                                                                <i class="fas fa-columns fa-sm fa-fw mr-2 text-gray-400"></i> 1 Halaman 2 Surat (Landscape)
-                                                            </a>
+                                                        <div class="dropdown-menu">
+                                                            <a class="dropdown-item" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>print_surat_keluar.php?id=<?php echo $row['id']; ?>&mode=portrait" target="_blank">1 Halaman 1 Surat (Portrait)</a>
+                                                            <a class="dropdown-item" href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>print_surat_keluar.php?id=<?php echo $row['id']; ?>&mode=landscape" target="_blank">1 Halaman 2 Surat (Landscape)</a>
                                                         </div>
-                                                    </div>
-                                                <?php else: ?>
-                                                    <a href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>print_surat_keluar.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-info btn-sm shadow-sm">
-                                                        <i class="fas fa-file-download"></i> Lihat/Unduh
+                                                    <?php else: ?>
+                                                        <a href="<?php echo htmlspecialchars($base_url, ENT_QUOTES, 'UTF-8'); ?>print_surat_keluar.php?id=<?php echo $row['id']; ?>" target="_blank" class="btn btn-sm btn-info">
+                                                            <i class="fas fa-eye"></i> Lihat
+                                                        </a>
+                                                    <?php endif; ?>
+                                                    <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>" title="Edit">
+                                                        <i class="fas fa-edit"></i> Edit
+                                                    </button>
+                                                    <a href="javascript:void(0);" onclick="confirmDelete('surat_keluar.php?delete=<?php echo $row['id']; ?>')" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i> Hapus
                                                     </a>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td>
-                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>" title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <a href="javascript:void(0);" onclick="confirmDelete('surat_keluar.php?delete=<?php echo $row['id']; ?>')" class="btn btn-danger btn-circle">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
+                                                </div>
                                             </td>
                                         </tr>
 

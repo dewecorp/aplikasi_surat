@@ -251,7 +251,6 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                         <th>Tgl Surat</th>
                                         <th>Perihal</th>
                                         <th>Pengirim</th>
-                                        <th>File</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -269,21 +268,19 @@ if (isset($_GET['filter_tanggal']) && !empty($_GET['filter_tanggal'])) {
                                             <td><?php echo htmlspecialchars($row['perihal']); ?></td>
                                             <td><?php echo htmlspecialchars($row['pengirim']); ?></td>
                                             <td>
-                                                <?php if (!empty($row['file']) && file_exists('uploads/' . $row['file'])): ?>
-                                                    <a href="surat_masuk_preview.php?id=<?php echo (int)$row['id']; ?>" target="_blank" class="btn btn-primary btn-sm">
-                                                        <i class="fas fa-eye"></i> Lihat
+                                                <div class="btn-group">
+                                                    <?php if (!empty($row['file']) && file_exists('uploads/' . $row['file'])): ?>
+                                                        <a href="surat_masuk_preview.php?id=<?php echo (int)$row['id']; ?>" target="_blank" class="btn btn-sm btn-primary">
+                                                            <i class="fas fa-eye"></i> Lihat
+                                                        </a>
+                                                    <?php endif; ?>
+                                                    <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>" title="Edit">
+                                                        <i class="fas fa-edit"></i> Edit
+                                                    </button>
+                                                    <a href="javascript:void(0);" onclick="confirmDelete('surat_masuk.php?delete=<?php echo $row['id']; ?>')" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i> Hapus
                                                     </a>
-                                                <?php else: ?>
-                                                    -
-                                                <?php endif; ?>
-                                            </td>
-                                            <td>
-                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>" title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <a href="javascript:void(0);" onclick="confirmDelete('surat_masuk.php?delete=<?php echo $row['id']; ?>')" class="btn btn-danger btn-circle">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
+                                                </div>
                                             </td>
                                         </tr>
 
