@@ -164,6 +164,15 @@ try {
     // Bersihkan temp
     deleteDirectory($temp_dir);
 
+    // Catat aktivitas dengan type khusus agar tidak tertukar dengan aktivitas lain
+    if (function_exists('log_activity')) {
+        log_activity(
+            (int)($_SESSION['user_id'] ?? 0),
+            'update_system',
+            'Update sistem dari GitHub: ' . $success_count . ' file diperbarui, ' . $skip_count . ' dilewati'
+        );
+    }
+
     respond(true, 'Update berhasil! ' . $success_count . ' file diperbarui, ' . $skip_count . ' file dilindungi dilewati.');
 
 } catch (Throwable $e) {

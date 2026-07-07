@@ -243,6 +243,7 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama, u.role FROM activity_log 
                             $is_surat_masuk = strpos($desc_lower, 'surat masuk') !== false;
                             $is_surat_keluar = strpos($desc_lower, 'surat keluar') !== false;
                             $is_surat_keputusan = strpos($desc_lower, 'surat keputusan') !== false;
+                            $is_simad_sync = strpos($desc_lower, 'sinkron') !== false && strpos($desc_lower, 'simad') !== false;
 
                             switch($act['activity_type']) {
                                 case 'login': 
@@ -278,7 +279,10 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama, u.role FROM activity_log 
                                     $border_color = 'border-left-warning'; 
                                     $text_color = 'text-warning';
                                     $type_label = 'UPDATE';
-                                    if ($is_surat_masuk) {
+                                    if ($is_simad_sync) {
+                                        $icon = 'fa-sync-alt';
+                                        $type_label = 'SINKRON SIMAD';
+                                    } elseif ($is_surat_masuk) {
                                         $icon = 'fa-edit';
                                         $type_label = 'EDIT MASUK';
                                     } elseif ($is_surat_keluar) {
@@ -288,6 +292,12 @@ $q_activity = mysqli_query($conn, "SELECT a.*, u.nama, u.role FROM activity_log 
                                         $icon = 'fa-edit';
                                         $type_label = 'EDIT SK';
                                     }
+                                    break;
+                                case 'update_system':
+                                    $icon = 'fa-cloud-download-alt';
+                                    $border_color = 'border-left-primary';
+                                    $text_color = 'text-primary';
+                                    $type_label = 'UPDATE SISTEM';
                                     break;
                                 case 'delete': 
                                     $icon = 'fa-trash'; 
