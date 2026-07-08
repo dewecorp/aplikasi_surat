@@ -336,16 +336,18 @@ include 'template/sidebar.php';
                                             <td><?php echo $row['file_name']; ?></td>
                                             <td><?php echo $row['file_size']; ?></td>
                                             <td><?php echo tgl_indo(date('Y-m-d', strtotime($row['created_at']))) . ' ' . date('H:i', strtotime($row['created_at'])); ?></td>
-                                            <td>
-                                                <a href="backup?download=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>" class="btn btn-success btn-circle" title="Download">
-                                                    <i class="fas fa-download"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#restoreModal<?php echo $row['id']; ?>" title="Restore">
-                                                    <i class="fas fa-undo-alt"></i>
-                                                </button>
-                                                 <a href="javascript:void(0);" onclick="confirmDelete('backup?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>')" class="btn btn-danger btn-circle" title="Hapus">
-                                                     <i class="fas fa-trash"></i>
-                                                 </a>
+                                            <td style="white-space: nowrap;">
+                                                <div class="btn-group">
+                                                    <a href="backup?download=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>" class="btn btn-sm btn-success" title="Download">
+                                                        <i class="fas fa-download"></i> Download
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#restoreModal<?php echo $row['id']; ?>" title="Restore">
+                                                        <i class="fas fa-undo-alt"></i> Restore
+                                                    </button>
+                                                    <a href="javascript:void(0);" onclick="confirmDelete('backup?delete=<?php echo $row['id']; ?>&csrf_token=<?php echo generate_csrf_token(); ?>')" class="btn btn-sm btn-danger" title="Hapus">
+                                                        <i class="fas fa-trash"></i> Hapus
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
 

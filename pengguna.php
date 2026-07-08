@@ -201,15 +201,17 @@ if (isset($_GET['delete'])) {
                                                     <span class="label label-info">Tata Usaha</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td>
-                                                <button type="button" class="btn btn-warning btn-circle" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>" title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <?php if ($row['role'] != 'admin'): ?>
-                                                    <a href="javascript:void(0);" onclick="confirmDelete('pengguna.php?delete=<?php echo $row['id']; ?>')" class="btn btn-danger btn-circle">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
-                                                <?php endif; ?>
+                                            <td style="white-space: nowrap;">
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editModal<?php echo $row['id']; ?>" title="Edit">
+                                                        <i class="fas fa-edit"></i> Edit
+                                                    </button>
+                                                    <?php if ($row['role'] != 'admin'): ?>
+                                                        <a href="javascript:void(0);" onclick="confirmDelete('pengguna.php?delete=<?php echo $row['id']; ?>')" class="btn btn-sm btn-danger">
+                                                            <i class="fas fa-trash"></i> Hapus
+                                                        </a>
+                                                    <?php endif; ?>
+                                                </div>
                                             </td>
                                         </tr>
 
