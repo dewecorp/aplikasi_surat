@@ -17,6 +17,13 @@ if (mysqli_num_rows($check) == 0) {
 }
 $data = mysqli_fetch_assoc($check);
 
+// Ambil data guru untuk dropdown kepala madrasah
+$guru_query = mysqli_query($conn, "SELECT id, nama FROM guru ORDER BY nama ASC");
+$guru_list = [];
+while ($g = mysqli_fetch_assoc($guru_query)) {
+    $guru_list[] = $g;
+}
+
 // Handle Update
 if (isset($_POST['update'])) {
     if (!verify_csrf_token($_POST['csrf_token'])) {
@@ -165,7 +172,14 @@ if (isset($_POST['update'])) {
                             <label>Nama Kepala Madrasah</label>
                             <div class="form-group">
                                 <div class="form-line">
-                                    <input type="text" class="form-control" name="kepala_madrasah" value="<?php echo htmlspecialchars($data['kepala_madrasah']); ?>" required>
+                                    <select class="form-control" name="kepala_madrasah" required>
+                                        <option value="">-- Pilih Guru --</option>
+                                        <?php foreach ($guru_list as $g): ?>
+                                            <option value="<?php echo htmlspecialchars($g['nama']); ?>" <?php echo ($data['kepala_madrasah'] == $g['nama']) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($g['nama']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </div>
                             </div>
                             <div class="row clearfix">
