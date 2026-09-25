@@ -72,14 +72,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aksi'])) {
         }
     } elseif ($aksi === 'save_outbound') {
         $en = isset($_POST['sims_api_enabled']) ? 1 : 0;
+        $reqhttps = isset($_POST['sims_require_https']) ? 1 : 0;
         $key = trim((string)($_POST['sims_api_key'] ?? ''));
+        $ips = trim((string)($_POST['sims_allowed_ips'] ?? ''));
         if ($key === '') {
             $msg_err = 'API key keluar tidak boleh kosong. Gunakan Generate.';
         } else {
+            sims_ensure_integrasi_schema($conn);
             $k = mysqli_real_escape_string($conn, $key);
-            if (mysqli_query($conn, "UPDATE pengaturan SET sims_api_key='$k', sims_api_enabled=$en")) {
+            $ipse = mysqli_real_escape_string($conn, $ips);
+            if (mysqli_query($conn, "UPDATE pengaturan SET sims_api_key='$k', sims_api_enabled=$en, sims_api_allowed_ips='$ipse', sims_api_require_https=$reqhttps")) {
                 $msg_ok = 'Endpoint keluar tersimpan. Copy URL + key ke web lain.';
-                log_activity((int)$_SESSION['user_id'], 'integrasi', 'Ubah API key keluar SIMS.');
+                log_activity((int)$_SESSION['user_id'], 'integrasi', 'Ubah API keluar SIMS (key/IP/HTTPS).');
             } else {
                 $msg_err = 'Gagal simpan: ' . mysqli_error($conn);
             }
@@ -232,15 +236,21 @@ $csrf = generate_csrf_token();
                     <div class="input-group mb-2"><input type="text" class="form-control" readonly value="<?php echo htmlspecialchars($outbound['surat_keluar']); ?>" id="out_keluar"><div class="input-group-append"><button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('out_keluar').value)">Copy</button></div></div>
                     <label>Surat Keputusan (GET)</label>
                     <div class="input-group mb-3"><input type="text" class="form-control" readonly value="<?php echo htmlspecialchars($outbound['surat_keputusan']); ?>" id="out_sk"><div class="input-group-append"><button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('out_sk').value)">Copy</button></div></div>
-                    <p class="small text-muted">Base URL ikut domain aktif otomatis. Auth: header <code>X-API-KEY</code> atau <code>?key=</code>. Param: <code>updated_since=Y-m-d H:i:s</code>, <code>limit</code>, <code>search</code>.</p>
+                    <p class="small text-muted">Base URL ikut domain aktif otomatis. Auth: header <code>X-API-KEY</code> saja (<code>?key=</code> ditolak). Param: <code>updated_since=Y-m-d H:i:s</code>, <code>limit</code>, <code>search</code>.</p>
                     <form method="POST">
                         <input type="hidden" name="csrf_token" value="<?php echo $csrf; ?>">
                         <input type="hidden" name="aksi" value="save_outbound">
                         <label>API Key Keluar</label>
                         <div class="input-group mb-2"><input type="text" class="form-control" name="sims_api_key" value="<?php echo htmlspecialchars($cfg['sims_api_key']); ?>"><div class="input-group-append"><button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(this.closest('form').querySelector('[name=sims_api_key]').value)">Copy</button></div></div>
+                        <label>Whitelist IP (opsional, pisah koma/spasi — kosong = semua IP)</label>
+                        <div class="form-group"><input type="text" class="form-control" name="sims_allowed_ips" value="<?php echo htmlspecialchars($cfg['sims_allowed_ips'] ?? ''); ?>" placeholder="cth: 103.147.9.12, 202.152.44.10"></div>
                         <div class="form-group form-check">
                             <input type="checkbox" class="form-check-input" name="sims_api_enabled" id="sims_en" <?php echo $cfg['sims_api_enabled'] ? 'checked' : ''; ?>>
                             <label class="form-check-label" for="sims_en">API keluar aktif</label>
+                        </div>
+                        <div class="form-group form-check">
+                            <input type="checkbox" class="form-check-input" name="sims_require_https" id="sims_https" <?php echo !empty($cfg['sims_require_https']) ? 'checked' : ''; ?>>
+                            <label class="form-check-label" for="sims_https">Wajib HTTPS di hosting (lokal .test tetap boleh HTTP)</label>
                         </div>
                         <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> SIMPAN</button>
                     </form>

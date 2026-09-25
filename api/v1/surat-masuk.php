@@ -14,38 +14,9 @@ function sims_api_out_json($code, $payload)
     exit;
 }
 
-function sims_api_key_ok($conn)
-{
-    $cfg = sims_get_integrasi($conn);
-    if (!$cfg['sims_api_enabled'] || $cfg['sims_api_key'] === '') {
-        return false;
-    }
-    $sent = '';
-    if (!empty($_SERVER['HTTP_X_API_KEY'])) {
-        $sent = trim((string)$_SERVER['HTTP_X_API_KEY']);
-    } elseif (function_exists('getallheaders')) {
-        $h = @getallheaders();
-        if (is_array($h)) {
-            foreach ($h as $k => $v) {
-                if (strtolower((string)$k) === 'x-api-key') {
-                    $sent = trim((string)$v);
-                    break;
-                }
-            }
-        }
-    }
-    if ($sent === '' && isset($_GET['key'])) {
-        $sent = trim((string)$_GET['key']);
-    }
-    if ($sent === '' && isset($_GET['api_key'])) {
-        $sent = trim((string)$_GET['api_key']);
-    }
-
-    return $sent !== '' && hash_equals($cfg['sims_api_key'], $sent);
-}
-
-if (!sims_api_key_ok($conn)) {
-    sims_api_out_json(401, ['status' => 'error', 'message' => 'API key tidak valid atau API nonaktif.']);
+$gate = sims_api_gate($conn, 'surat-masuk');
+if (!$gate['ok']) {
+    sims_api_out_json($gate['code'], ['status' => 'error', 'message' => $gate['message']]);
 }
 
 $where = [];
