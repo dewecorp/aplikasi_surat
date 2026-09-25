@@ -1,0 +1,112 @@
+<?php
+require_once __DIR__ . '/../../session_init.php';
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../integrasi_helper.php';
+
+header('Content-Type: application/json; charset=UTF-8');
+
+function sims_api_out_json_sk($code, $payload)
+{
+    global $conn;
+    http_response_code($code);
+    sims_log_api($conn, 'surat-keputusan', $code, $payload['message'] ?? null);
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+function sims_api_key_ok_sk($conn)
+{
+    $cfg = sims_get_integrasi($conn);
+    if (!$cfg['sims_api_enabled'] || $cfg['sims_api_key'] === '') {
+        return false;
+    }
+    $sent = '';
+    if (!empty($_SERVER['HTTP_X_API_KEY'])) {
+        $sent = trim((string)$_SERVER['HTTP_X_API_KEY']);
+    } elseif (function_exists('getallheaders')) {
+        $h = @getallheaders();
+        if (is_array($h)) {
+            foreach ($h as $k => $v) {
+                if (strtolower((string)$k) === 'x-api-key') {
+                    $sent = trim((string)$v);
+                    break;
+                }
+            }
+        }
+    }
+    if ($sent === '' && isset($_GET['key'])) {
+        $sent = trim((string)$_GET['key']);
+    }
+    if ($sent === '' && isset($_GET['api_key'])) {
+        $sent = trim((string)$_GET['api_key']);
+    }
+
+    return $sent !== '' && hash_equals($cfg['sims_api_key'], $sent);
+}
+
+if (!sims_api_key_ok_sk($conn)) {
+    sims_api_out_json_sk(401, ['status' => 'error', 'message' => 'API key tidak valid atau API nonaktif.']);
+}
+
+$where = [];
+$updated_since = isset($_GET['updated_since']) ? trim((string)$_GET['updated_since']) : '';
+if ($updated_since !== '') {
+    $dt = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $updated_since);
+    if ($dt === false || $dt->format('Y-m-d H:i:s') !== $updated_since) {
+        sims_api_out_json_sk(400, ['status' => 'error', 'message' => 'Format updated_since harus Y-m-d H:i:s.']);
+    }
+    $where[] = "updated_at >= '" . mysqli_real_escape_string($conn, $updated_since) . "'";
+}
+if (!empty($_GET['search'])) {
+    $s = mysqli_real_escape_string($conn, trim((string)$_GET['search']));
+    $where[] = "(no_surat LIKE '%$s%' OR nama_sk LIKE '%$s%' OR tentang LIKE '%$s%')";
+}
+$limit = isset($_GET['limit']) ? max(0, min(1000, (int)$_GET['limit'])) : 0;
+
+$has_updated = false;
+$rc = @mysqli_query($conn, "SHOW COLUMNS FROM surat_keputusan LIKE 'updated_at'");
+if ($rc && mysqli_num_rows($rc) > 0) {
+    $has_updated = true;
+} else {
+    $where = array_values(array_filter($where, static function ($w) {
+        return stripos($w, 'updated_at') === false;
+    }));
+}
+$sql = 'SELECT id, tgl_surat, no_surat, nama_sk, tentang, file, file_lampiran, created_at FROM surat_keputusan';
+if ($where !== []) {
+    $sql .= ' WHERE ' . implode(' AND ', $where);
+}
+$sql .= ' ORDER BY id DESC';
+if ($limit > 0) {
+    $sql .= ' LIMIT ' . $limit;
+}
+$q = @mysqli_query($conn, $sql);
+if (!$q) {
+    sims_api_out_json_sk(500, ['status' => 'error', 'message' => 'Query gagal.']);
+}
+$base = sims_current_base_url();
+$rows = [];
+while ($r = mysqli_fetch_assoc($q)) {
+    if (!empty($r['file'])) {
+        $r['file_url'] = $base . 'uploads/' . ltrim((string)$r['file'], '/');
+    } else {
+        $r['file_url'] = null;
+    }
+    if (!empty($r['file_lampiran'])) {
+        $r['file_lampiran_url'] = $base . 'uploads/' . ltrim((string)$r['file_lampiran'], '/');
+    } else {
+        $r['file_lampiran_url'] = null;
+    }
+    $rows[] = $r;
+}
+$mode = 'full';
+if ($updated_since !== '' && $has_updated) {
+    $mode = 'incremental';
+}
+sims_api_out_json_sk(200, [
+    'status' => 'success',
+    'sync_mode' => $mode,
+    'total_data' => count($rows),
+    'last_sync' => date('Y-m-d H:i:s'),
+    'data' => $rows,
+]);

@@ -92,6 +92,7 @@ function sims_outbound_map($base = null)
     return [
         'surat_masuk' => $base . 'api/v1/surat-masuk',
         'surat_keluar' => $base . 'api/v1/surat-keluar',
+        'surat_keputusan' => $base . 'api/v1/surat-keputusan',
     ];
 }
 

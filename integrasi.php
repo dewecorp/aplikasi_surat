@@ -229,7 +229,9 @@ $csrf = generate_csrf_token();
                     <label>Surat Masuk (GET)</label>
                     <div class="input-group mb-2"><input type="text" class="form-control" readonly value="<?php echo htmlspecialchars($outbound['surat_masuk']); ?>" id="out_masuk"><div class="input-group-append"><button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('out_masuk').value)">Copy</button></div></div>
                     <label>Surat Keluar (GET)</label>
-                    <div class="input-group mb-3"><input type="text" class="form-control" readonly value="<?php echo htmlspecialchars($outbound['surat_keluar']); ?>" id="out_keluar"><div class="input-group-append"><button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('out_keluar').value)">Copy</button></div></div>
+                    <div class="input-group mb-2"><input type="text" class="form-control" readonly value="<?php echo htmlspecialchars($outbound['surat_keluar']); ?>" id="out_keluar"><div class="input-group-append"><button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('out_keluar').value)">Copy</button></div></div>
+                    <label>Surat Keputusan (GET)</label>
+                    <div class="input-group mb-3"><input type="text" class="form-control" readonly value="<?php echo htmlspecialchars($outbound['surat_keputusan']); ?>" id="out_sk"><div class="input-group-append"><button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('out_sk').value)">Copy</button></div></div>
                     <p class="small text-muted">Base URL ikut domain aktif otomatis. Auth: header <code>X-API-KEY</code> atau <code>?key=</code>. Param: <code>updated_since=Y-m-d H:i:s</code>, <code>limit</code>, <code>search</code>.</p>
                     <form method="POST">
                         <input type="hidden" name="csrf_token" value="<?php echo $csrf; ?>">
