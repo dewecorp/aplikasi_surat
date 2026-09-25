@@ -72,6 +72,15 @@ function simad_hub_urls(): array
     if (!empty($SIMAD_TEACHERS_API_URL) && is_string($SIMAD_TEACHERS_API_URL) && trim($SIMAD_TEACHERS_API_URL) !== '') {
         return [trim($SIMAD_TEACHERS_API_URL)];
     }
+    if (isset($conn) && $conn instanceof mysqli) {
+        $rq = @mysqli_query($conn, 'SELECT simad_teachers_api_url FROM pengaturan LIMIT 1');
+        if ($rq && mysqli_num_rows($rq) > 0) {
+            $row = mysqli_fetch_assoc($rq);
+            if (!empty($row['simad_teachers_api_url']) && simad_is_usable_hub_url(trim((string)$row['simad_teachers_api_url']))) {
+                return [trim((string)$row['simad_teachers_api_url'])];
+            }
+        }
+    }
     $def = trim((string)SIMAD_DEFAULT_TEACHERS_API_URL);
     if ($def !== '' && simad_is_usable_hub_url($def)) {
         return [$def];
@@ -159,6 +168,7 @@ function simad_config(): array
 {
     $ck = getenv('SIMAD_SYNC_CRON_KEY');
     $ak = getenv('SIMAD_API_KEY');
+    global $conn;
 
     /** Opsional: global $SIMAD_INCREMENTAL_SYNC, $SIMAD_HUB_FETCH_LIMIT di config; atau env SIMAD_INCREMENTAL_SYNC / SIMAD_TEACHERS_LIMIT */
     global $SIMAD_INCREMENTAL_SYNC, $SIMAD_HUB_FETCH_LIMIT;
@@ -181,11 +191,31 @@ function simad_config(): array
         $lim = max(0, min(1000, (int)$SIMAD_HUB_FETCH_LIMIT));
     }
 
+    $dbKey = '';
+    $dbAuto = true;
+    $dbInterval = 60;
+    if (isset($conn) && $conn instanceof mysqli) {
+        $rq = @mysqli_query($conn, 'SELECT simad_api_key, simad_auto_sync_enabled, simad_auto_sync_interval_minutes FROM pengaturan LIMIT 1');
+        if ($rq && mysqli_num_rows($rq) > 0) {
+            $row = mysqli_fetch_assoc($rq);
+            $dbKey = trim((string)($row['simad_api_key'] ?? ''));
+            $dbAuto = ((int)($row['simad_auto_sync_enabled'] ?? 1)) === 1;
+            $dbInterval = min(10080, max(15, (int)($row['simad_auto_sync_interval_minutes'] ?? 60)));
+        }
+    }
+    $finalKey = ($ak !== false && trim((string)$ak) !== '') ? trim((string)$ak) : '';
+    if ($finalKey === '' && $dbKey !== '') {
+        $finalKey = $dbKey;
+    }
+    if ($finalKey === '') {
+        $finalKey = SIMAD_HUB_API_KEY;
+    }
+
     return [
         'api_urls' => simad_hub_urls(),
-        'api_key' => ($ak !== false && trim((string)$ak) !== '') ? trim((string)$ak) : SIMAD_HUB_API_KEY,
-        'auto_when_admin_opens_guru_page' => true,
-        'auto_interval_minutes' => min(10080, max(15, 60)),
+        'api_key' => $finalKey,
+        'auto_when_admin_opens_guru_page' => $dbAuto,
+        'auto_interval_minutes' => $dbInterval,
         'cron_http_secret' => ($ck !== false && trim((string)$ck) !== '') ? trim((string)$ck) : '',
         'use_incremental_sync' => $incr,
         'hub_fetch_limit' => min(1000, $lim),

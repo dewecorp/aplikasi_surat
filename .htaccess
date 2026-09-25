@@ -32,7 +32,7 @@ RewriteRule ^ %1 [R=302,L]
 
 # Route halaman aplikasi secara eksplisit sebelum pengecekan folder fisik.
 # Ini mencegah /guru atau /surat_masuk dibaca sebagai folder hosting dan berakhir Forbidden.
-RewriteRule ^(index|guru|surat_masuk|surat_keluar|surat_keputusan|riwayat|pengguna|pengaturan|backup|login|logout|update_system|sync_guru_simad)$ $1.php [L,QSA]
+RewriteRule ^(index|guru|surat_masuk|surat_keluar|surat_keputusan|riwayat|pengguna|pengaturan|integrasi|backup|login|logout|update_system|sync_guru_simad)$ $1.php [L,QSA]
 RewriteRule ^(export_guru_excel|export_guru_print|download_template_guru|export_pengguna_excel|export_pengguna_print|export_riwayat_excel|export_riwayat_print|print_surat_keluar|print_surat_keputusan|export_surat_keluar_excel|export_surat_keluar_print|export_surat_masuk_excel|export_surat_masuk_print|surat_masuk_preview|lampiran_preview|view_lampiran)$ $1.php [L,QSA]
 
 # Tangani request tanpa ekstensi secara internal (/file -> /file.php).

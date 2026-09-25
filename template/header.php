@@ -10,6 +10,16 @@ $q_instansi = mysqli_query($conn, "SELECT * FROM pengaturan LIMIT 1");
 $instansi = mysqli_fetch_assoc($q_instansi);
 $nama_sekolah = $instansi['nama_madrasah'];
 $logo_sekolah = $instansi['logo'];
+$sims_jml_guru = 0;
+$sims_jml_surat_masuk = 0;
+$sims_jml_surat_keluar = 0;
+$sims_jml_sk = 0;
+foreach (['guru' => 'sims_jml_guru', 'surat_masuk' => 'sims_jml_surat_masuk', 'surat_keluar' => 'sims_jml_surat_keluar', 'surat_keputusan' => 'sims_jml_sk'] as $t => $v) {
+    $q = @mysqli_query($conn, "SELECT COUNT(*) AS total FROM `$t`");
+    if ($q && ($r = mysqli_fetch_assoc($q))) {
+        $$v = (int)$r['total'];
+    }
+}
 
 // Title Page Logic
 $page = basename($_SERVER['PHP_SELF'], ".php");
@@ -21,6 +31,7 @@ $titles = [
     'riwayat' => 'Riwayat',
     'pengguna' => 'Data Pengguna',
     'pengaturan' => 'Pengaturan',
+    'integrasi' => 'Integrasi API',
     'backup' => 'Backup & Restore',
     'login' => 'Login'
 ];
@@ -347,23 +358,27 @@ $sims_app_url = htmlspecialchars($sims_app_raw_url, ENT_QUOTES, 'UTF-8');
             <div class="nav-item <?php echo ($page == 'guru') ? 'active' : ''; ?>">
                 <a class="nav-link" href="<?php echo $sims_app_url; ?>guru"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-user"></i>
-                    <span>Data Guru</span></a>
+                    <span>Data Guru</span>
+                    <span class="badge badge-primary badge-pill ml-2"><?php echo $sims_jml_guru; ?></span></a>
             </div>
             <?php endif; ?>
             <div class="nav-item <?php echo ($page == 'surat_masuk') ? 'active' : ''; ?>">
                 <a class="nav-link" href="<?php echo $sims_app_url; ?>surat_masuk"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-inbox"></i>
-                    <span>Surat Masuk</span></a>
+                    <span>Surat Masuk</span>
+                    <span class="badge badge-primary badge-pill ml-2"><?php echo $sims_jml_surat_masuk; ?></span></a>
             </div>
             <div class="nav-item <?php echo ($page == 'surat_keluar') ? 'active' : ''; ?>">
                 <a class="nav-link" href="<?php echo $sims_app_url; ?>surat_keluar"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-paper-plane"></i>
-                    <span>Surat Keluar</span></a>
+                    <span>Surat Keluar</span>
+                    <span class="badge badge-primary badge-pill ml-2"><?php echo $sims_jml_surat_keluar; ?></span></a>
             </div>
             <div class="nav-item <?php echo ($page == 'surat_keputusan') ? 'active' : ''; ?>">
                 <a class="nav-link" href="<?php echo $sims_app_url; ?>surat_keputusan"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-gavel"></i>
-                    <span>Surat Keputusan</span></a>
+                    <span>Surat Keputusan</span>
+                    <span class="badge badge-primary badge-pill ml-2"><?php echo $sims_jml_sk; ?></span></a>
             </div>
             <div class="nav-item <?php echo ($page == 'riwayat') ? 'active' : ''; ?>">
                 <a class="nav-link" href="<?php echo $sims_app_url; ?>riwayat"<?php echo $sims_drawer_nav_onclick; ?>>
@@ -380,6 +395,11 @@ $sims_app_url = htmlspecialchars($sims_app_raw_url, ENT_QUOTES, 'UTF-8');
                 <a class="nav-link" href="<?php echo $sims_app_url; ?>pengaturan"<?php echo $sims_drawer_nav_onclick; ?>>
                     <i class="fas fa-cogs"></i>
                     <span>Pengaturan</span></a>
+            </div>
+            <div class="nav-item <?php echo ($page == 'integrasi') ? 'active' : ''; ?>">
+                <a class="nav-link" href="<?php echo $sims_app_url; ?>integrasi"<?php echo $sims_drawer_nav_onclick; ?>>
+                    <i class="fas fa-plug"></i>
+                    <span>Integrasi API</span></a>
             </div>
             <?php endif; ?>
             <div class="nav-item">
