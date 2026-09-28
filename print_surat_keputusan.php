@@ -1,5 +1,20 @@
 <?php
+require_once 'session_init.php';
 include 'config.php';
+require_once 'integrasi_helper.php';
+
+$is_api_valid = false;
+$sentKey = sims_api_sent_key();
+if ($sentKey !== '') {
+    $gate = sims_api_gate($conn, 'surat-keputusan');
+    if ($gate['ok']) {
+        $is_api_valid = true;
+    }
+}
+
+if (!isset($_SESSION['user_id']) && !$is_api_valid) {
+    die("Unauthorized Access");
+}
 
 if (!isset($_GET['id'])) {
     die("ID tidak ditemukan");
@@ -37,6 +52,12 @@ $instansi = mysqli_fetch_assoc($q_instansi);
             page-break-before: auto;
             page-break-inside: avoid;
             margin-top: 30px;
+        }
+        
+        .lampiran-section table,
+        .content-cell table,
+        .menetapkan-content table {
+            table-layout: auto !important;
         }
         
         body { 

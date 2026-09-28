@@ -1,8 +1,18 @@
 <?php
 require_once 'session_init.php';
 include 'config.php';
+require_once 'integrasi_helper.php';
 
-if (!isset($_SESSION['user_id'])) {
+$is_api_valid = false;
+$sentKey = sims_api_sent_key();
+if ($sentKey !== '') {
+    $gate = sims_api_gate($conn, 'surat-keluar');
+    if ($gate['ok']) {
+        $is_api_valid = true;
+    }
+}
+
+if (!isset($_SESSION['user_id']) && !$is_api_valid) {
     die("Unauthorized Access");
 }
 

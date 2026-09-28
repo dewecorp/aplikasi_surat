@@ -231,17 +231,17 @@ $csrf = generate_csrf_token();
                 <div class="card-header"><strong>Endpoint Keluar — SIMS (copy ke web lain)</strong></div>
                 <div class="card-body">
                     <label>Surat Masuk (GET)</label>
-                    <div class="input-group mb-2"><input type="text" class="form-control" readonly value="<?php echo htmlspecialchars($outbound['surat_masuk']); ?>" id="out_masuk"><div class="input-group-append"><button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('out_masuk').value)">Copy</button></div></div>
+                    <div class="input-group mb-2"><input type="text" class="form-control" readonly value="<?php echo htmlspecialchars($outbound['surat_masuk']); ?>" id="out_masuk"><div class="input-group-append"><button class="btn btn-outline-secondary" type="button" onclick="simsCopyText(document.getElementById('out_masuk').value,this)">Copy</button></div></div>
                     <label>Surat Keluar (GET)</label>
-                    <div class="input-group mb-2"><input type="text" class="form-control" readonly value="<?php echo htmlspecialchars($outbound['surat_keluar']); ?>" id="out_keluar"><div class="input-group-append"><button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('out_keluar').value)">Copy</button></div></div>
+                    <div class="input-group mb-2"><input type="text" class="form-control" readonly value="<?php echo htmlspecialchars($outbound['surat_keluar']); ?>" id="out_keluar"><div class="input-group-append"><button class="btn btn-outline-secondary" type="button" onclick="simsCopyText(document.getElementById('out_keluar').value,this)">Copy</button></div></div>
                     <label>Surat Keputusan (GET)</label>
-                    <div class="input-group mb-3"><input type="text" class="form-control" readonly value="<?php echo htmlspecialchars($outbound['surat_keputusan']); ?>" id="out_sk"><div class="input-group-append"><button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('out_sk').value)">Copy</button></div></div>
+                    <div class="input-group mb-3"><input type="text" class="form-control" readonly value="<?php echo htmlspecialchars($outbound['surat_keputusan']); ?>" id="out_sk"><div class="input-group-append"><button class="btn btn-outline-secondary" type="button" onclick="simsCopyText(document.getElementById('out_sk').value,this)">Copy</button></div></div>
                     <p class="small text-muted">Base URL ikut domain aktif otomatis. Auth: header <code>X-API-KEY</code> saja (<code>?key=</code> ditolak). Param: <code>updated_since=Y-m-d H:i:s</code>, <code>limit</code>, <code>search</code>.</p>
                     <form method="POST">
                         <input type="hidden" name="csrf_token" value="<?php echo $csrf; ?>">
                         <input type="hidden" name="aksi" value="save_outbound">
                         <label>API Key Keluar</label>
-                        <div class="input-group mb-2"><input type="text" class="form-control" name="sims_api_key" value="<?php echo htmlspecialchars($cfg['sims_api_key']); ?>"><div class="input-group-append"><button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(this.closest('form').querySelector('[name=sims_api_key]').value)">Copy</button></div></div>
+                        <div class="input-group mb-2"><input type="text" class="form-control" name="sims_api_key" value="<?php echo htmlspecialchars($cfg['sims_api_key']); ?>"><div class="input-group-append"><button class="btn btn-outline-secondary" type="button" onclick="simsCopyText(this.closest('form').querySelector('[name=sims_api_key]').value,this)">Copy</button></div></div>
                         <label>Whitelist IP (opsional, pisah koma/spasi — kosong = semua IP)</label>
                         <div class="form-group"><input type="text" class="form-control" name="sims_allowed_ips" value="<?php echo htmlspecialchars($cfg['sims_allowed_ips'] ?? ''); ?>" placeholder="cth: 103.147.9.12, 202.152.44.10"></div>
                         <div class="form-group form-check">
@@ -317,4 +317,41 @@ $csrf = generate_csrf_token();
     </div>
 </div>
 
+<script>
+function simsCopyDone(btn, ok, msg) {
+    if (btn) {
+        var orig = btn.getAttribute('data-orig') || btn.innerHTML;
+        if (!btn.getAttribute('data-orig')) btn.setAttribute('data-orig', orig);
+        btn.innerHTML = ok ? 'Copied' : 'Gagal';
+        setTimeout(function(){ btn.innerHTML = btn.getAttribute('data-orig'); }, 1500);
+    }
+    if (!ok && msg) alert(msg);
+}
+function simsCopyText(text, btn) {
+    text = (text == null) ? '' : String(text);
+    if (!text) { simsCopyDone(btn, false, 'Tidak ada teks disalin.'); return; }
+    function fallback() {
+        try {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.setAttribute('readonly','');
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            ta.setSelectionRange(0, ta.value.length);
+            var ok = document.execCommand('copy');
+            document.body.removeChild(ta);
+            simsCopyDone(btn, ok, ok ? '' : 'Copy gagal. Salin manual.');
+        } catch (e) { simsCopyDone(btn, false, 'Copy gagal. Salin manual.'); }
+    }
+    if (navigator.clipboard && window.isSecureContext !== false) {
+        try {
+            var p = navigator.clipboard.writeText(text);
+            if (p && p.then) { p.then(function(){ simsCopyDone(btn, true); }, fallback); return; }
+        } catch (e) {}
+    }
+    fallback();
+}
+</script>
 <?php include 'template/footer.php'; ?>
