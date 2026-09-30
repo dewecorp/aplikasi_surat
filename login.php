@@ -55,6 +55,7 @@ if (isset($_POST['login'])) {
     <meta name="author" content="">
 
     <title>Login | SIMS</title>
+    <link rel="icon" href="<?php echo (!empty($logo) && file_exists($logo)) ? $logo : "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%231e88e5%22><path d=%22M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z%22/></svg>"; ?>">
 
     <!-- Custom fonts for this template-->
     <link href="assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -116,9 +117,10 @@ if (isset($_POST['login'])) {
                                                 name="username" aria-describedby="emailHelp"
                                                 placeholder="Username" required autofocus>
                                         </div>
-                                        <div class="form-group">
+                                        <div class="form-group position-relative">
                                             <input type="password" class="form-control form-control-user"
-                                                name="password" placeholder="Password" required>
+                                                id="password" name="password" placeholder="Password" required style="padding-right: 2.5rem;">
+                                            <span id="togglePassword" class="fas fa-fw fa-eye" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; z-index: 10; color: #6e707e;"></span>
                                         </div>
                                         <button type="submit" name="login" class="btn btn-primary btn-user btn-block">
                                             MASUK
@@ -213,6 +215,20 @@ if (isset($_POST['login'])) {
         </script>
     <?php endif; ?>
 
+    <script>
+        $(document).ready(function() {
+            $('#togglePassword').on('click', function() {
+                var input = $('#password');
+                if (input.attr('type') === 'password') {
+                    input.attr('type', 'text');
+                    $(this).removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    input.attr('type', 'password');
+                    $(this).removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

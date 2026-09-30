@@ -180,13 +180,6 @@ if ($qe) {
         $endpoints[] = $r;
     }
 }
-$logs = [];
-$ql = @mysqli_query($conn, 'SELECT endpoint, method, ip, status_code, message, created_at FROM api_log ORDER BY id DESC LIMIT 20');
-if ($ql) {
-    while ($r = mysqli_fetch_assoc($ql)) {
-        $logs[] = $r;
-    }
-}
 $csrf = generate_csrf_token();
 ?>
 
@@ -270,11 +263,11 @@ $csrf = generate_csrf_token();
             <form method="POST" class="form-inline mb-3">
                 <input type="hidden" name="csrf_token" value="<?php echo $csrf; ?>">
                 <input type="hidden" name="aksi" value="add_endpoint">
-                <select name="arah" class="form-control mr-2"><option value="masuk">Masuk (kita tarik)</option><option value="keluar">Keluar (web lain tarik)</option></select>
-                <input name="nama" class="form-control mr-2" placeholder="Nama mis. SIMAD Guru" required>
-                <input name="url" class="form-control mr-2" style="min-width:280px" placeholder="https://domain/api/..." required>
-                <input name="api_key" class="form-control mr-2" placeholder="API key (opsional)">
-                <button class="btn btn-success" type="submit">+ TAMBAH</button>
+                <select name="arah" class="form-control mr-2 mb-2"><option value="masuk">Masuk (kita tarik)</option><option value="keluar">Keluar (web lain tarik)</option></select>
+                <input name="nama" class="form-control mr-2 mb-2" placeholder="Nama mis. SIMAD Guru" required>
+                <input name="url" class="form-control mr-2 mb-2" style="min-width:280px" placeholder="https://domain/api/..." required>
+                <input name="api_key" class="form-control mr-2 mb-2" placeholder="API key (opsional)">
+                <button class="btn btn-success mb-2" type="submit">+ TAMBAH</button>
             </form>
             <div class="table-responsive">
             <table class="table table-bordered table-sm">
@@ -298,21 +291,6 @@ $csrf = generate_csrf_token();
                 </tbody>
             </table>
             </div>
-        </div>
-    </div>
-
-    <div class="card mb-4">
-        <div class="card-header"><strong>Log Akses Endpoint Keluar</strong> <span class="small text-muted">(20 terakhir — siapa tarik data)</span></div>
-        <div class="card-body table-responsive">
-            <table class="table table-bordered table-sm">
-                <thead><tr><th>Waktu</th><th>Endpoint</th><th>IP</th><th>Kode</th><th>Pesan</th></tr></thead>
-                <tbody>
-                <?php foreach ($logs as $l): ?>
-                <tr><td><?php echo htmlspecialchars($l['created_at']); ?></td><td><?php echo htmlspecialchars($l['endpoint']); ?></td><td><?php echo htmlspecialchars((string)($l['ip'] ?? '')); ?></td><td><?php echo (int)$l['status_code']; ?></td><td><?php echo htmlspecialchars((string)($l['message'] ?? '')); ?></td></tr>
-                <?php endforeach; ?>
-                <?php if (!$logs): ?><tr><td colspan="5" class="text-center text-muted">Belum ada hit.</td></tr><?php endif; ?>
-                </tbody>
-            </table>
         </div>
     </div>
 </div>
